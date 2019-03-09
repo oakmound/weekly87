@@ -1,4 +1,4 @@
-package run
+package characters
 
 import (
 	"image/color"
