@@ -5,9 +5,9 @@ import (
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/entities/x/btn"
-	"github.com/oakmound/oak/entities/x/mods"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
+	"github.com/oakmound/weekly87/internal/menus"
 	"golang.org/x/image/colornames"
 )
 
@@ -36,39 +36,33 @@ var Scene = scene.Scene{
 		// 4. Credits
 		// 5. Exit game
 
-		btnHeight := 30.0
-		btnWidth := 120.0
-
-		menuX := (float64(oak.ScreenWidth) - btnWidth) / 2
+		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) / 4
 
-		btnCfg := btn.And(
-			btn.Width(btnWidth),
-			btn.Height(btnHeight),
-			btn.Mod(mods.HighlightOff(colornames.Blue, 3, 0, 0)),
-			btn.Mod(mods.InnerHighlightOff(colornames.Black, 1, 0, 0)),
-			btn.TxtOff(btnWidth/4, btnHeight/3), //magic numbers
-		)
-
-		start := btn.New(btnCfg, btn.Color(colornames.Green), btn.Pos(menuX, menuY), btn.Text("Start Game"))
-		menuY += btnHeight * 1.5
-		load := btn.New(btnCfg, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Load Game"))
-		menuY += btnHeight * 1.5
-		settings := btn.New(btnCfg, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Settings"),
+		start := btn.New(menus.BtnCfgA, btn.Color(colornames.Green), btn.Pos(menuX, menuY), btn.Text("Start Game"),
+			btn.Binding(func(int, interface{}) int {
+				nextscene = "inn"
+				stayInMenu = false
+				return 0
+			}))
+		menuY += menus.BtnHeightA * 1.5
+		load := btn.New(menus.BtnCfgA, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Load Game"))
+		menuY += menus.BtnHeightA * 1.5
+		settings := btn.New(menus.BtnCfgA, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Settings"),
 			btn.Binding(func(int, interface{}) int {
 				nextscene = "settings"
 				stayInMenu = false
 				return 0
 			}))
-		menuY += btnHeight * 1.5
-		credits := btn.New(btnCfg, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Credits"))
-		menuY += btnHeight * 1.5
-		exit := btn.New(btnCfg, btn.Pos(menuX, menuY), btn.Text("Exit Game"))
+		menuY += menus.BtnHeightA * 1.5
+		credits := btn.New(menus.BtnCfgA, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Credits"))
+		menuY += menus.BtnHeightA * 1.5
+		exit := btn.New(menus.BtnCfgA, btn.Pos(menuX, menuY), btn.Text("Exit Game"))
 		// render.Draw()
 
 		fmt.Println("How high are the buttons", start.Y(), load.Y(), settings.Y(), credits.Y(), exit.Y())
 
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
-	End:  scene.GoTo(nextscene),
+	End:  scene.GoToPtr(&nextscene),
 }

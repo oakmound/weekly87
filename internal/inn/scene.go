@@ -1,4 +1,4 @@
-package settings
+package inn
 
 import (
 	"fmt"
@@ -13,11 +13,10 @@ import (
 var stayInMenu bool
 var nextscene string
 
-// Scene to display our settings
 var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
 		stayInMenu = true
-		nextscene = "settings"
+		nextscene = "inn"
 		render.SetDrawStack(
 			render.NewCompositeR(),
 			render.NewHeap(false),
@@ -27,8 +26,8 @@ var Scene = scene.Scene{
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) / 4
 
-		exit := btn.New(menus.BtnCfgA, btn.Pos(menuX, menuY), btn.Text("Return To Menu"), btn.Binding(func(int, interface{}) int {
-			nextscene = "startup"
+		exit := btn.New(menus.BtnCfgA, btn.Pos(menuX, menuY), btn.Text("Start Run"), btn.Binding(func(int, interface{}) int {
+			nextscene = "run"
 			stayInMenu = false
 			return 0
 		}))

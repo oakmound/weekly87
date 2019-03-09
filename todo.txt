@@ -1,0 +1,28 @@
+
+Menu stuff
+
+1. Make a background for the menus
+
+2. Make a title for the menus
+
+3. Maybe make the menu buttons nicer (not high priority)
+
+Game stuff
+
+1. Flesh out inn 
+
+2. Flesh out run
+
+3. Populate code for records and seed generation
+
+4. Give ability to show records / stats
+
+5. Give ability to show base seed / current seed and specify it on new game?
+
+6. Flesh out interfaces as we progress
+
+7. Generally change Moving to Interactive for entities / players
+
+8. Split out chests or other obstacles from needing to have move.Mover methods
+
+9. Add section generation
