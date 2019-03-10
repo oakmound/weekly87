@@ -9,6 +9,8 @@ import (
 	"github.com/oakmound/oak/render"
 )
 
+var _ Character = &Chest{}
+
 type Chest struct {
 	*entities.Solid
 }

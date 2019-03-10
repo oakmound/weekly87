@@ -6,7 +6,7 @@ import (
 
 type Character interface {
 	move.Mover
-	// ???
+	Destroy()
 }
 
 type Player interface {

@@ -20,6 +20,7 @@ var playerMoveRect floatgeom.Rect2
 // facing is whether is game is moving forward or backward,
 // 1 means forward, -1 means backward
 var facing = 1
+var runSpeed = 4.0
 
 // Scene  to display the run
 var Scene = scene.Scene{
@@ -40,6 +41,8 @@ var Scene = scene.Scene{
 			// maybe effects?
 			// ui
 			render.NewHeap(true),
+			render.NewDrawFPS(),
+			render.NewLogicFPS(),
 		)
 
 		playerMoveRect = floatgeom.NewRect2(0, float64(oak.ScreenHeight)*1/3, float64(oak.ScreenWidth),
@@ -56,7 +59,6 @@ var Scene = scene.Scene{
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
 			}
-			fmt.Println(ply.Vec().X(), ply.Vec().Y())
 			move.WASD(ply)
 			move.Limit(ply, playerMoveRect)
 			//collision.HitLabel()
@@ -64,10 +66,34 @@ var Scene = scene.Scene{
 		}, "EnterFrame")
 		render.Draw(s.R, 2, 2)
 
-		sct := TestSection()
+		// todo populate baseseed
+		tracker := NewSectionTracker(baseSeed)
+		sct := tracker.Next()
 		sct.Draw()
+		nextSct := tracker.Next()
+		fmt.Println("Section width:", sct.W())
+		nextSct.SetBackgroundX(sct.X() + sct.W())
+		nextSct.Draw()
+
 		event.GlobalBind(func(int, interface{}) int {
-			sct.Shift(2 * float64(-facing))
+			sct.Shift(runSpeed * float64(-facing))
+			nextSct.Shift(runSpeed * float64(-facing))
+			// This calculation needs to be modified based
+			// on how much of the screen a section takes up.
+			// If a section takes up more than one screen,
+			// this is fine, otherwise it needs to change a little
+			offLeft := sct.W() + sct.X()
+			if offLeft < 0 {
+				// This is a little racy, but
+				// we don't want the game to hitch here
+				sct.Destroy()
+				sct = nextSct
+				go func() {
+					nextSct = tracker.Next()
+					nextSct.SetBackgroundX(sct.X() + sct.W())
+					nextSct.Draw()
+				}()
+			}
 			return 0
 		}, "EnterFrame")
 
@@ -109,6 +135,8 @@ var Scene = scene.Scene{
 
 		// for right now the one character can chain boxes behind them
 		// infinitely, eventually there should be an upgrade thing
+
+		// Sections jitter a bit and it is annoying, must fix
 
 	},
 	Loop: scene.BooleanLoop(&stayInGame),

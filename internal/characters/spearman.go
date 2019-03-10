@@ -14,6 +14,8 @@ import (
 	"github.com/oakmound/oak/render"
 )
 
+var _ Character = &Spearman{}
+
 type Spearman struct {
 	*entities.Interactive
 }
