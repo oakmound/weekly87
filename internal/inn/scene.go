@@ -71,19 +71,17 @@ var Scene = scene.Scene{
 
 			move.WASD(ply)
 			move.Limit(ply, innSpace)
+			<-s.RSpace.CallOnHits()
 			//collision.HitLabel()
 			return 0
 		}, "EnterFrame")
 		s.Speed = physics.NewVector(5, 5) // We actually allow players to move around in the inn!
 
-		s.RSpace.Add(characters.LabelDoor,
+		s.RSpace.Add(collision.Label(characters.LabelDoor),
 			(func(s1, s2 *collision.Space) {
-				p := s1.CID.E().(*characters.Character)
-				fmt.Println("Collided with a Character!", p)
 				nextscene = "run"
 				stayInMenu = false
-			}),
-		)
+			}))
 
 		render.Draw(s.R, 2, 1)
 

@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"github.com/oakmound/oak"
+	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/physics"
@@ -26,7 +27,7 @@ func NewDoor() *Door {
 
 	d := &Door{}
 	d.Solid = entities.NewSolid(0, 0, width, height, render.NewColorBox(int(width), int(height), color.RGBA{0, 0, 255, 255}), nil, d.Init())
-	d.UpdateLabel(LabelDoor)
+	d.UpdateLabel(collision.Label(LabelDoor))
 	return d
 }
 
