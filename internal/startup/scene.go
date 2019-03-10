@@ -14,7 +14,7 @@ import (
 var stayInMenu bool
 var nextscene string
 
-// Scene  to display
+// Scene  to display at startup
 var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
 		stayInMenu = true

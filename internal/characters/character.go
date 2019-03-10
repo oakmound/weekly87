@@ -1,4 +1,4 @@
-package run
+package characters
 
 import (
 	"github.com/oakmound/oak/entities/x/move"

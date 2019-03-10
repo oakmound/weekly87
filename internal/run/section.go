@@ -7,6 +7,7 @@ import (
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/render"
+	"github.com/oakmound/weekly87/internal/characters"
 )
 
 var (
@@ -22,7 +23,7 @@ type Section struct {
 	// a sprite via composite.ToSprite
 	ground   [64][24]render.Renderable
 	wall     [64][12]render.Renderable
-	entities []Character
+	entities []characters.Character
 }
 
 func TestSection() *Section {
@@ -41,7 +42,7 @@ func TestSection() *Section {
 			)
 		}
 	}
-	ch := NewChest(0)
+	ch := characters.NewChest(0)
 	ch.SetPos(800, 400)
 	s.entities = append(s.entities, ch)
 	return s

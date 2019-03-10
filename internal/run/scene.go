@@ -3,8 +3,6 @@ package run
 import (
 	"fmt"
 
-	"github.com/oakmound/oak/collision"
-
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
@@ -12,6 +10,7 @@ import (
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
+	"github.com/oakmound/weekly87/internal/characters"
 )
 
 var stayInGame bool
@@ -22,6 +21,7 @@ var playerMoveRect floatgeom.Rect2
 // 1 means forward, -1 means backward
 var facing = 1
 
+// Scene  to display the run
 var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
 		stayInGame = true
@@ -50,16 +50,16 @@ var Scene = scene.Scene{
 		// 3. Shift the player move rect gradually if we just started moving back
 		// 4. Flip enemies / characters as needed
 
-		s := NewSpearman(50, float64(oak.ScreenHeight/2))
+		s := characters.NewSpearman(50, float64(oak.ScreenHeight/2))
 		s.Bind(func(id int, _ interface{}) int {
-			ply, ok := event.GetEntity(id).(Player)
+			ply, ok := event.GetEntity(id).(characters.Player)
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
 			}
 			fmt.Println(ply.Vec().X(), ply.Vec().Y())
 			move.WASD(ply)
 			move.Limit(ply, playerMoveRect)
-			collision.HitLabel()
+			//collision.HitLabel()
 			return 0
 		}, "EnterFrame")
 		render.Draw(s.R, 2, 2)
