@@ -6,6 +6,7 @@ import (
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
+	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/entities/x/move"
@@ -48,12 +49,19 @@ var Scene = scene.Scene{
 
 		fmt.Println("How high are the buttons", exit.Y())
 
+		// Make the Inn backing
 		innBackground, _ := render.LoadSprite("", filepath.Join("raw", "placeholder_inn.png"))
 		render.Draw(innBackground, 0)
 
+		// A way to enter the run
+		innDoor := characters.NewDoor()
+		iW, iH := innDoor.R.GetDims()
+		innDoor.SetPos(float64(oak.ScreenWidth-iW), float64(oak.ScreenHeight-iH)/2) //Center the door on the right side
+		render.Draw(innDoor.R, 1)
+
 		innSpace := floatgeom.NewRect2(0, 0, float64(oak.ScreenWidth), float64(oak.ScreenHeight)-32) //Adjusted for the current size of the spearman
 
-		// TODO: remove the spearman freom here
+		// TODO: remove the spearman from here
 		s := characters.NewSpearman(float64(oak.ScreenWidth)/2, float64(oak.ScreenHeight/2))
 		s.Bind(func(id int, _ interface{}) int {
 			ply, ok := event.GetEntity(id).(characters.Player)
@@ -66,7 +74,17 @@ var Scene = scene.Scene{
 			//collision.HitLabel()
 			return 0
 		}, "EnterFrame")
-		s.Speed = physics.NewVector(5, 5)
+		s.Speed = physics.NewVector(5, 5) // We actually allow players to move around in the inn!
+
+		s.RSpace.Add(characters.LabelDoor,
+			(func(s1, s2 *collision.Space) {
+				p := s1.CID.E().(*characters.Character)
+				fmt.Println("Collided with a Character!", p)
+				nextscene = "run"
+				stayInMenu = false
+			}),
+		)
+
 		render.Draw(s.R, 2, 1)
 
 	},

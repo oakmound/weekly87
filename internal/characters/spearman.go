@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render/mod"
@@ -14,7 +15,7 @@ import (
 )
 
 type Spearman struct {
-	*entities.Moving
+	*entities.Interactive
 }
 
 func (s *Spearman) Init() event.CID {
@@ -25,7 +26,8 @@ func NewSpearman(x, y float64) *Spearman {
 	s := &Spearman{}
 	// r := render.NewColorBox(playerWidth, playerHeight, color.RGBA{255, 0, 0, 255})
 	r := render.NewSwitch("walkRT", s.loadAnimationMap())
-	s.Moving = entities.NewMoving(x, y, playerWidth, playerHeight, r, nil, s.Init(), 0)
+	s.Interactive = entities.NewInteractive(x, y, playerWidth, playerHeight, r, nil, s.Init(), 0)
+	collision.Add(s.RSpace.Space)
 	s.Speed = physics.NewVector(0, 5)
 
 	// s.R = render.NewCompoundR("walkRT", s.loadAnimationMap())
@@ -41,7 +43,7 @@ func (s *Spearman) loadAnimationMap() map[string]render.Modifiable {
 
 	animFilePath := (filepath.Join("16x32", "warrior.png"))
 
-	walkRT, err := render.LoadSheetSequence(animFilePath, 16, 32, 0, 8, []int{1, 0, 2, 0}...)
+	walkRT, err := render.LoadSheetSequence(animFilePath, 16, 32, 0, 8, []int{1, 0, 2, 0, 0, 0}...)
 	dlog.ErrorCheck(err)
 	walkLT := walkRT.Copy().Modify(mod.FlipX)
 
