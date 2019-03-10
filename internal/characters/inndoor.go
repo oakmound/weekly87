@@ -40,5 +40,4 @@ func (d *Door) GetDelta() physics.Vector {
 }
 
 func (d *Door) Flip() {
-	return
 }

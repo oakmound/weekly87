@@ -1,11 +1,6 @@
 package run
 
 import (
-	"fmt"
-	"image/color"
-	"math/rand"
-
-	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/weekly87/internal/characters"
 )
@@ -18,71 +13,15 @@ var (
 // Todo generate section
 
 type Section struct {
+	id       int64
 	ground   *render.Sprite
 	wall     *render.Sprite
 	entities []characters.Character
 }
 
-type sectionGenerator struct {
-	// Todo: these should be at the generated level,
-	// made into a render.Composite, then converted into
-	// a sprite via composite.ToSprite
-	ground   [64][24]render.Modifiable
-	wall     [64][12]render.Modifiable
-	entities []characters.Character
-}
-
-func (sg *sectionGenerator) generate() *Section {
-	groundOffset := float64(oak.ScreenHeight) * 1 / 3
-	// Place ground and wall appropariately in composites and
-	// create sprites
-	s := &Section{}
-	gcmp := render.NewCompositeM()
-	for x, col := range sg.ground {
-		for y, r := range col {
-			r.SetPos(float64(x)*16, groundOffset+float64(y)*16)
-			gcmp.Append(r)
-		}
-	}
-	s.ground = gcmp.ToSprite()
-	wcmp := render.NewCompositeM()
-	for x, col := range sg.wall {
-		for y, r := range col {
-			r.SetPos(float64(x)*16, float64(y)*16)
-			wcmp.Append(r)
-		}
-	}
-	s.wall = wcmp.ToSprite()
-	s.entities = sg.entities
-	return s
-}
-
-func TestSection() *Section {
-	s := &sectionGenerator{}
-	for x := 0; x < len(s.ground); x++ {
-		for y := 0; y < len(s.ground[x]); y++ {
-			s.ground[x][y] = render.NewColorBox(
-				16, 16, color.RGBA{0, uint8(rand.Intn(125)), 255, 255},
-			)
-		}
-	}
-	for x := 0; x < len(s.wall); x++ {
-		for y := 0; y < len(s.wall[x]); y++ {
-			s.wall[x][y] = render.NewColorBox(
-				16, 16, color.RGBA{0, uint8(rand.Intn(10)), 120, 255},
-			)
-		}
-	}
-
-	ch := characters.NewChest(0)
-	ch.SetPos(800, 400)
-	s.entities = append(s.entities, ch)
-	return s.generate()
-}
-
 func (s *Section) Draw() {
-	render.Draw(s.ground)
-	render.Draw(s.wall)
+	render.Draw(s.ground, 0)
+	render.Draw(s.wall, 1)
 	for _, e := range s.entities {
 		render.Draw(e.GetRenderable(), 2, 1)
 	}
@@ -90,9 +29,31 @@ func (s *Section) Draw() {
 
 func (s *Section) Shift(shift float64) {
 	s.ground.ShiftX(shift)
-	s.wall.ShiftX(shift)
 	for _, e := range s.entities {
 		ShiftMoverX(e, shift)
-		fmt.Println(e.Vec().X(), e.Vec().Y())
 	}
+}
+
+func (s *Section) SetBackgroundX(x float64) {
+	s.ground.SetX(x)
+}
+
+func (s *Section) Destroy() {
+	s.ground.Undraw()
+	s.wall.Undraw()
+	for _, e := range s.entities {
+		e.Destroy()
+	}
+}
+
+// X returns the leftmost x value of this section
+func (s *Section) X() float64 {
+	return s.ground.X()
+}
+
+// W returns how wide this section is
+func (s *Section) W() float64 {
+	// assumes ground and wall are same width
+	w, _ := s.ground.GetDims()
+	return float64(w)
 }
