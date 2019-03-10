@@ -2,8 +2,10 @@ package main
 
 import (
 	"github.com/oakmound/oak"
+	"github.com/oakmound/weekly87/internal/credits"
 	"github.com/oakmound/weekly87/internal/inn"
 	"github.com/oakmound/weekly87/internal/run"
+	"github.com/oakmound/weekly87/internal/savemanagement"
 	"github.com/oakmound/weekly87/internal/settings"
 	"github.com/oakmound/weekly87/internal/startup"
 )
@@ -19,6 +21,8 @@ func main() {
 	oak.AddScene("startup", startup.Scene)
 	oak.AddScene("inn", inn.Scene)
 	oak.AddScene("settings", settings.Scene)
+	oak.AddScene("credits", credits.Scene)
+	oak.AddScene("load", savemanagement.Scene)
 	oak.AddScene("run", run.Scene)
 	oak.Init("startup")
 }

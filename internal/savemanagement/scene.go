@@ -1,4 +1,4 @@
-package settings
+package savemanagement
 
 import (
 	"fmt"
@@ -17,13 +17,12 @@ var nextscene string
 var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
 		stayInMenu = true
-		nextscene = "settings"
+		nextscene = "load"
 		render.SetDrawStack(
 			render.NewCompositeR(),
 			render.NewHeap(false),
 			render.NewHeap(true),
 		)
-
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) * 3 / 4
 
@@ -35,7 +34,7 @@ var Scene = scene.Scene{
 
 		fmt.Println("How high are the buttons", exit.Y())
 
-		text := render.DefFont().NewStrText("Settings are under construction", float64(oak.ScreenWidth)/2-100, float64(oak.ScreenHeight)/4)
+		text := render.DefFont().NewStrText("Save Management is under construction", float64(oak.ScreenWidth)/2-100, float64(oak.ScreenHeight)/4)
 		render.Draw(text, 0, 1)
 
 	},

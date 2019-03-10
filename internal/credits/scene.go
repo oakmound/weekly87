@@ -1,4 +1,4 @@
-package settings
+package credits
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ var nextscene string
 var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
 		stayInMenu = true
-		nextscene = "settings"
+		nextscene = "credits"
 		render.SetDrawStack(
 			render.NewCompositeR(),
 			render.NewHeap(false),
@@ -35,11 +35,10 @@ var Scene = scene.Scene{
 
 		fmt.Println("How high are the buttons", exit.Y())
 
-		text := render.DefFont().NewStrText("Settings are under construction", float64(oak.ScreenWidth)/2-100, float64(oak.ScreenHeight)/4)
+		text := render.DefFont().NewStrText("The Credits are under construction", float64(oak.ScreenWidth)/2-100, float64(oak.ScreenHeight)/4)
 		render.Draw(text, 0, 1)
 
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
-	// scene.GoTo("inn"),
-	End: scene.GoToPtr(&nextscene),
+	End:  scene.GoToPtr(&nextscene),
 }
