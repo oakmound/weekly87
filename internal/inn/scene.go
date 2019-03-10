@@ -59,6 +59,9 @@ var Scene = scene.Scene{
 		innDoor.SetPos(float64(oak.ScreenWidth-iW), float64(oak.ScreenHeight-iH)/2) //Center the door on the right side
 		render.Draw(innDoor.R, 1)
 
+		text := render.DefFont().NewStrText("Hit the button or walk out of the inn to start the game!", float64(oak.ScreenWidth)/2-120, float64(oak.ScreenHeight)/4-40)
+		render.Draw(text, 3, 1)
+
 		innSpace := floatgeom.NewRect2(0, 0, float64(oak.ScreenWidth), float64(oak.ScreenHeight)-32) //Adjusted for the current size of the spearman
 
 		// TODO: remove the spearman from here
