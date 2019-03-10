@@ -47,8 +47,6 @@ var Scene = scene.Scene{
 			return 0
 		}))
 
-		fmt.Println("How high are the buttons", exit.Y())
-
 		// Make the Inn backing
 		innBackground, _ := render.LoadSprite("", filepath.Join("raw", "placeholder_inn.png"))
 		render.Draw(innBackground, 0)
@@ -64,32 +62,71 @@ var Scene = scene.Scene{
 
 		innSpace := floatgeom.NewRect2(0, 0, float64(oak.ScreenWidth), float64(oak.ScreenHeight)-32) //Adjusted for the current size of the spearman
 
-		// TODO: remove the spearman from here
-		s := characters.NewSpearman(float64(oak.ScreenWidth)/2, float64(oak.ScreenHeight/2))
-		s.Bind(func(id int, _ interface{}) int {
-			ply, ok := event.GetEntity(id).(characters.Player)
-			if !ok {
-				dlog.Error("Non-player sent to player binding")
-			}
+		pc := characters.NewPc(characters.JobSwordsman, float64(oak.ScreenWidth)/2, float64(oak.ScreenHeight/2))
 
-			move.WASD(ply)
-			move.Limit(ply, innSpace)
-			<-s.RSpace.CallOnHits()
-			//collision.HitLabel()
+		pc2 := characters.NewPc(characters.JobArcher, float64(pc.X()-18), float64(oak.ScreenHeight/2))
+		pc2.Bind(func(id int, _ interface{}) int {
+			pcInnBindings(id)
 			return 0
 		}, "EnterFrame")
-		s.Speed = physics.NewVector(5, 5) // We actually allow players to move around in the inn!
 
-		s.RSpace.Add(collision.Label(characters.LabelDoor),
+		pc.Bind(func(id int, _ interface{}) int {
+			ply := pcInnBindings(id)
+			move.Limit(ply, innSpace)
+			<-pc.RSpace.CallOnHits()
+			return 0
+		}, "EnterFrame")
+		pc.Speed = physics.NewVector(5, 5) // We actually allow players to move around in the inn!
+		pc2.Speed = pc.Speed
+
+		pc.RSpace.Add(collision.Label(characters.LabelDoor),
 			(func(s1, s2 *collision.Space) {
 				nextscene = "run"
 				stayInMenu = false
 			}))
 
-		render.Draw(s.R, 2, 1)
+		render.Draw(pc.R, 2, 1)
+		render.Draw(pc2.R, 2, 1)
+
+		menuX -= (menus.BtnWidthA * .625)
+		menuY += menus.BtnHeightA * 1.5
+
+		selectPC1 := btn.New(menus.BtnCfgA, btn.Layers(2), btn.Pos(menuX, menuY), btn.Text("Change PC 1"), btn.Binding(func(int, interface{}) int {
+			pc.R.Undraw()
+			pc.SetJob((pc.Job + 1) % characters.JobMax)
+			render.Draw(pc.R, 2, 1)
+			return 0
+		}))
+		menuX += menus.BtnWidthA * 5 / 4
+		selectPC2 := btn.New(menus.BtnCfgA, btn.Layers(2), btn.Pos(menuX, menuY), btn.Text("Change PC 2"), btn.Binding(func(int, interface{}) int {
+			pc2.R.Undraw()
+			pc2.SetJob((pc2.Job + 1) % characters.JobMax)
+			render.Draw(pc2.R, 2, 1)
+			return 0
+		}))
+		fmt.Println("How high are the buttons", exit.Y(), selectPC1.X(), selectPC2.X())
 
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
 	// scene.GoTo("inn"),
 	End: scene.GoToPtr(&nextscene),
+}
+
+func pcInnBindings(id int) characters.Player {
+	ply, ok := event.GetEntity(id).(characters.Player)
+	if !ok {
+		dlog.Error("Non-player sent to player binding")
+	}
+
+	oldDeltaX := ply.GetDelta().X()
+	move.WASD(ply)
+	if oldDeltaX != ply.GetDelta().X() { //Lazy impl since we dont have facing baked into WASD movement
+		img := ply.GetRenderable().(*render.Switch)
+		if ply.GetDelta().X() > 0 {
+			img.Set("walkRT")
+		} else {
+			img.Set("walkLT")
+		}
+	}
+	return ply
 }
