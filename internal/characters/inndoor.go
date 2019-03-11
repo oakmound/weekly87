@@ -7,13 +7,13 @@ import (
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
-	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 )
 
 // Door is a small struct to make Doors (initially just the 2 innDoors)
 type Door struct {
 	*entities.Solid
+	Unmoving
 }
 
 func (d *Door) Init() event.CID {
@@ -29,14 +29,6 @@ func NewDoor() *Door {
 	d.Solid = entities.NewSolid(0, 0, width, height, render.NewColorBox(int(width), int(height), color.RGBA{0, 0, 255, 255}), nil, d.Init())
 	d.UpdateLabel(collision.Label(LabelDoor))
 	return d
-}
-
-func (d *Door) GetSpeed() physics.Vector {
-	return physics.Vector{}
-}
-
-func (d *Door) GetDelta() physics.Vector {
-	return physics.Vector{}
 }
 
 func (d *Door) Flip() {

@@ -1,8 +1,10 @@
 package characters
 
 const (
-	LabelNone  = iota
-	LabelDoor  = iota
-	LabelChest = iota
-	LabelPC    = iota
+	LabelNone = iota
+	LabelDoor
+	LabelChest
+	LabelPC
+	LabelEnemy
+	LabelPlayerAttack
 )

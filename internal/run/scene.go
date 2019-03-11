@@ -1,13 +1,12 @@
 package run
 
 import (
-	"fmt"
-
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities/x/move"
 	"github.com/oakmound/oak/event"
+	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/characters"
@@ -20,7 +19,7 @@ var playerMoveRect floatgeom.Rect2
 // facing is whether is game is moving forward or backward,
 // 1 means forward, -1 means backward
 var facing = 1
-var runSpeed = 4.0
+var runSpeed = 2.0
 
 // Scene  to display the run
 var Scene = scene.Scene{
@@ -59,9 +58,38 @@ var Scene = scene.Scene{
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
 			}
-			move.WASD(ply)
-			move.Limit(ply, playerMoveRect)
-			//collision.HitLabel()
+			// The idea behind splitting up the move functions
+			// flawed when they're all working together--we only want
+			// to shift everything -once-, otherwise there are jitters
+			// or other awkward bits to moving around.
+			vec := ply.Vec()
+			delta := ply.GetDelta()
+			spd := ply.GetSpeed()
+			r := ply.GetRenderable()
+			sp := ply.GetSpace()
+
+			delta.Zero()
+
+			delta.SetX(runSpeed)
+			if oak.IsDown("W") {
+				delta.Add(physics.NewVector(0, -spd.Y()))
+			}
+			if oak.IsDown("S") {
+				delta.Add(physics.NewVector(0, spd.Y()))
+			}
+
+			vec.Add(delta)
+			oak.ViewPos.X += int(runSpeed)
+			// This is 6, when it should be 32
+			//_, h := r.GetDims()
+			hf := 32.0
+			if vec.Y() < playerMoveRect.Min.Y() {
+				vec.SetY(playerMoveRect.Min.Y())
+			} else if vec.Y() > playerMoveRect.Max.Y()-hf {
+				vec.SetY(playerMoveRect.Max.Y() - hf)
+			}
+			r.SetPos(vec.X(), vec.Y())
+			sp.Update(vec.X(), vec.Y(), sp.GetW(), sp.GetH())
 			return 0
 		}, "EnterFrame")
 		render.Draw(s.R, 2, 2)
@@ -71,26 +99,30 @@ var Scene = scene.Scene{
 		sct := tracker.Next()
 		sct.Draw()
 		nextSct := tracker.Next()
-		fmt.Println("Section width:", sct.W())
 		nextSct.SetBackgroundX(sct.X() + sct.W())
 		nextSct.Draw()
 
 		event.GlobalBind(func(int, interface{}) int {
-			sct.Shift(runSpeed * float64(-facing))
-			nextSct.Shift(runSpeed * float64(-facing))
+			//sct.Shift(runSpeed * float64(-facing))
+			//nextSct.Shift(runSpeed * float64(-facing))
 			// This calculation needs to be modified based
 			// on how much of the screen a section takes up.
 			// If a section takes up more than one screen,
 			// this is fine, otherwise it needs to change a little
-			offLeft := sct.W() + sct.X()
-			if offLeft < 0 {
-				// This is a little racy, but
-				// we don't want the game to hitch here
+			w := sct.W()
+			offLeft := oak.ViewPos.X - int(w)
+			if offLeft >= 0 {
+				// We need a way to make these actions draw-level atomic
+				// Or a way to fake it so there isn't a blip
+				oak.ViewPos.X = offLeft
+				nextSct.Shift(-w)
 				sct.Destroy()
 				sct = nextSct
+				// Todo: shift player, not locally stored s
+				s.ShiftX(-w)
 				go func() {
 					nextSct = tracker.Next()
-					nextSct.SetBackgroundX(sct.X() + sct.W())
+					nextSct.SetBackgroundX(sct.X() + w)
 					nextSct.Draw()
 				}()
 			}
@@ -118,8 +150,14 @@ var Scene = scene.Scene{
 		// Background should probably be very basic hallway with tile types
 		// and different themes populate the tile types
 
-		// Character types:
-		// First character has spearish thing, can move up down and stab forward
+		// Character types: 10 Sec cooldown ability, 30 sec
+		// Spearman - Shove up - Attack in front
+		// Warrior - Shove back - Shove all enemies back
+		// Cleric - Slow down run speed for short period - Revive
+		// Ranger - Y Speed boost for short period - Shoot arrow in front
+		// Rogue - Invisible for short period - Blink / jump forward
+		// Paladin - Invincible for short period -
+		// Mage - Spawns Fire - Freeze all enemies in place
 
 		// Enemy types:
 		// 1. Stands in the way and hurts if you touch it
