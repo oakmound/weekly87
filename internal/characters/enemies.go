@@ -110,6 +110,7 @@ func (ec *EnemyConstructor) NewEnemy() (*BasicEnemy, error) {
 		} else {
 			be.swtch.Set("stand" + be.facing)
 		}
+		<-be.RSpace.CallOnHits()
 		return 0
 	}, "EnterFrame")
 	be.RSpace.Add(LabelPlayerAttack, func(s, _ *collision.Space) {

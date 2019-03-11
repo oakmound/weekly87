@@ -3,13 +3,16 @@ package run
 import (
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
+	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
+	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/entities/x/move"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/characters"
+	"github.com/oakmound/weekly87/internal/menus"
 )
 
 var stayInGame bool
@@ -58,6 +61,10 @@ var Scene = scene.Scene{
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
 			}
+			if !ply.Alive() {
+				// This logic has to change once there are multiple characters
+				return 0
+			}
 			// The idea behind splitting up the move functions
 			// flawed when they're all working together--we only want
 			// to shift everything -once-, otherwise there are jitters
@@ -90,9 +97,30 @@ var Scene = scene.Scene{
 			}
 			r.SetPos(vec.X(), vec.Y())
 			sp.Update(vec.X(), vec.Y(), sp.GetW(), sp.GetH())
+			<-ply.GetReactiveSpace().CallOnHits()
 			return 0
 		}, "EnterFrame")
 		render.Draw(s.R, 2, 2)
+		rs := s.GetReactiveSpace()
+		rs.Add(characters.LabelEnemy, func(s, _ *collision.Space) {
+			ply, ok := s.CID.E().(characters.Player)
+			if !ok {
+				dlog.Error("Non-player sent to player binding")
+			}
+			ply.Kill()
+			// Logic has to change once there are multiple characters
+			// Show pop up to go back to inn
+			menuX := (float64(oak.ScreenWidth) - 180) / 2 // + float64(oak.ViewPos.X)
+			menuY := float64(oak.ScreenHeight) / 4        //+ float64(oak.ViewPos.Y)
+			btn.New(menus.BtnCfgA, btn.Layers(3, 0),
+				btn.Pos(menuX, menuY), btn.Text("Defeated! Return to Inn?"),
+				btn.Width(180),
+				btn.Binding(func(int, interface{}) int {
+					nextscene = "inn"
+					stayInGame = false
+					return 0
+				}))
+		})
 
 		// todo populate baseseed
 		tracker := NewSectionTracker(baseSeed)

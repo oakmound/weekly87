@@ -14,10 +14,10 @@ import (
 	"github.com/oakmound/oak/render"
 )
 
-var _ Character = &Spearman{}
+var _ Player = &Spearman{}
 
 type Spearman struct {
-	*entities.Interactive
+	basePlayer
 }
 
 func (s *Spearman) Init() event.CID {
@@ -30,6 +30,7 @@ func NewSpearman(x, y float64) *Spearman {
 	s.Interactive = entities.NewInteractive(x, y, playerWidth, playerHeight, r, nil, s.Init(), 0)
 	collision.Add(s.RSpace.Space)
 	s.Speed = physics.NewVector(0, 5)
+	s.alive = true
 
 	// h.animation = ch.R.(*render.Compound)
 	return s

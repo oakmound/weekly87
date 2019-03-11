@@ -1,7 +1,6 @@
 package inn
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/oakmound/oak"
@@ -34,20 +33,16 @@ var Scene = scene.Scene{
 
 			// ui
 			render.NewHeap(true),
-			//ui text
-			render.NewHeap(true),
 		)
 
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) / 4
 
-		exit := btn.New(menus.BtnCfgA, btn.Layers(2), btn.Pos(menuX, menuY), btn.Text("Start Run"), btn.Binding(func(int, interface{}) int {
+		btn.New(menus.BtnCfgA, btn.Layers(2, 0), btn.Pos(menuX, menuY), btn.Text("Start Run"), btn.Binding(func(int, interface{}) int {
 			nextscene = "run"
 			stayInMenu = false
 			return 0
 		}))
-
-		fmt.Println("How high are the buttons", exit.Y())
 
 		// Make the Inn backing
 		innBackground, _ := render.LoadSprite("", filepath.Join("raw", "placeholder_inn.png"))
@@ -60,7 +55,7 @@ var Scene = scene.Scene{
 		render.Draw(innDoor.R, 1)
 
 		text := render.DefFont().NewStrText("Hit the button or walk out of the inn to start the game!", float64(oak.ScreenWidth)/2-120, float64(oak.ScreenHeight)/4-40)
-		render.Draw(text, 3, 1)
+		render.Draw(text, 2, 1)
 
 		innSpace := floatgeom.NewRect2(0, 0, float64(oak.ScreenWidth), float64(oak.ScreenHeight)-32) //Adjusted for the current size of the spearman
 
