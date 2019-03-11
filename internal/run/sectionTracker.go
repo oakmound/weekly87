@@ -52,9 +52,9 @@ func (st *SectionTracker) Next() *Section {
 	st.rng.Seed(st.start + st.sectionsDeep)
 	// This following section is test code
 	// These initial rng calls should make these test sections more distinct
-	rLimit := st.rng.Intn(255)
-	gLimit := st.rng.Intn(255)
-	bLimit := st.rng.Intn(255)
+	rLimit := st.rng.Intn(255) + 1
+	gLimit := st.rng.Intn(255) + 1
+	bLimit := st.rng.Intn(255) + 1
 	for x := 0; x < len(st.ground); x++ {
 		for y := 0; y < len(st.ground[x]); y++ {
 			st.ground[x][y] = render.NewColorBox(
@@ -66,9 +66,9 @@ func (st *SectionTracker) Next() *Section {
 			)
 		}
 	}
-	rLimit = st.rng.Intn(255)
-	gLimit = st.rng.Intn(255)
-	bLimit = st.rng.Intn(255)
+	rLimit = st.rng.Intn(255) + 1
+	gLimit = st.rng.Intn(255) + 1
+	bLimit = st.rng.Intn(255) + 1
 	for x := 0; x < len(st.wall); x++ {
 		for y := 0; y < len(st.wall[x]); y++ {
 			st.wall[x][y] = render.NewColorBox(
@@ -87,7 +87,7 @@ func (st *SectionTracker) Next() *Section {
 		AnimationMap: map[string]render.Modifiable{
 			"standRT": render.NewColorBox(32, 32, color.RGBA{255, 125, 0, 255}),
 			"standLT": render.NewColorBox(32, 32, color.RGBA{125, 255, 0, 255}),
-			"walkRT":  render.NewColorBox(32, 32, color.RGBA{0, 125, 255, 255}),
+			"walkRT":  render.NewColorBox(32, 32, color.RGBA{0, 0, 0, 255}),
 			"walkLT":  render.NewColorBox(32, 32, color.RGBA{255, 255, 255, 255}),
 		},
 	}
@@ -97,5 +97,8 @@ func (st *SectionTracker) Next() *Section {
 	} else {
 		st.entities = append(st.entities, e)
 	}
+	ch := characters.NewChest(1)
+	ch.SetPos(800, 500)
+	st.entities = append(st.entities, ch)
 	return st.generate()
 }
