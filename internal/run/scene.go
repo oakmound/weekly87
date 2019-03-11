@@ -2,13 +2,11 @@ package run
 
 import (
 	"github.com/oakmound/oak"
-	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/entities/x/move"
 	"github.com/oakmound/oak/event"
-	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/characters"
@@ -17,12 +15,10 @@ import (
 
 var stayInGame bool
 var nextscene string
-var playerMoveRect floatgeom.Rect2
 
 // facing is whether is game is moving forward or backward,
 // 1 means forward, -1 means backward
 var facing = 1
-var runSpeed = 2.0
 
 // Scene  to display the run
 var Scene = scene.Scene{
@@ -47,67 +43,29 @@ var Scene = scene.Scene{
 			render.NewLogicFPS(),
 		)
 
-		playerMoveRect = floatgeom.NewRect2(0, float64(oak.ScreenHeight)*1/3, float64(oak.ScreenWidth),
-			float64(oak.ScreenHeight))
 		// Todo: add collision with chests, when this happpens the chest
 		// 1. needs to be collected
 		// 2. If we're going forward, start going back
 		// 3. Shift the player move rect gradually if we just started moving back
 		// 4. Flip enemies / characters as needed
 
-		s := characters.NewSpearman(50, float64(oak.ScreenHeight/2))
-		s.Bind(func(id int, _ interface{}) int {
-			ply, ok := event.GetEntity(id).(characters.Player)
-			if !ok {
-				dlog.Error("Non-player sent to player binding")
-			}
-			if !ply.Alive() {
-				// This logic has to change once there are multiple characters
-				return 0
-			}
-			// The idea behind splitting up the move functions
-			// flawed when they're all working together--we only want
-			// to shift everything -once-, otherwise there are jitters
-			// or other awkward bits to moving around.
-			vec := ply.Vec()
-			delta := ply.GetDelta()
-			spd := ply.GetSpeed()
-			r := ply.GetRenderable()
-			sp := ply.GetSpace()
-
-			delta.Zero()
-
-			delta.SetX(runSpeed)
-			if oak.IsDown("W") {
-				delta.Add(physics.NewVector(0, -spd.Y()))
-			}
-			if oak.IsDown("S") {
-				delta.Add(physics.NewVector(0, spd.Y()))
-			}
-
-			vec.Add(delta)
-			oak.ViewPos.X += int(runSpeed)
-			// This is 6, when it should be 32
-			//_, h := r.GetDims()
-			hf := 32.0
-			if vec.Y() < playerMoveRect.Min.Y() {
-				vec.SetY(playerMoveRect.Min.Y())
-			} else if vec.Y() > playerMoveRect.Max.Y()-hf {
-				vec.SetY(playerMoveRect.Max.Y() - hf)
-			}
-			r.SetPos(vec.X(), vec.Y())
-			sp.Update(vec.X(), vec.Y(), sp.GetW(), sp.GetH())
-			<-ply.GetReactiveSpace().CallOnHits()
-			return 0
-		}, "EnterFrame")
+		s, err := characters.NewSpearman(
+			characters.PlayerWallOffset, float64(oak.ScreenHeight/2),
+		)
+		if err != nil {
+			dlog.Error(err)
+			return
+		}
 		render.Draw(s.R, 2, 2)
 		rs := s.GetReactiveSpace()
 		rs.Add(characters.LabelEnemy, func(s, _ *collision.Space) {
-			ply, ok := s.CID.E().(characters.Player)
+			ply, ok := s.CID.E().(*characters.Player)
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
+				return
 			}
-			ply.Kill()
+			ply.Alive = false
+			ply.Trigger("Kill", nil)
 			// Logic has to change once there are multiple characters
 			// Show pop up to go back to inn
 			menuX := (float64(oak.ScreenWidth) - 180) / 2 // + float64(oak.ViewPos.X)
@@ -122,6 +80,23 @@ var Scene = scene.Scene{
 				}))
 		})
 
+		rs.Add(characters.LabelChest, func(s, s2 *collision.Space) {
+			_, ok := s.CID.E().(*characters.Player)
+			if !ok {
+				dlog.Error("Non-player sent to player binding")
+				return
+			}
+			_, ok = s2.CID.E().(*characters.Chest)
+			if !ok {
+				dlog.Error("Non-chest sent to chest binding")
+				return
+			}
+			//val := ch.Value
+			// Todo: pick up logic
+			facing = -1
+			event.Trigger("RunBack", nil)
+		})
+
 		// todo populate baseseed
 		tracker := NewSectionTracker(baseSeed)
 		sct := tracker.Next()
@@ -131,15 +106,21 @@ var Scene = scene.Scene{
 		nextSct.Draw()
 
 		event.GlobalBind(func(int, interface{}) int {
-			//sct.Shift(runSpeed * float64(-facing))
-			//nextSct.Shift(runSpeed * float64(-facing))
 			// This calculation needs to be modified based
 			// on how much of the screen a section takes up.
 			// If a section takes up more than one screen,
 			// this is fine, otherwise it needs to change a little
-			w := sct.W()
-			offLeft := oak.ViewPos.X - int(w)
-			if offLeft >= 0 {
+			w := sct.W() * float64(facing)
+			var offLeft int
+			var shift bool
+			if facing == 1 {
+				offLeft = oak.ViewPos.X - int(w)
+				shift = offLeft >= 0
+			} else {
+				offLeft = oak.ViewPos.X - int(w)
+				shift = offLeft >= int(sct.W())
+			}
+			if shift {
 				// We need a way to make these actions draw-level atomic
 				// Or a way to fake it so there isn't a blip
 				oak.ViewPos.X = offLeft
@@ -206,8 +187,7 @@ var Scene = scene.Scene{
 
 	},
 	Loop: scene.BooleanLoop(&stayInGame),
-	// scene.GoTo("inn"),
-	End: scene.GoToPtr(&nextscene),
+	End:  scene.GoToPtr(&nextscene),
 }
 
 func ShiftMoverX(mvr move.Mover, x float64) {
