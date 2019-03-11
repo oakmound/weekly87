@@ -87,6 +87,7 @@ func (ec *EnemyConstructor) NewEnemy() (*BasicEnemy, error) {
 	be.RSpace.UpdateLabel(LabelEnemy)
 	be.CheckedBind(func(be *BasicEnemy, _ interface{}) int {
 		be.facing = "RT"
+		be.Speed = be.Speed.Scale(-1)
 		return 0
 	}, "RunBack")
 	be.CheckedBind(func(be *BasicEnemy, _ interface{}) int {
@@ -99,7 +100,7 @@ func (ec *EnemyConstructor) NewEnemy() (*BasicEnemy, error) {
 			be.ShiftPos(be.Delta.X(), be.Delta.Y())
 			// Default behavior is to flip when hitting the ceiling
 			if be.Y() < float64(oak.ScreenHeight)*1/3 ||
-				be.Y() > (float64(oak.ScreenHeight)-be.W) {
+				be.Y() > (float64(oak.ScreenHeight)-be.H) {
 				be.Speed.SetY(be.Speed.Y() * -1)
 				// Adjust so we don't exist in the wall for a frame
 				be.ShiftPos(0, be.Speed.Y())
