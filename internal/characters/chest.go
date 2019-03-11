@@ -13,6 +13,7 @@ var _ Character = &Chest{}
 type Chest struct {
 	*entities.Reactive
 	Unmoving
+	Value int64
 }
 
 func (c *Chest) Init() event.CID {
@@ -21,8 +22,10 @@ func (c *Chest) Init() event.CID {
 
 func NewChest(value int64) *Chest {
 	ch := &Chest{}
+	// Todo: calculate image based on value
 	ch.Reactive = entities.NewReactive(0, 0, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{0, 255, 255, 255}), nil, ch.Init())
 	ch.RSpace.UpdateLabel(LabelChest)
+	ch.Value = value
 	return ch
 }
