@@ -56,10 +56,11 @@ func (pc *PlayerConstructor) Copy() *PlayerConstructor {
 
 type Player struct {
 	*entities.Interactive
-	facing   string
-	Swtch    *render.Switch
-	Alive    bool
-	RunSpeed float64
+	facing      string
+	Swtch       *render.Switch
+	Alive       bool
+	RunSpeed    float64
+	ChestValues []int64
 }
 
 func (p *Player) Init() event.CID {

@@ -1,6 +1,8 @@
 package run
 
 import (
+	"sync"
+
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
@@ -90,8 +92,12 @@ var Scene = scene.Scene{
 		nextSct.Draw()
 		var oldSct *Section
 
+		chestHeight := 0.0
+
+		facingLock := sync.Mutex{}
+
 		rs.Add(characters.LabelChest, func(s, s2 *collision.Space) {
-			_, ok := s.CID.E().(*characters.Player)
+			p, ok := s.CID.E().(*characters.Player)
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
 				return
@@ -101,18 +107,33 @@ var Scene = scene.Scene{
 				dlog.Error("Non-chest sent to chest binding")
 				return
 			}
+			r := ch.R.(render.Modifiable).Copy()
+			_, h := r.GetDims()
+
+			chestHeight += float64(h + 1)
+
+			r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -chestHeight)
+			p.ChestValues = append(p.ChestValues, ch.Value)
+
 			ch.Destroy()
-			//val := ch.Value
-			// Todo: pick up logic
-			facing = -1
+			render.Draw(r, 2, 2)
+			facingLock.Lock()
+			if facing == 1 {
 
-			event.Trigger("RunBack", nil)
+				// Todo: pick up logic
+				facing = -1
+				facingLock.Unlock()
 
-			// Shift sections
-			//tracker.ShiftDepth(-1)
-			oldSct = nextSct
-			nextSct = tracker.Prev()
-			nextSct.SetBackgroundX(sct.X() - sct.W())
+				event.Trigger("RunBack", nil)
+
+				// Shift sections
+				//tracker.ShiftDepth(-1)
+				oldSct = nextSct
+				nextSct = tracker.Prev()
+				nextSct.SetBackgroundX(sct.X() - sct.W())
+			} else {
+				facingLock.Unlock()
+			}
 		})
 
 		rs.Add(characters.LabelDoor, func(_, _ *collision.Space) {

@@ -109,14 +109,15 @@ func (st *SectionTracker) Produce(delta int64) *Section {
 	} else {
 		st.entities = append(st.entities, e)
 	}
-	ch := characters.NewChest(1)
-	ch.SetPos(800, 500)
-	st.entities = append(st.entities, ch)
 
 	if st.sectionsDeep == 1 {
 		d := characters.NewOutDoor(delta < 0)
 		d.SetPos(0, 0)
 		st.entities = append(st.entities, d)
+	} else {
+		ch := characters.NewChest(1)
+		ch.SetPos(800, 500)
+		st.entities = append(st.entities, ch)
 	}
 
 	return st.generate()
