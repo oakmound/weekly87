@@ -1,7 +1,9 @@
-package characters
+package enemies
 
 import (
 	"errors"
+
+	"github.com/oakmound/weekly87/internal/characters/labels"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/physics"
@@ -14,16 +16,14 @@ import (
 	"github.com/oakmound/oak/render"
 )
 
-var _ Character = &BasicEnemy{}
-
-var requiredEnemyAnimations = []string{
+var requiredAnimations = []string{
 	"standRT",
 	"standLT",
 	"walkRT",
 	"walkLT",
 }
 
-type EnemyConstructor struct {
+type Constructor struct {
 	Position   floatgeom.Point2
 	Dimensions floatgeom.Point2
 	Speed      floatgeom.Point2
@@ -36,6 +36,8 @@ type EnemyConstructor struct {
 	AnimationMap map[string]render.Modifiable
 	Bindings     map[string]func(*BasicEnemy, interface{}) int
 }
+
+var Constructors [TypeLimit]Constructor
 
 type BasicEnemy struct {
 	*entities.Interactive
@@ -61,11 +63,11 @@ func (be *BasicEnemy) CheckedBind(bnd func(*BasicEnemy, interface{}) int, ev str
 // NewEnemy creates an enemy that will animate walking or standing appropriately,
 // move according to its speed, flip its facing when the player picks up
 // a chest, and die when a player attack hits it
-func (ec *EnemyConstructor) NewEnemy() (*BasicEnemy, error) {
+func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 	if ec.Dimensions == (floatgeom.Point2{}) {
 		return nil, errors.New("Dimensions must be provided")
 	}
-	for _, s := range requiredEnemyAnimations {
+	for _, s := range requiredAnimations {
 		if _, ok := ec.AnimationMap[s]; !ok {
 			return nil, errors.New("Animation name " + s + " must be provided")
 		}
@@ -84,7 +86,7 @@ func (ec *EnemyConstructor) NewEnemy() (*BasicEnemy, error) {
 	)
 	be.Speed = physics.NewVector(ec.Speed.X(), ec.Speed.Y())
 	be.facing = "LT"
-	be.RSpace.UpdateLabel(LabelEnemy)
+	be.RSpace.UpdateLabel(labels.Enemy)
 	be.CheckedBind(func(be *BasicEnemy, _ interface{}) int {
 		be.facing = "RT"
 		be.Speed = be.Speed.Scale(-1)
@@ -114,7 +116,7 @@ func (ec *EnemyConstructor) NewEnemy() (*BasicEnemy, error) {
 		<-be.RSpace.CallOnHits()
 		return 0
 	}, "EnterFrame")
-	be.RSpace.Add(LabelPlayerAttack, func(s, _ *collision.Space) {
+	be.RSpace.Add(labels.PlayerAttack, func(s, _ *collision.Space) {
 		be, ok := s.CID.E().(*BasicEnemy)
 		if !ok {
 			dlog.Error("On hit for basic enemy called on non-basic enemy")

@@ -3,20 +3,24 @@ package run
 import (
 	"sync"
 
+	"github.com/oakmound/weekly87/internal/characters/doodads"
+	"github.com/oakmound/weekly87/internal/characters/labels"
+	"github.com/oakmound/weekly87/internal/characters/players"
+
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities/x/btn"
-	"github.com/oakmound/oak/entities/x/move"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
-	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/menus"
+	"github.com/oakmound/weekly87/internal/run/section"
 )
 
 var stayInGame bool
 var nextscene string
+var baseSeed int64
 
 // facing is whether is game is moving forward or backward,
 // 1 means forward, -1 means backward
@@ -46,8 +50,8 @@ var Scene = scene.Scene{
 			render.NewLogicFPS(),
 		)
 
-		s, err := characters.NewSpearman(
-			characters.PlayerWallOffset, float64(oak.ScreenHeight/2),
+		s, err := players.NewSpearman(
+			players.WallOffset, float64(oak.ScreenHeight/2),
 		)
 		if err != nil {
 			dlog.Error(err)
@@ -55,8 +59,8 @@ var Scene = scene.Scene{
 		}
 		render.Draw(s.R, 2, 2)
 		rs := s.GetReactiveSpace()
-		rs.Add(characters.LabelEnemy, func(s, _ *collision.Space) {
-			ply, ok := s.CID.E().(*characters.Player)
+		rs.Add(labels.Enemy, func(s, _ *collision.Space) {
+			ply, ok := s.CID.E().(*players.Player)
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
 				return
@@ -78,25 +82,25 @@ var Scene = scene.Scene{
 		})
 
 		// todo populate baseseed
-		tracker := NewSectionTracker(baseSeed)
+		tracker := section.NewTracker(baseSeed)
 		sct := tracker.Next()
 		sct.Draw()
 		nextSct := tracker.Next()
 		nextSct.SetBackgroundX(sct.X() + sct.W())
 		nextSct.Draw()
-		var oldSct *Section
+		var oldSct *section.Section
 
 		chestHeight := 0.0
 
 		facingLock := sync.Mutex{}
 
-		rs.Add(characters.LabelChest, func(s, s2 *collision.Space) {
-			p, ok := s.CID.E().(*characters.Player)
+		rs.Add(labels.Chest, func(s, s2 *collision.Space) {
+			p, ok := s.CID.E().(*players.Player)
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
 				return
 			}
-			ch, ok := s2.CID.E().(*characters.Chest)
+			ch, ok := s2.CID.E().(*doodads.Chest)
 			if !ok {
 				dlog.Error("Non-chest sent to chest binding")
 				return
@@ -128,7 +132,7 @@ var Scene = scene.Scene{
 			}
 		})
 
-		rs.Add(characters.LabelDoor, func(_, _ *collision.Space) {
+		rs.Add(labels.Door, func(_, _ *collision.Space) {
 			stayInGame = false
 		})
 
@@ -214,12 +218,4 @@ var Scene = scene.Scene{
 	},
 	Loop: scene.BooleanLoop(&stayInGame),
 	End:  scene.GoToPtr(&nextscene),
-}
-
-func ShiftMoverX(mvr move.Mover, x float64) {
-	vec := mvr.Vec()
-	vec.ShiftX(x)
-	mvr.GetRenderable().SetPos(vec.X(), vec.Y())
-	sp := mvr.GetSpace()
-	sp.Update(vec.X(), vec.Y(), sp.GetW(), sp.GetH())
 }

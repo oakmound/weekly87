@@ -8,7 +8,7 @@ import (
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
-	"github.com/oakmound/weekly87/internal/characters"
+	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/menus"
 )
 
@@ -43,7 +43,7 @@ var Scene = scene.Scene{
 		render.Draw(innBackground, 0)
 
 		// A way to enter the run
-		characters.NewDoor()
+		doodads.NewInnDoor()
 
 		text := render.DefFont().NewStrText("Hit the button or walk out of the inn to start the game!", float64(oak.ScreenWidth)/2-120, float64(oak.ScreenHeight)/4-40)
 		render.Draw(text, 2, 1)

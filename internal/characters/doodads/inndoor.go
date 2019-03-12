@@ -1,32 +1,33 @@
-package characters
+package doodads
 
 import (
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
+
+	"github.com/oakmound/weekly87/internal/characters/labels"
 )
 
-// Door is a small struct to make Doors (initially just the 2 innDoors)
-type Door struct {
+type InnDoor struct {
 	*entities.Solid
 	Unmoving
 }
 
-func (d *Door) Init() event.CID {
+func (d *InnDoor) Init() event.CID {
 	return event.NextID(d)
 }
 
-func NewDoor() *Door {
+func NewInnDoor() *InnDoor {
 
 	width := 83.0
 	height := 258.0
 
-	d := &Door{}
+	d := &InnDoor{}
 	d.Solid = entities.NewSolid(float64(oak.ScreenWidth)-width, 239, width, height, nil, nil, d.Init())
-	d.UpdateLabel(collision.Label(LabelDoor))
+	d.UpdateLabel(collision.Label(labels.Door))
 	return d
 }
 
-func (d *Door) Flip() {
+func (d *InnDoor) Flip() {
 }

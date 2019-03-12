@@ -1,7 +1,6 @@
 package startup
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -10,9 +9,10 @@ import (
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
-	"github.com/oakmound/weekly87/internal/characters"
+	"github.com/oakmound/weekly87/internal/characters/enemies"
+	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/menus"
-	"github.com/oakmound/weekly87/internal/run"
+	"github.com/oakmound/weekly87/internal/run/section"
 	"golang.org/x/image/colornames"
 )
 
@@ -31,8 +31,9 @@ var Scene = scene.Scene{
 		)
 
 		if prevScene == "loading" {
-			characters.Init()
-			run.Init()
+			players.Init()
+			section.Init()
+			enemies.Init()
 			// The game has just started, maybe do some
 			// intro visual stuff
 
@@ -54,22 +55,18 @@ var Scene = scene.Scene{
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) / 4
 
-		start := btn.New(menus.BtnCfgA, btn.Color(colornames.Green), btn.Pos(menuX, menuY), btn.Text("Start Game"), bindNewScene("inn"))
+		btn.New(menus.BtnCfgA, btn.Color(colornames.Green), btn.Pos(menuX, menuY), btn.Text("Start Game"), bindNewScene("inn"))
 		menuY += menus.BtnHeightA * 1.5
-		load := btn.New(menus.BtnCfgA, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Load Game"), bindNewScene("load"))
+		btn.New(menus.BtnCfgA, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Load Game"), bindNewScene("load"))
 		menuY += menus.BtnHeightA * 1.5
-		settings := btn.New(menus.BtnCfgA, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Settings"), bindNewScene("settings"))
+		btn.New(menus.BtnCfgA, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Settings"), bindNewScene("settings"))
 		menuY += menus.BtnHeightA * 1.5
-		credits := btn.New(menus.BtnCfgA, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Credits"), bindNewScene("credits"))
+		btn.New(menus.BtnCfgA, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Credits"), bindNewScene("credits"))
 		menuY += menus.BtnHeightA * 1.5
-		exit := btn.New(menus.BtnCfgA, btn.Pos(menuX, menuY), btn.Text("Exit Game"), btn.Binding(func(int, interface{}) int {
+		btn.New(menus.BtnCfgA, btn.Pos(menuX, menuY), btn.Text("Exit Game"), btn.Binding(func(int, interface{}) int {
 			os.Exit(3)
 			return 0
 		}))
-		// render.Draw()
-
-		fmt.Println("How high are the buttons", start.Y(), load.Y(), settings.Y(), credits.Y(), exit.Y())
-
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
 	End:  scene.GoToPtr(&nextscene),

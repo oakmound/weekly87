@@ -1,4 +1,4 @@
-package characters
+package players
 
 import (
 	"path/filepath"
@@ -9,7 +9,7 @@ import (
 	"github.com/oakmound/oak/render/mod"
 )
 
-var SpearmanConstructor *PlayerConstructor
+var SpearmanConstructor *Constructor
 
 func Init() {
 	animFilePath := (filepath.Join("16x32", "warrior.png"))
@@ -34,7 +34,7 @@ func Init() {
 
 	deadLT := deadRT.Copy().Modify(mod.FlipX)
 
-	SpearmanConstructor = &PlayerConstructor{
+	SpearmanConstructor = &Constructor{
 		AnimationMap: map[string]render.Modifiable{
 			"walkRT":    walkRT,
 			"walkLT":    walkLT,

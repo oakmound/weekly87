@@ -1,4 +1,4 @@
-package run
+package section
 
 import (
 	"github.com/oakmound/oak"
@@ -6,13 +6,13 @@ import (
 	"github.com/oakmound/weekly87/internal/characters"
 )
 
-type sectionGenerator struct {
+type compressor struct {
 	ground   [70][24]render.Modifiable
 	wall     [70][12]render.Modifiable
 	entities []characters.Character
 }
 
-func (sg *sectionGenerator) generate() *Section {
+func (sg *compressor) generate() *Section {
 
 	// Place ground and wall appropariately in composites and
 	// create sprites

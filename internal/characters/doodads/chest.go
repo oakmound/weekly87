@@ -1,4 +1,4 @@
-package characters
+package doodads
 
 import (
 	"image/color"
@@ -6,9 +6,9 @@ import (
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/render"
-)
 
-var _ Character = &Chest{}
+	"github.com/oakmound/weekly87/internal/characters/labels"
+)
 
 type Chest struct {
 	*entities.Reactive
@@ -25,7 +25,7 @@ func NewChest(value int64) *Chest {
 	// Todo: calculate image based on value
 	ch.Reactive = entities.NewReactive(0, 0, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{0, 255, 255, 255}), nil, ch.Init())
-	ch.RSpace.UpdateLabel(LabelChest)
+	ch.RSpace.UpdateLabel(labels.Chest)
 	ch.Value = value
 	return ch
 }

@@ -1,4 +1,4 @@
-package characters
+package doodads
 
 import "github.com/oakmound/oak/physics"
 
@@ -11,4 +11,3 @@ func (Unmoving) GetSpeed() physics.Vector {
 func (Unmoving) GetDelta() physics.Vector {
 	return physics.Vector{}
 }
-

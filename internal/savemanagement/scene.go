@@ -1,8 +1,6 @@
 package savemanagement
 
 import (
-	"fmt"
-
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
@@ -26,13 +24,11 @@ var Scene = scene.Scene{
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) * 3 / 4
 
-		exit := btn.New(menus.BtnCfgA, btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3), btn.Pos(menuX, menuY), btn.Text("Return To Menu"), btn.Binding(func(int, interface{}) int {
+		btn.New(menus.BtnCfgA, btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3), btn.Pos(menuX, menuY), btn.Text("Return To Menu"), btn.Binding(func(int, interface{}) int {
 			nextscene = "startup"
 			stayInMenu = false
 			return 0
 		}))
-
-		fmt.Println("How high are the buttons", exit.Y())
 
 		text := render.DefFont().NewStrText("Save Management is under construction", float64(oak.ScreenWidth)/2-100, float64(oak.ScreenHeight)/4)
 		render.Draw(text, 0, 1)

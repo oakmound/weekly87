@@ -1,19 +1,19 @@
-package run
+package section
 
 import "github.com/oakmound/oak/dlog"
 
-type SectionChangeType int
+type ChangeType int
 
 const (
-	EntityDestroyed SectionChangeType = iota
+	EntityDestroyed ChangeType = iota
 )
 
-type SectionChange struct {
-	typ SectionChangeType
+type Change struct {
+	typ ChangeType
 	val int
 }
 
-func (s *Section) ApplyChange(ch *SectionChange) {
+func (s *Section) ApplyChange(ch *Change) {
 	switch ch.typ {
 	case EntityDestroyed:
 		// val is index of entity destroyed

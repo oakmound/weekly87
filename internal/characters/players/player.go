@@ -1,8 +1,7 @@
-package characters
+package players
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -10,12 +9,14 @@ import (
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/physics"
 
+	"github.com/oakmound/weekly87/internal/characters/labels"
+
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/render"
 )
 
-var requiredPlayerAnimations = []string{
+var requiredAnimations = []string{
 	"standRT",
 	"standLT",
 	"walkRT",
@@ -26,7 +27,7 @@ var requiredPlayerAnimations = []string{
 	"standHold",
 }
 
-type PlayerConstructor struct {
+type Constructor struct {
 	Position   floatgeom.Point2
 	Speed      floatgeom.Point2
 	Dimensions floatgeom.Point2
@@ -46,8 +47,8 @@ type PlayerConstructor struct {
 // Copy returns a shallow copy of the constructor.
 // Don't modify the animation map or bindings on a copy of a constructor, that part isn't
 // deep copied.
-func (pc *PlayerConstructor) Copy() *PlayerConstructor {
-	return &PlayerConstructor{
+func (pc *Constructor) Copy() *Constructor {
+	return &Constructor{
 		Position:     pc.Position,
 		Speed:        pc.Speed,
 		Dimensions:   pc.Dimensions,
@@ -83,13 +84,13 @@ func (p *Player) CheckedBind(bnd func(*Player, interface{}) int, ev string) {
 	}, ev)
 }
 
-const PlayerWallOffset = 50
+const WallOffset = 50
 
-func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
+func (pc *Constructor) NewPlayer() (*Player, error) {
 	if pc.Dimensions == (floatgeom.Point2{}) {
 		return nil, errors.New("Dimensions must be provided")
 	}
-	for _, s := range requiredPlayerAnimations {
+	for _, s := range requiredAnimations {
 		if _, ok := pc.AnimationMap[s]; !ok {
 			return nil, errors.New("Animation name " + s + " must be provided")
 		}
@@ -112,7 +113,7 @@ func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
 	p.Speed = physics.NewVector(pc.Speed.X(), pc.Speed.Y())
 	p.RunSpeed = pc.RunSpeed
 
-	p.RSpace.UpdateLabel(LabelPC)
+	p.RSpace.UpdateLabel(labels.PC)
 
 	p.CheckedBind(func(p *Player, _ interface{}) int {
 		p.facing = "LT"
@@ -123,17 +124,16 @@ func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
 		p.RunSpeed *= -1
 		p.CheckedBind(func(p *Player, _ interface{}) int {
 			// Shift the player back until against the right wall
-			if int(p.X())-oak.ViewPos.X >= oak.ScreenWidth-PlayerWallOffset {
+			if int(p.X())-oak.ViewPos.X >= oak.ScreenWidth-WallOffset {
 				return event.UnbindSingle
 			}
-			p.ShiftX(-p.RunSpeed)
+			p.ShiftX(-p.RunSpeed * 2)
 			return 0
 		}, "EnterFrame")
 		return event.UnbindSingle
 	}, "RunBack")
 
 	p.CheckedBind(func(p *Player, _ interface{}) int {
-		fmt.Println("Kill triggered")
 		dlog.ErrorCheck(p.Swtch.Set("dead" + p.facing))
 		return 0
 	}, "Kill")
@@ -144,7 +144,6 @@ func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
 			// This logic has to change once there are multiple characters
 			return 0
 		}
-		//fmt.Println("Player Loc", p.X(), p.Y())
 		// The idea behind splitting up the move functions is
 		// flawed when they're all working together--we only want
 		// to shift everything -once-, otherwise there are jitters

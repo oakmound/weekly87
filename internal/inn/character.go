@@ -1,8 +1,6 @@
 package inn
 
 import (
-	"fmt"
-
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/collision"
@@ -12,11 +10,12 @@ import (
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
-	"github.com/oakmound/weekly87/internal/characters"
+	"github.com/oakmound/weekly87/internal/characters/labels"
+	"github.com/oakmound/weekly87/internal/characters/players"
 )
 
 func NewInnWalker(innSpace floatgeom.Rect2) {
-	anims := characters.SpearmanConstructor.AnimationMap
+	anims := players.SpearmanConstructor.AnimationMap
 
 	s := entities.NewInteractive(
 		float64(oak.ScreenWidth/2),
@@ -39,7 +38,6 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 		move.Limit(ply, innSpace)
 		<-s.RSpace.CallOnHits()
 		swch := ply.R.(*render.Switch)
-		fmt.Println(ply.Delta.X(), ply.Delta.Y())
 		if ply.Delta.X() != 0 || ply.Delta.Y() != 0 {
 			if ply.Delta.X() > 0 {
 				swch.Set("walkRT")
@@ -51,12 +49,11 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 			err := swch.Set("stand" + string(cur[len(cur)-2:]))
 			dlog.ErrorCheck(err)
 		}
-		fmt.Println("Switch state:", swch.Get())
 		return 0
 	}, "EnterFrame")
 	s.Speed = physics.NewVector(5, 5) // We actually allow players to move around in the inn!
 
-	s.RSpace.Add(collision.Label(characters.LabelDoor),
+	s.RSpace.Add(collision.Label(labels.Door),
 		(func(s1, s2 *collision.Space) {
 			nextscene = "run"
 			stayInMenu = false

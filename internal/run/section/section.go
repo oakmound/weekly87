@@ -1,6 +1,7 @@
-package run
+package section
 
 import (
+	"github.com/oakmound/oak/entities/x/move"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/weekly87/internal/characters"
 )
@@ -30,7 +31,7 @@ func (s *Section) Draw() {
 func (s *Section) Shift(shift float64) {
 	s.wall.ShiftX(shift)
 	for _, e := range s.entities {
-		ShiftMoverX(e, shift)
+		move.ShiftX(e, shift)
 	}
 }
 
@@ -38,7 +39,7 @@ func (s *Section) SetBackgroundX(x float64) {
 	delta := x - s.wall.X()
 	s.wall.SetX(x)
 	for _, e := range s.entities {
-		ShiftMoverX(e, delta)
+		move.ShiftX(e, delta)
 	}
 }
 

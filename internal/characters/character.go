@@ -10,8 +10,3 @@ type Character interface {
 	Destroy()
 	GetReactiveSpace() *collision.ReactiveSpace
 }
-
-const (
-	playerHeight = 32
-	playerWidth  = 16
-)

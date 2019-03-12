@@ -1,4 +1,4 @@
-package characters
+package doodads
 
 import (
 	"image/color"
@@ -7,6 +7,8 @@ import (
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/render"
+
+	"github.com/oakmound/weekly87/internal/characters/labels"
 )
 
 type OutDoor struct {
@@ -26,7 +28,7 @@ func NewOutDoor(runback bool) *OutDoor {
 	d := &OutDoor{}
 	d.Reactive = entities.NewReactive(0, 0, width, height, render.NewColorBox(int(width), int(height), color.RGBA{0, 0, 255, 255}), nil, d.Init())
 	if runback {
-		d.RSpace.UpdateLabel(LabelDoor)
+		d.RSpace.UpdateLabel(labels.Door)
 	}
 	return d
 }
