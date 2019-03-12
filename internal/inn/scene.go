@@ -43,10 +43,7 @@ var Scene = scene.Scene{
 		render.Draw(innBackground, 0)
 
 		// A way to enter the run
-		innDoor := characters.NewDoor()
-		iW, iH := innDoor.R.GetDims()
-		innDoor.SetPos(float64(oak.ScreenWidth-iW), float64(oak.ScreenHeight-iH)/2) //Center the door on the right side
-		render.Draw(innDoor.R, 1)
+		characters.NewDoor()
 
 		text := render.DefFont().NewStrText("Hit the button or walk out of the inn to start the game!", float64(oak.ScreenWidth)/2-120, float64(oak.ScreenHeight)/4-40)
 		render.Draw(text, 2, 1)

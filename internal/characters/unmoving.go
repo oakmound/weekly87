@@ -11,3 +11,4 @@ func (Unmoving) GetSpeed() physics.Vector {
 func (Unmoving) GetDelta() physics.Vector {
 	return physics.Vector{}
 }
+

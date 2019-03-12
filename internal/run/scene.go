@@ -1,8 +1,6 @@
 package run
 
 import (
-	"fmt"
-
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
@@ -83,23 +81,6 @@ var Scene = scene.Scene{
 				}))
 		})
 
-		rs.Add(characters.LabelChest, func(s, s2 *collision.Space) {
-			_, ok := s.CID.E().(*characters.Player)
-			if !ok {
-				dlog.Error("Non-player sent to player binding")
-				return
-			}
-			_, ok = s2.CID.E().(*characters.Chest)
-			if !ok {
-				dlog.Error("Non-chest sent to chest binding")
-				return
-			}
-			//val := ch.Value
-			// Todo: pick up logic
-			facing = -1
-			event.Trigger("RunBack", nil)
-		})
-
 		// todo populate baseseed
 		tracker := NewSectionTracker(baseSeed)
 		sct := tracker.Next()
@@ -107,6 +88,36 @@ var Scene = scene.Scene{
 		nextSct := tracker.Next()
 		nextSct.SetBackgroundX(sct.X() + sct.W())
 		nextSct.Draw()
+		var oldSct *Section
+
+		rs.Add(characters.LabelChest, func(s, s2 *collision.Space) {
+			_, ok := s.CID.E().(*characters.Player)
+			if !ok {
+				dlog.Error("Non-player sent to player binding")
+				return
+			}
+			ch, ok := s2.CID.E().(*characters.Chest)
+			if !ok {
+				dlog.Error("Non-chest sent to chest binding")
+				return
+			}
+			ch.Destroy()
+			//val := ch.Value
+			// Todo: pick up logic
+			facing = -1
+
+			event.Trigger("RunBack", nil)
+
+			// Shift sections
+			//tracker.ShiftDepth(-1)
+			oldSct = nextSct
+			nextSct = tracker.Prev()
+			nextSct.SetBackgroundX(sct.X() - sct.W())
+		})
+
+		rs.Add(characters.LabelDoor, func(_, _ *collision.Space) {
+			stayInGame = false
+		})
 
 		event.GlobalBind(func(int, interface{}) int {
 			// This calculation needs to be modified based
@@ -121,22 +132,33 @@ var Scene = scene.Scene{
 				shift = offLeft >= 0
 			} else {
 				offLeft = oak.ViewPos.X - int(w)
-				shift = offLeft <= 1
+				shift = offLeft <= -int(w)
 			}
-			fmt.Println("Shift bind", offLeft, oak.ViewPos.X, w, shift)
-			if shift {
+			//fmt.Println("Shift bind", offLeft, oak.ViewPos.X, w, shift)
+			if shift && !tracker.AtStart() {
+				if oldSct != nil {
+					nextSct.Shift(-w)
+					sct.Shift(-w)
+					oldSct.Destroy()
+					oldSct = nil
+				} else {
+					sct.Destroy()
+					sct = nextSct
+				}
 				// We need a way to make these actions draw-level atomic
 				// Or a way to fake it so there isn't a blip
 				oak.ViewPos.X = offLeft
 				nextSct.Shift(-w)
-				sct.Destroy()
-				sct = nextSct
 				// Todo: shift player, not locally stored s
 				s.ShiftX(-w)
 				go func() {
-					nextSct = tracker.Next()
+					nextSct = tracker.Produce(int64(facing))
+					//fmt.Println("Setting next section to", sct.X(), w, sct.X()+w)
 					nextSct.SetBackgroundX(sct.X() + w)
 					nextSct.Draw()
+					if tracker.AtStart() {
+						oak.SetViewportBounds(0, 0, 4000, 4000)
+					}
 				}()
 			}
 			return 0

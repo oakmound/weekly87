@@ -46,9 +46,21 @@ func (st *SectionTracker) ShiftDepth(depth int64) {
 	st.SetDepth(st.sectionsDeep + depth)
 }
 
+func (st *SectionTracker) AtStart() bool {
+	return st.sectionsDeep == 1
+}
+
+func (st *SectionTracker) Prev() *Section {
+	return st.Produce(-1)
+}
+
 // Next produces another section.
 func (st *SectionTracker) Next() *Section {
-	st.sectionsDeep++
+	return st.Produce(1)
+}
+
+func (st *SectionTracker) Produce(delta int64) *Section {
+	st.sectionsDeep += delta
 	st.rng.Seed(st.start + st.sectionsDeep)
 	// This following section is test code
 	// These initial rng calls should make these test sections more distinct
@@ -100,5 +112,12 @@ func (st *SectionTracker) Next() *Section {
 	ch := characters.NewChest(1)
 	ch.SetPos(800, 500)
 	st.entities = append(st.entities, ch)
+
+	if st.sectionsDeep == 1 {
+		d := characters.NewOutDoor(delta < 0)
+		d.SetPos(0, 0)
+		st.entities = append(st.entities, d)
+	}
+
 	return st.generate()
 }

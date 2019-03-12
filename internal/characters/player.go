@@ -2,7 +2,6 @@ package characters
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -140,7 +139,7 @@ func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
 			// This logic has to change once there are multiple characters
 			return 0
 		}
-		fmt.Println("Player Loc", p.X(), p.Y())
+		//fmt.Println("Player Loc", p.X(), p.Y())
 		// The idea behind splitting up the move functions is
 		// flawed when they're all working together--we only want
 		// to shift everything -once-, otherwise there are jitters
@@ -156,7 +155,8 @@ func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
 		}
 
 		p.Vector.Add(p.Delta)
-		oak.ViewPos.X += int(p.RunSpeed)
+		oak.SetScreen(oak.ViewPos.X+int(p.RunSpeed), oak.ViewPos.Y)
+		//oak.ViewPos.X += int(p.RunSpeed)
 		// This is 6, when it should be 32
 		//_, h := r.GetDims()
 		hf := 32.0

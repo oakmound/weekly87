@@ -1,13 +1,10 @@
 package characters
 
 import (
-	"image/color"
-
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
-	"github.com/oakmound/oak/render"
 )
 
 // Door is a small struct to make Doors (initially just the 2 innDoors)
@@ -22,11 +19,11 @@ func (d *Door) Init() event.CID {
 
 func NewDoor() *Door {
 
-	width := float64(oak.ScreenWidth / 8)
-	height := float64(oak.ScreenHeight)
+	width := 83.0
+	height := 258.0
 
 	d := &Door{}
-	d.Solid = entities.NewSolid(0, 0, width, height, render.NewColorBox(int(width), int(height), color.RGBA{0, 0, 255, 255}), nil, d.Init())
+	d.Solid = entities.NewSolid(float64(oak.ScreenWidth)-width, 239, width, height, nil, nil, d.Init())
 	d.UpdateLabel(collision.Label(LabelDoor))
 	return d
 }
