@@ -2,6 +2,7 @@ package characters
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -119,10 +120,12 @@ func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
 	p.CheckedBind(func(p *Player, _ interface{}) int {
 		p.facing = "LT"
 		p.Speed = p.Speed.Scale(-1)
+		fmt.Println(p.Speed.X(), p.Speed.Y())
 		return 0
 	}, "RunBack")
 
 	p.CheckedBind(func(p *Player, _ interface{}) int {
+		//p.RunSpeed *= -1
 		p.CheckedBind(func(p *Player, _ interface{}) int {
 			// Shift the player back until against the right wall
 			if int(p.X())-oak.ViewPos.X >= oak.ScreenWidth-PlayerWallOffset {
@@ -139,6 +142,7 @@ func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
 			// This logic has to change once there are multiple characters
 			return 0
 		}
+		fmt.Println("Player Loc", p.X(), p.Y())
 		// The idea behind splitting up the move functions is
 		// flawed when they're all working together--we only want
 		// to shift everything -once-, otherwise there are jitters

@@ -1,6 +1,8 @@
 package run
 
 import (
+	"fmt"
+
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
@@ -118,8 +120,9 @@ var Scene = scene.Scene{
 				shift = offLeft >= 0
 			} else {
 				offLeft = oak.ViewPos.X - int(w)
-				shift = offLeft >= int(sct.W())
+				shift = offLeft <= 1
 			}
+			fmt.Println("Shift bind", offLeft, oak.ViewPos.X, w, shift)
 			if shift {
 				// We need a way to make these actions draw-level atomic
 				// Or a way to fake it so there isn't a blip
