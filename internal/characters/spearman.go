@@ -1,7 +1,6 @@
 package characters
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -17,7 +16,6 @@ func Init() {
 	sheet, err := render.LoadSprites(filepath.Join("assets", "images"),
 		animFilePath, 16, 32, 0)
 	dlog.ErrorCheck(err)
-	fmt.Println(sheet)
 	standRT := sheet[0][0]
 	standLT := sheet[0][0].Copy().Modify(mod.FlipX)
 
