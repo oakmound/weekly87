@@ -11,7 +11,8 @@ import (
 
 type Pc struct {
 	*entities.Interactive
-	SpecialBind  func()
+	SpecialBind1 func()
+	SpecialBind2 func()
 	animationMap map[string]render.Modifiable
 	Job          int
 }
@@ -47,16 +48,27 @@ func (p *Pc) setJob(job int) {
 	case JobArcher:
 		job := &Archer{}
 		p.animationMap = job.loadAnimationMap()
-		p.SpecialBind = job.Special
+		p.SpecialBind1 = job.Special1
+		p.SpecialBind2 = job.Special2
+	case JobMedic:
+		job := &Medic{}
+		p.animationMap = job.loadAnimationMap()
+		p.SpecialBind1 = job.Special1
+		p.SpecialBind2 = job.Special2
 	default:
 		job := &Swordsman{}
 		p.animationMap = job.loadAnimationMap()
-		p.SpecialBind = job.Special
+		p.SpecialBind1 = job.Special1
+		p.SpecialBind2 = job.Special2
 	}
 
 	return
 }
 
-func (p *Pc) Attack1() {
+func (p *Pc) Special1() {
+
+}
+
+func (p *Pc) Special2() {
 
 }

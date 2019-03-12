@@ -12,5 +12,6 @@ const (
 const (
 	JobSwordsman = iota
 	JobArcher    = iota
+	JobMedic     = iota
 	JobMax       = iota
 )

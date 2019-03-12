@@ -11,7 +11,8 @@ type Character interface {
 
 type Player interface {
 	Character
-	Attack1()
+	Special1()
+	Special2() //Should Return an ability
 }
 
 const (

@@ -3,6 +3,7 @@ package inn
 import (
 	"fmt"
 	"path/filepath"
+	"strconv"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -63,13 +64,6 @@ var Scene = scene.Scene{
 		innSpace := floatgeom.NewRect2(0, 0, float64(oak.ScreenWidth), float64(oak.ScreenHeight)-32) //Adjusted for the current size of the spearman
 
 		pc := characters.NewPc(characters.JobSwordsman, float64(oak.ScreenWidth)/2, float64(oak.ScreenHeight/2))
-
-		pc2 := characters.NewPc(characters.JobArcher, float64(pc.X()-18), float64(oak.ScreenHeight/2))
-		pc2.Bind(func(id int, _ interface{}) int {
-			pcInnBindings(id)
-			return 0
-		}, "EnterFrame")
-
 		pc.Bind(func(id int, _ interface{}) int {
 			ply := pcInnBindings(id)
 			move.Limit(ply, innSpace)
@@ -77,7 +71,6 @@ var Scene = scene.Scene{
 			return 0
 		}, "EnterFrame")
 		pc.Speed = physics.NewVector(5, 5) // We actually allow players to move around in the inn!
-		pc2.Speed = pc.Speed
 
 		pc.RSpace.Add(collision.Label(characters.LabelDoor),
 			(func(s1, s2 *collision.Space) {
@@ -86,10 +79,9 @@ var Scene = scene.Scene{
 			}))
 
 		render.Draw(pc.R, 2, 1)
-		render.Draw(pc2.R, 2, 1)
 
-		menuX -= (menus.BtnWidthA * .625)
 		menuY += menus.BtnHeightA * 1.5
+		menuX -= (menus.BtnWidthA * (.125*float64((characters.CurrentParty.MaxSize%2)) + float64((characters.CurrentParty.MaxSize / 2))))
 
 		selectPC1 := btn.New(menus.BtnCfgA, btn.Layers(2), btn.Pos(menuX, menuY), btn.Text("Change PC 1"), btn.Binding(func(int, interface{}) int {
 			pc.R.Undraw()
@@ -97,14 +89,28 @@ var Scene = scene.Scene{
 			render.Draw(pc.R, 2, 1)
 			return 0
 		}))
-		menuX += menus.BtnWidthA * 5 / 4
-		selectPC2 := btn.New(menus.BtnCfgA, btn.Layers(2), btn.Pos(menuX, menuY), btn.Text("Change PC 2"), btn.Binding(func(int, interface{}) int {
-			pc2.R.Undraw()
-			pc2.SetJob((pc2.Job + 1) % characters.JobMax)
-			render.Draw(pc2.R, 2, 1)
-			return 0
-		}))
-		fmt.Println("How high are the buttons", exit.Y(), selectPC1.X(), selectPC2.X())
+
+		for x := 2; x <= characters.CurrentParty.MaxSize; x++ {
+			menuX += menus.BtnWidthA * 5 / 4
+			pctmp := characters.NewPc(characters.JobArcher, float64(pc.X()-18), float64(oak.ScreenHeight/2))
+			pctmp.Bind(func(id int, _ interface{}) int {
+				pcInnBindings(id)
+				return 0
+			}, "EnterFrame")
+			pctmp.Speed = pc.Speed
+			render.Draw(pctmp.R, 2, 1)
+			btnTxt := "Change PC " + strconv.Itoa(x)
+			btn.New(menus.BtnCfgA, btn.Layers(2), btn.Pos(menuX, menuY), btn.Text(btnTxt), btn.Binding(func(int, interface{}) int {
+				fmt.Println("Whoo")
+				pctmp.R.Undraw()
+				pctmp.SetJob((pctmp.Job + 1) % characters.JobMax)
+				render.Draw(pctmp.R, 2, 1)
+				return 0
+			}))
+
+		}
+
+		fmt.Println("How high are the buttons", exit.Y(), selectPC1.X())
 
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
