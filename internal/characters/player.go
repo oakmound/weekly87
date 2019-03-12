@@ -119,22 +119,20 @@ func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
 
 	p.CheckedBind(func(p *Player, _ interface{}) int {
 		p.facing = "LT"
-		p.Speed = p.Speed.Scale(-1)
-		fmt.Println(p.Speed.X(), p.Speed.Y())
 		return 0
 	}, "RunBack")
 
 	p.CheckedBind(func(p *Player, _ interface{}) int {
-		//p.RunSpeed *= -1
+		p.RunSpeed *= -1
 		p.CheckedBind(func(p *Player, _ interface{}) int {
 			// Shift the player back until against the right wall
 			if int(p.X())-oak.ViewPos.X >= oak.ScreenWidth-PlayerWallOffset {
 				return event.UnbindSingle
 			}
-			p.ShiftX(p.RunSpeed)
+			p.ShiftX(-p.RunSpeed)
 			return 0
 		}, "EnterFrame")
-		return 0
+		return event.UnbindSingle
 	}, "RunBack")
 
 	p.CheckedBind(func(p *Player, _ interface{}) int {

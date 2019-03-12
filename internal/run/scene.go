@@ -27,6 +27,7 @@ var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
 		stayInGame = true
 		nextscene = "inn"
+		facing = 1
 
 		// There should be some way to draw to a stack based
 		// on layer name
