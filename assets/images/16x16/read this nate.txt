@@ -1,0 +1,31 @@
+all of the tiles are grouped into types. 
+Each is a 2x2 of four 16x16px tiles for a total of 16 tiles.
+
+positions
+1  2
+
+3  4
+
+
+For floor tiles:
+A zone should have a majority of a single type. They can however have tiles from neighboring number.
+
+1 <-> 2 <-> 3 <-> 4
+
+the next zone should also be neighboring to the number of the current zone.
+
+
+For wall tiles:
+same rules apply for zone type transitions so they need to be neighboring.
+
+wall ties for zones 1 and 2 are shared and 3 and 4 are shared but not between the two.
+
+1 <-> 2 =/= 3 <-> 4
+
+zones 1 and 2 also have special rules for wall tiles.
+
+the bottom two tiles in each of the 2x2 zones are made to boarder the floor tiles.
+these should only be used in that row and the tiles on the top of the 2x2s shouldn't be
+used for the lowest row. 
+
+message me if any of this doesn't make since.
