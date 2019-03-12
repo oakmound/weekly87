@@ -4,54 +4,42 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/oakmound/oak/collision"
+	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
-	"github.com/oakmound/oak/physics"
-	"github.com/oakmound/oak/render/mod"
-
-	"github.com/oakmound/oak/entities"
-	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/render"
+	"github.com/oakmound/oak/render/mod"
 )
 
-var _ Character = &Spearman{}
+var SpearmanConstructor *PlayerConstructor
 
-type Spearman struct {
-	*entities.Interactive
-}
-
-func (s *Spearman) Init() event.CID {
-	return event.NextID(s)
-}
-
-func NewSpearman(x, y float64) *Spearman {
-	s := &Spearman{}
-	// r := render.NewColorBox(playerWidth, playerHeight, color.RGBA{255, 0, 0, 255})
-	r := render.NewSwitch("walkRT", s.loadAnimationMap())
-	s.Interactive = entities.NewInteractive(x, y, playerWidth, playerHeight, r, nil, s.Init(), 0)
-	collision.Add(s.RSpace.Space)
-	s.Speed = physics.NewVector(0, 5)
-
-	// s.R = render.NewCompoundR("walkRT", s.loadAnimationMap())
-	// h.animation = ch.R.(*render.Compound)
-	return s
-}
-
-func (s *Spearman) Attack1() {
-	fmt.Println("Attacking!")
-}
-
-func (s *Spearman) loadAnimationMap() map[string]render.Modifiable {
-
+func Init() {
 	animFilePath := (filepath.Join("16x32", "warrior.png"))
+	sheet, err := render.LoadSprites(filepath.Join("assets", "images"),
+		animFilePath, 16, 32, 0)
+	dlog.ErrorCheck(err)
+	fmt.Println(sheet)
+	standRT := sheet[0][0]
+	standLT := sheet[0][0].Copy().Modify(mod.FlipX)
 
 	walkRT, err := render.LoadSheetSequence(animFilePath, 16, 32, 0, 8, []int{1, 0, 2, 0, 0, 0}...)
 	dlog.ErrorCheck(err)
 	walkLT := walkRT.Copy().Modify(mod.FlipX)
 
-	return map[string]render.Modifiable{
-
-		"walkRT": render.NewReverting(walkRT),
-		"walkLT": render.NewReverting(walkLT),
+	SpearmanConstructor = &PlayerConstructor{
+		AnimationMap: map[string]render.Modifiable{
+			"walkRT":  walkRT,
+			"walkLT":  walkLT,
+			"standRT": standRT,
+			"standLT": standLT,
+		},
+		Dimensions: floatgeom.Point2{16, 32},
+		Speed:      floatgeom.Point2{0, 5},
+		RunSpeed:   6.0,
 	}
+}
+
+func NewSpearman(x, y float64) (*Player, error) {
+	cs := SpearmanConstructor.Copy()
+	cs.Position = floatgeom.Point2{x, y}
+	return cs.NewPlayer()
 }

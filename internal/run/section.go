@@ -28,14 +28,18 @@ func (s *Section) Draw() {
 }
 
 func (s *Section) Shift(shift float64) {
-	s.ground.ShiftX(shift)
+	s.wall.ShiftX(shift)
 	for _, e := range s.entities {
 		ShiftMoverX(e, shift)
 	}
 }
 
 func (s *Section) SetBackgroundX(x float64) {
-	s.ground.SetX(x)
+	delta := x - s.wall.X()
+	s.wall.SetX(x)
+	for _, e := range s.entities {
+		ShiftMoverX(e, delta)
+	}
 }
 
 func (s *Section) Destroy() {
@@ -48,12 +52,12 @@ func (s *Section) Destroy() {
 
 // X returns the leftmost x value of this section
 func (s *Section) X() float64 {
-	return s.ground.X()
+	return s.wall.X()
 }
 
 // W returns how wide this section is
 func (s *Section) W() float64 {
 	// assumes ground and wall are same width
-	w, _ := s.ground.GetDims()
+	w, _ := s.wall.GetDims()
 	return float64(w)
 }

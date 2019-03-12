@@ -5,14 +5,15 @@ import (
 
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
-	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 )
 
 var _ Character = &Chest{}
 
 type Chest struct {
-	*entities.Solid
+	*entities.Reactive
+	Unmoving
+	Value int64
 }
 
 func (c *Chest) Init() event.CID {
@@ -21,16 +22,10 @@ func (c *Chest) Init() event.CID {
 
 func NewChest(value int64) *Chest {
 	ch := &Chest{}
-	ch.Solid = entities.NewSolid(0, 0, 16, 16,
+	// Todo: calculate image based on value
+	ch.Reactive = entities.NewReactive(0, 0, 16, 16,
 		render.NewColorBox(16, 16, color.RGBA{0, 255, 255, 255}), nil, ch.Init())
-	ch.UpdateLabel(LabelChest)
+	ch.RSpace.UpdateLabel(LabelChest)
+	ch.Value = value
 	return ch
-}
-
-func (c *Chest) GetSpeed() physics.Vector {
-	return physics.Vector{}
-}
-
-func (c *Chest) GetDelta() physics.Vector {
-	return physics.Vector{}
 }

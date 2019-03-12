@@ -13,18 +13,19 @@ type sectionGenerator struct {
 }
 
 func (sg *sectionGenerator) generate() *Section {
-	groundOffset := float64(oak.ScreenHeight) * 1 / 3
+
 	// Place ground and wall appropariately in composites and
 	// create sprites
 	s := &Section{}
-	gcmp := render.NewCompositeM()
+	groundOffset := float64(oak.ScreenHeight) * 1 / 3
+	gcmp1 := render.NewCompositeM()
 	for x, col := range sg.ground {
 		for y, r := range col {
 			r.SetPos(float64(x)*16, groundOffset+float64(y)*16)
-			gcmp.Append(r)
+			gcmp1.Append(r)
 		}
 	}
-	s.ground = gcmp.ToSprite()
+	s.ground = gcmp1.ToSprite()
 	wcmp := render.NewCompositeM()
 	for x, col := range sg.wall {
 		for y, r := range col {
@@ -35,6 +36,8 @@ func (sg *sectionGenerator) generate() *Section {
 	s.wall = wcmp.ToSprite()
 	// Todo: attach all entities at offsets?
 	s.wall.Vector = s.wall.AttachX(s.ground, 0)
-	s.entities = sg.entities
+	s.entities = make([]characters.Character, len(sg.entities))
+	copy(s.entities, sg.entities)
+	sg.entities = nil
 	return s
 }

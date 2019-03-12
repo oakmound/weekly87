@@ -10,6 +10,7 @@ import (
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
+	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/menus"
 	"golang.org/x/image/colornames"
 )
@@ -28,9 +29,10 @@ var Scene = scene.Scene{
 			render.NewHeap(true),
 		)
 
-		if prevScene == "" {
+		if prevScene == "loading" {
+			characters.Init()
 			// The game has just started, maybe do some
-			// intro stuff
+			// intro visual stuff
 
 			//Maybe load? Maybe set seed?
 			dlog.Info("Starting game")
