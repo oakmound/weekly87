@@ -22,6 +22,8 @@ var requiredPlayerAnimations = []string{
 	"walkLT",
 	"deadRT",
 	"deadLT",
+	"walkHold",
+	"standHold",
 }
 
 type PlayerConstructor struct {
@@ -172,9 +174,17 @@ func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
 		p.RSpace.Update(p.Vector.X(), p.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
 		<-p.RSpace.CallOnHits()
 		if p.Delta.X() != 0 || p.Delta.Y() != 0 {
-			p.Swtch.Set("walk" + p.facing)
+			if len(p.ChestValues) > 0 {
+				p.Swtch.Set("walkHold")
+			} else {
+				p.Swtch.Set("walk" + p.facing)
+			}
 		} else {
-			p.Swtch.Set("stand" + p.facing)
+			if len(p.ChestValues) > 0 {
+				p.Swtch.Set("standHold")
+			} else {
+				p.Swtch.Set("stand" + p.facing)
+			}
 		}
 		return 0
 	}, "EnterFrame")

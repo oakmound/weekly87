@@ -18,10 +18,15 @@ func Init() {
 	dlog.ErrorCheck(err)
 	standRT := sheet[0][0].Copy()
 	standLT := sheet[0][0].Copy().Modify(mod.FlipX)
+	standHold := sheet[0][1].Copy().Modify(mod.FlipX)
 
 	walkRT, err := render.LoadSheetSequence(animFilePath, 16, 32, 0, 8, []int{1, 0, 2, 0, 0, 0}...)
 	dlog.ErrorCheck(err)
 	walkLT := walkRT.Copy().Modify(mod.FlipX)
+
+	walkHold, err := render.LoadSheetSequence(animFilePath, 16, 32, 0, 8, []int{1, 1, 2, 1, 0, 1}...)
+	dlog.ErrorCheck(err)
+	walkHold = walkHold.Copy().Modify(mod.FlipX).(*render.Sequence)
 
 	deadRT := sheet[0][0].Copy()
 	deadRT.Filter(mod.Fade(125))
@@ -31,12 +36,14 @@ func Init() {
 
 	SpearmanConstructor = &PlayerConstructor{
 		AnimationMap: map[string]render.Modifiable{
-			"walkRT":  walkRT,
-			"walkLT":  walkLT,
-			"standRT": standRT,
-			"standLT": standLT,
-			"deadRT":  deadRT,
-			"deadLT":  deadLT,
+			"walkRT":    walkRT,
+			"walkLT":    walkLT,
+			"standRT":   standRT,
+			"standLT":   standLT,
+			"deadRT":    deadRT,
+			"deadLT":    deadLT,
+			"walkHold":  walkHold,
+			"standHold": standHold,
 		},
 		Dimensions: floatgeom.Point2{16, 32},
 		Speed:      floatgeom.Point2{0, 5},
