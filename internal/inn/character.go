@@ -51,6 +51,7 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 			err := swch.Set("stand" + string(cur[len(cur)-2:]))
 			dlog.ErrorCheck(err)
 		}
+		fmt.Println("Switch state:", swch.Get())
 		return 0
 	}, "EnterFrame")
 	s.Speed = physics.NewVector(5, 5) // We actually allow players to move around in the inn!

@@ -46,12 +46,6 @@ var Scene = scene.Scene{
 			render.NewLogicFPS(),
 		)
 
-		// Todo: add collision with chests, when this happpens the chest
-		// 1. needs to be collected
-		// 2. If we're going forward, start going back
-		// 3. Shift the player move rect gradually if we just started moving back
-		// 4. Flip enemies / characters as needed
-
 		s, err := characters.NewSpearman(
 			characters.PlayerWallOffset, float64(oak.ScreenHeight/2),
 		)
@@ -69,10 +63,10 @@ var Scene = scene.Scene{
 			}
 			ply.Alive = false
 			ply.Trigger("Kill", nil)
-			// Logic has to change once there are multiple characters
+			// Todo: Logic has to change once there are multiple characters
 			// Show pop up to go back to inn
-			menuX := (float64(oak.ScreenWidth) - 180) / 2 // + float64(oak.ViewPos.X)
-			menuY := float64(oak.ScreenHeight) / 4        //+ float64(oak.ViewPos.Y)
+			menuX := (float64(oak.ScreenWidth) - 180) / 2
+			menuY := float64(oak.ScreenHeight) / 4
 			btn.New(menus.BtnCfgA, btn.Layers(3, 0),
 				btn.Pos(menuX, menuY), btn.Text("Defeated! Return to Inn?"),
 				btn.Width(180),
@@ -120,14 +114,12 @@ var Scene = scene.Scene{
 			facingLock.Lock()
 			if facing == 1 {
 
-				// Todo: pick up logic
 				facing = -1
 				facingLock.Unlock()
 
 				event.Trigger("RunBack", nil)
 
 				// Shift sections
-				//tracker.ShiftDepth(-1)
 				oldSct = nextSct
 				nextSct = tracker.Prev()
 				nextSct.SetBackgroundX(sct.X() - sct.W())
@@ -155,7 +147,6 @@ var Scene = scene.Scene{
 				offLeft = oak.ViewPos.X - int(w)
 				shift = offLeft <= -int(w)
 			}
-			//fmt.Println("Shift bind", offLeft, oak.ViewPos.X, w, shift)
 			if shift && !tracker.AtStart() {
 				if oldSct != nil {
 					nextSct.Shift(-w)
@@ -174,7 +165,6 @@ var Scene = scene.Scene{
 				s.ShiftX(-w)
 				go func() {
 					nextSct = tracker.Produce(int64(facing))
-					//fmt.Println("Setting next section to", sct.X(), w, sct.X()+w)
 					nextSct.SetBackgroundX(sct.X() + w)
 					nextSct.Draw()
 					if tracker.AtStart() {
@@ -187,11 +177,6 @@ var Scene = scene.Scene{
 
 		// Maybe there's a countdown timer
 
-		// There should be a player running to the right from the left
-		// side of the screen
-
-		// We need a scrolling background
-
 		// The state of the game is generated based on combining a base seed
 		// and the current section the player is in. When the game is first started
 		// base seed is populated randomly and stored in a settings file, then
@@ -200,8 +185,6 @@ var Scene = scene.Scene{
 		// We also need to keep track of changes to each section like enemies destroyed
 		// This means map[int64][]int, where the slice is list of enemies destroyed
 		// with enemies identified by order they are made in
-
-		// The inn should have some image on the left of the first section
 
 		// Background should probably be very basic hallway with tile types
 		// and different themes populate the tile types
@@ -216,10 +199,9 @@ var Scene = scene.Scene{
 		// Mage - Spawns Fire - Freeze all enemies in place
 
 		// Enemy types:
-		// 1. Stands in the way and hurts if you touch it
-		// 2. Goes up and down and hurts if you touch it
-		// 3. Charges right to left and hurts if you touch it
-		// 3a. As 3, but can slightly curve during charge
+		// 1. Stands Still or walks in a basic path
+		// 2. Charges right to left and hurts if you touch it
+		// 2a. As 2, but can slightly curve during charge
 
 		// Treasure types:
 		// bigger and fancier boxes with fancier colors
@@ -229,9 +211,6 @@ var Scene = scene.Scene{
 
 		// for right now the one character can chain boxes behind them
 		// infinitely, eventually there should be an upgrade thing
-
-		// Sections jitter a bit and it is annoying, must fix
-
 	},
 	Loop: scene.BooleanLoop(&stayInGame),
 	End:  scene.GoToPtr(&nextscene),

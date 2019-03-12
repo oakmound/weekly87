@@ -2,6 +2,7 @@ package characters
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -19,6 +20,8 @@ var requiredPlayerAnimations = []string{
 	"standLT",
 	"walkRT",
 	"walkLT",
+	"deadRT",
+	"deadLT",
 }
 
 type PlayerConstructor struct {
@@ -108,14 +111,6 @@ func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
 	p.RunSpeed = pc.RunSpeed
 
 	p.RSpace.UpdateLabel(LabelPC)
-	p.CheckedBind(func(p *Player, _ interface{}) int {
-		if p.Delta.X() != 0 || p.Delta.Y() != 0 {
-			p.Swtch.Set("walk" + p.facing)
-		} else {
-			p.Swtch.Set("stand" + p.facing)
-		}
-		return 0
-	}, "EnterFrame")
 
 	p.CheckedBind(func(p *Player, _ interface{}) int {
 		p.facing = "LT"
@@ -136,7 +131,14 @@ func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
 	}, "RunBack")
 
 	p.CheckedBind(func(p *Player, _ interface{}) int {
+		fmt.Println("Kill triggered")
+		dlog.ErrorCheck(p.Swtch.Set("dead" + p.facing))
+		return 0
+	}, "Kill")
+
+	p.CheckedBind(func(p *Player, _ interface{}) int {
 		if !p.Alive {
+			p.Swtch.Set("dead" + p.facing)
 			// This logic has to change once there are multiple characters
 			return 0
 		}
@@ -169,6 +171,11 @@ func (pc *PlayerConstructor) NewPlayer() (*Player, error) {
 		p.R.SetPos(p.Vector.X(), p.Vector.Y())
 		p.RSpace.Update(p.Vector.X(), p.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
 		<-p.RSpace.CallOnHits()
+		if p.Delta.X() != 0 || p.Delta.Y() != 0 {
+			p.Swtch.Set("walk" + p.facing)
+		} else {
+			p.Swtch.Set("stand" + p.facing)
+		}
 		return 0
 	}, "EnterFrame")
 
