@@ -12,6 +12,7 @@ import (
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/menus"
+	"github.com/oakmound/weekly87/internal/run"
 	"golang.org/x/image/colornames"
 )
 
@@ -31,6 +32,7 @@ var Scene = scene.Scene{
 
 		if prevScene == "loading" {
 			characters.Init()
+			run.Init()
 			// The game has just started, maybe do some
 			// intro visual stuff
 

@@ -4,6 +4,8 @@ import (
 	"image/color"
 	"math/rand"
 
+	"github.com/oakmound/oak/alg"
+
 	"github.com/oakmound/weekly87/internal/characters"
 
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -62,34 +64,61 @@ func (st *SectionTracker) Next() *Section {
 func (st *SectionTracker) Produce(delta int64) *Section {
 	st.sectionsDeep += delta
 	st.rng.Seed(st.start + st.sectionsDeep)
+	// Section plan:
+	// Tiles:
+	// A | B
+	// - - -
+	// C | D
+	//
+	// Clear Weather
+	// A: 3 sections
+	// B: 3 sections
+	// C: 3 sections
+	// D: 3 sections
+	// Cloudy weather
+	// C: 4 sections
+	// B: 4 sections
+	// A: 4 sections
+	// Stormy weather
+	// B: 5 sections
+	// C: 5 sections
+	// D: 5 sections
+	// Snowy weather
+	// C: 6 sections
+	// B: 6 sections
+	// A: 3 Sections
+	// Repeat
+
 	// This following section is test code
 	// These initial rng calls should make these test sections more distinct
-	rLimit := st.rng.Intn(255) + 1
-	gLimit := st.rng.Intn(255) + 1
-	bLimit := st.rng.Intn(255) + 1
+	plan := sectionPlans[((st.sectionsDeep-1)/3)%int64(len(sectionPlans))]
+	gWeights := alg.RemainingWeights(plan.groundTileWeights)
+	sfWeights := alg.RemainingWeights(plan.surfaceTileWeights)
+	skWeights := alg.RemainingWeights(plan.skyTileWeights)
+
 	for x := 0; x < len(st.ground); x++ {
 		for y := 0; y < len(st.ground[x]); y++ {
-			st.ground[x][y] = render.NewColorBox(
-				16, 16, color.RGBA{
-					uint8(st.rng.Intn(rLimit)),
-					uint8(st.rng.Intn(gLimit)),
-					uint8(st.rng.Intn(bLimit)),
-					255},
-			)
+			choice := alg.WeightedChooseOne(gWeights)
+			//fmt.Println(choice)
+			t := plan.groundTiles[choice]
+			st.ground[x][y] = t.Copy()
 		}
 	}
-	rLimit = st.rng.Intn(255) + 1
-	gLimit = st.rng.Intn(255) + 1
-	bLimit = st.rng.Intn(255) + 1
+
 	for x := 0; x < len(st.wall); x++ {
 		for y := 0; y < len(st.wall[x]); y++ {
-			st.wall[x][y] = render.NewColorBox(
-				16, 16, color.RGBA{
-					uint8(st.rng.Intn(rLimit)),
-					uint8(st.rng.Intn(gLimit)),
-					uint8(st.rng.Intn(bLimit)),
-					255},
-			)
+			var t render.Modifiable
+			if y == len(st.wall[x])-1 {
+				choice := alg.WeightedChooseOne(sfWeights)
+				//fmt.Println(choice)
+				t = plan.surfaceTiles[choice]
+
+			} else {
+				choice := alg.WeightedChooseOne(skWeights)
+				//fmt.Println(choice)
+				t = plan.skyTiles[choice]
+			}
+			st.wall[x][y] = t.Copy()
 		}
 	}
 	testEC := &characters.EnemyConstructor{

@@ -40,7 +40,7 @@ func Init() {
 		},
 		Dimensions: floatgeom.Point2{16, 32},
 		Speed:      floatgeom.Point2{0, 5},
-		RunSpeed:   6.0,
+		RunSpeed:   2.0,
 	}
 }
 
