@@ -24,5 +24,6 @@ func main() {
 	oak.AddScene("credits", credits.Scene)
 	oak.AddScene("load", savemanagement.Scene)
 	oak.AddScene("run", run.Scene)
+	oak.AddScene("endGame", run.EndScene) // At end if there is time break this into its own package and export the correct stats
 	oak.Init("startup")
 }
