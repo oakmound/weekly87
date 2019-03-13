@@ -55,15 +55,15 @@ var Scene = scene.Scene{
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) / 4
 
-		btn.New(menus.BtnCfgA, btn.Color(colornames.Green), btn.Pos(menuX, menuY), btn.Text("Start Game"), bindNewScene("inn"))
-		menuY += menus.BtnHeightA * 1.5
-		btn.New(menus.BtnCfgA, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Load Game"), bindNewScene("load"))
-		menuY += menus.BtnHeightA * 1.5
-		btn.New(menus.BtnCfgA, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Settings"), bindNewScene("settings"))
-		menuY += menus.BtnHeightA * 1.5
-		btn.New(menus.BtnCfgA, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Credits"), bindNewScene("credits"))
-		menuY += menus.BtnHeightA * 1.5
-		btn.New(menus.BtnCfgA, btn.Pos(menuX, menuY), btn.Text("Exit Game"), btn.Binding(func(int, interface{}) int {
+		btn.New(menus.BtnCfgB, btn.Color(colornames.Green), btn.Pos(menuX, menuY), btn.Text("Start Game"), bindNewScene("inn"))
+		menuY += menus.BtnHeightB * 1.5
+		btn.New(menus.BtnCfgB, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Load Game"), bindNewScene("load"))
+		menuY += menus.BtnHeightB * 1.5
+		btn.New(menus.BtnCfgB, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Settings"), bindNewScene("settings"))
+		menuY += menus.BtnHeightB * 1.5
+		btn.New(menus.BtnCfgB, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Credits"), bindNewScene("credits"))
+		menuY += menus.BtnHeightB * 1.5
+		btn.New(menus.BtnCfgB, btn.Pos(menuX, menuY), btn.Text("Exit Game"), btn.Binding(func(int, interface{}) int {
 			os.Exit(3)
 			return 0
 		}))

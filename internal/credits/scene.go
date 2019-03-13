@@ -1,6 +1,9 @@
 package credits
 
 import (
+	"image/color"
+	"path/filepath"
+
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
@@ -22,10 +25,40 @@ var Scene = scene.Scene{
 			render.NewHeap(true),
 		)
 
-		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
-		menuY := float64(oak.ScreenHeight) * 3 / 4
+		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
+		render.Draw(menuBackground, 0)
 
-		btn.New(menus.BtnCfgA, btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3), btn.Pos(menuX, menuY), btn.Text("Return To Menu"), btn.Binding(func(int, interface{}) int {
+		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
+		menuY := float64(oak.ScreenHeight) * 1 / 4
+
+		btn.New(
+			menus.BtnCfgB,
+			btn.Text("Art - LightningFenrir"),
+			btn.Pos(menuX, menuY),
+			btn.Color(color.RGBA{0, 125, 255, 255}),
+		)
+
+		menuY += menus.BtnHeightB * 1.5
+
+		btn.New(
+			menus.BtnCfgB,
+			btn.Text("Code - PlausiblyFun"),
+			btn.Pos(menuX, menuY),
+			btn.Color(color.RGBA{0, 125, 255, 255}),
+		)
+
+		menuY += menus.BtnHeightB * 1.5
+
+		btn.New(
+			menus.BtnCfgB,
+			btn.Text("Code/Music - 200sc"),
+			btn.Pos(menuX, menuY),
+			btn.Color(color.RGBA{0, 125, 255, 255}),
+		)
+
+		menuY += menus.BtnHeightB * 1.5
+
+		btn.New(menus.BtnCfgB, btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3), btn.Pos(menuX, menuY), btn.Text("Return To Menu"), btn.Binding(func(int, interface{}) int {
 			nextscene = "startup"
 			stayInMenu = false
 			return 0
