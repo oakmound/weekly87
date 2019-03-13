@@ -3,7 +3,7 @@ package section
 import (
 	"path/filepath"
 
-	"github.com/200sc/go-dist/floatrange"
+	"github.com/200sc/go-dist/intrange"
 
 	"github.com/oakmound/oak/dlog"
 
@@ -13,9 +13,9 @@ import (
 )
 
 type entityPlan struct {
-	chestCount        int
-	chestRange        floatrange.Range
-	enemyCount        int
+	chestCount        intrange.Range
+	chestRange        intrange.Range
+	enemyCount        intrange.Range
 	enemyDistribution [enemies.TypeLimit]float64
 }
 
@@ -48,6 +48,16 @@ func Init() {
 	dlog.ErrorCheck(err)
 	groundSheet, err := render.LoadSprites(dir, filepath.Join("16x16", "floorTiles.png"), 16, 16, 0)
 	dlog.ErrorCheck(err)
+
+	entityPlanA := entityPlan{
+		chestCount: intrange.NewLinear(0, 5),
+		chestRange: intrange.NewLinear(1, 5),
+		enemyCount: intrange.NewLinear(3, 7),
+		enemyDistribution: [...]float64{
+			enemies.Hare:   .5,
+			enemies.Mantis: .5,
+		},
+	}
 
 	aPlanWeight := tileWeight{
 		groundTileWeights: []float64{
@@ -249,54 +259,67 @@ func Init() {
 		{
 			tilePlan:   tilePlans["A"],
 			tileWeight: tileWeights[0],
+			entityPlan: entityPlanA,
 		},
 		{
 			tilePlan:   tilePlans["B"],
 			tileWeight: tileWeights[1],
+			entityPlan: entityPlanA,
 		},
 		{
 			tilePlan:   tilePlans["C"],
 			tileWeight: tileWeights[2],
+			entityPlan: entityPlanA,
 		},
 		{
 			tilePlan:   tilePlans["D"],
 			tileWeight: tileWeights[3],
+			entityPlan: entityPlanA,
 		},
 		{
 			tilePlan:   tilePlans["C"],
 			tileWeight: tileWeights[4],
+			entityPlan: entityPlanA,
 		},
 		{
 			tilePlan:   tilePlans["B"],
 			tileWeight: tileWeights[5],
+			entityPlan: entityPlanA,
 		},
 		{
 			tilePlan:   tilePlans["A"],
 			tileWeight: tileWeights[6],
+			entityPlan: entityPlanA,
 		},
 		{
 			tilePlan:   tilePlans["B"],
 			tileWeight: tileWeights[7],
+			entityPlan: entityPlanA,
 		},
 		{
 			tilePlan:   tilePlans["C"],
 			tileWeight: tileWeights[8],
+			entityPlan: entityPlanA,
 		},
 		{
 			tilePlan:   tilePlans["D"],
 			tileWeight: tileWeights[9],
+			entityPlan: entityPlanA,
 		},
 		{
 			tilePlan:   tilePlans["C"],
 			tileWeight: tileWeights[10],
+			entityPlan: entityPlanA,
 		},
 		{
 			tilePlan:   tilePlans["B"],
 			tileWeight: tileWeights[11],
+			entityPlan: entityPlanA,
 		},
 		{
 			tilePlan:   tilePlans["A"],
 			tileWeight: tileWeights[12],
+			entityPlan: entityPlanA,
 		},
 	}
 }
