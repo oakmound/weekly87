@@ -62,11 +62,12 @@ func (pc *Constructor) Copy() *Constructor {
 
 type Player struct {
 	*entities.Interactive
-	facing      string
-	Swtch       *render.Switch
-	Alive       bool
-	RunSpeed    float64
-	ChestValues []int64
+	facing             string
+	Swtch              *render.Switch
+	Alive              bool
+	ForcedInvulnerable bool
+	RunSpeed           float64
+	ChestValues        []int64
 }
 
 func (p *Player) Init() event.CID {
@@ -122,9 +123,11 @@ func (pc *Constructor) NewPlayer() (*Player, error) {
 
 	p.CheckedBind(func(p *Player, _ interface{}) int {
 		p.RunSpeed *= -1
+		p.ForcedInvulnerable = true
 		p.CheckedBind(func(p *Player, _ interface{}) int {
 			// Shift the player back until against the right wall
 			if int(p.X())-oak.ViewPos.X >= oak.ScreenWidth-WallOffset {
+				p.ForcedInvulnerable = false
 				return event.UnbindSingle
 			}
 			p.ShiftX(-p.RunSpeed * 2)

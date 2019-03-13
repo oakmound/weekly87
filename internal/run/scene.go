@@ -78,10 +78,15 @@ var Scene = scene.Scene{
 		}
 		render.Draw(s.R, 2, 2)
 		rs := s.GetReactiveSpace()
+
+		// Interaction with Enemies
 		rs.Add(labels.Enemy, func(s, _ *collision.Space) {
 			ply, ok := s.CID.E().(*players.Player)
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
+				return
+			}
+			if ply.ForcedInvulnerable {
 				return
 			}
 			ply.Alive = false
@@ -155,13 +160,14 @@ var Scene = scene.Scene{
 			}
 		})
 
+		// Player got back to the Inn!
 		rs.Add(labels.Door, func(_, _ *collision.Space) {
 			stayInGame = false
-
 			runInfo = records.RunInfo{Party: []*players.Player{s}}
 
 		})
 
+		// Section creation bind to support infinite* hallway
 		event.GlobalBind(func(int, interface{}) int {
 			// This calculation needs to be modified based
 			// on how much of the screen a section takes up.
@@ -195,6 +201,7 @@ var Scene = scene.Scene{
 				s.ShiftX(-w)
 				go func() {
 					nextSct = tracker.Produce(int64(facing))
+					//fmt.Println("Sec", nextSct.GetID(), "total", tracker.SectionsDeep())
 					nextSct.SetBackgroundX(sct.X() + w)
 					nextSct.Draw()
 					if tracker.AtStart() {
