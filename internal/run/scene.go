@@ -8,6 +8,7 @@ import (
 	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
+	"github.com/oakmound/weekly87/internal/records"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
@@ -24,6 +25,8 @@ var stayInGame bool
 var nextscene string
 var baseSeed int64
 
+var runInfo records.RunInfo
+
 // facing is whether is game is moving forward or backward,
 // 1 means forward, -1 means backward
 var facing = 1
@@ -32,8 +35,13 @@ var facing = 1
 var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
 		stayInGame = true
-		nextscene = "inn"
+		nextscene = "endGame"
 		facing = 1
+
+		runInfo = records.RunInfo{
+			Party:           []*players.Player{},
+			SectionsCleared: 0,
+		}
 
 		// There should be some way to draw to a stack based
 		// on layer name
@@ -79,20 +87,21 @@ var Scene = scene.Scene{
 			ply.Alive = false
 			ply.Trigger("Kill", nil)
 			// Todo: Logic has to change once there are multiple characters
-			// Show pop up to go back to inn
+			// Show pop up to go to endgame scene
 			menuX := (float64(oak.ScreenWidth) - 180) / 2
 			menuY := float64(oak.ScreenHeight) / 4
-			btn.New(menus.BtnCfgA, btn.Layers(3, 0),
-				btn.Pos(menuX, menuY), btn.Text("Defeated! Return to Inn?"),
+			btn.New(menus.BtnCfgB, btn.Layers(3, 0),
+				btn.Pos(menuX, menuY), btn.Text("Defeated! See Your Stats?"),
 				btn.Width(180),
 				btn.Binding(func(int, interface{}) int {
-					nextscene = "inn"
+					nextscene = "endGame"
 					stayInGame = false
+
 					return 0
 				}))
 		})
 
-		// todo populate baseseed
+		// TODO: populate baseseed
 		tracker := section.NewTracker(baseSeed)
 		sct := tracker.Next()
 		sct.Draw()
@@ -148,6 +157,9 @@ var Scene = scene.Scene{
 
 		rs.Add(labels.Door, func(_, _ *collision.Space) {
 			stayInGame = false
+
+			runInfo = records.RunInfo{Party: []*players.Player{s}}
+
 		})
 
 		event.GlobalBind(func(int, interface{}) int {
@@ -188,6 +200,8 @@ var Scene = scene.Scene{
 					if tracker.AtStart() {
 						oak.SetViewportBounds(0, 0, 4000, 4000)
 					}
+					// fmt.Println("sections", runInfo.SectionsCleared)
+					runInfo.SectionsCleared++
 				}()
 			}
 			return 0
