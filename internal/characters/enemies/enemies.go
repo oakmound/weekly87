@@ -49,6 +49,11 @@ func (be *BasicEnemy) Init() event.CID {
 	return event.NextID(be)
 }
 
+func (be *BasicEnemy) Destroy() {
+	collision.DefTree.Delete(be.RSpace.Space)
+	be.Interactive.Destroy()
+}
+
 func (be *BasicEnemy) CheckedBind(bnd func(*BasicEnemy, interface{}) int, ev string) {
 	be.Bind(func(id int, data interface{}) int {
 		be, ok := event.GetEntity(id).(*BasicEnemy)
@@ -122,6 +127,7 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 			dlog.Error("On hit for basic enemy called on non-basic enemy")
 			return
 		}
+		// TODO: track changes?
 		be.Destroy()
 	})
 	for ev, b := range ec.Bindings {

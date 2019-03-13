@@ -1,15 +1,17 @@
 package section
 
 import (
-	"image/color"
 	"math/rand"
+
+	"github.com/oakmound/oak"
 
 	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/enemies"
 
+	"github.com/200sc/go-dist/floatrange"
+
 	"github.com/oakmound/oak/alg"
 
-	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/render"
 )
@@ -51,6 +53,10 @@ func (st *Tracker) ShiftDepth(depth int64) {
 
 func (st *Tracker) AtStart() bool {
 	return st.sectionsDeep == 1
+}
+
+func (st *Tracker) At() int64 {
+	return st.sectionsDeep
 }
 
 func (st *Tracker) Prev() *Section {
@@ -118,23 +124,22 @@ func (st *Tracker) Produce(delta int64) *Section {
 		}
 	}
 
-	// The following section is test code
-	testEC := &enemies.Constructor{
-		Position:   floatgeom.Point2{400, 400},
-		Dimensions: floatgeom.Point2{32, 32},
-		Speed:      floatgeom.Point2{-3 * rand.Float64(), -5 * (rand.Float64() - .5)},
-		AnimationMap: map[string]render.Modifiable{
-			"standRT": render.NewColorBox(32, 32, color.RGBA{255, 125, 0, 255}),
-			"standLT": render.NewColorBox(32, 32, color.RGBA{125, 255, 0, 255}),
-			"walkRT":  render.NewColorBox(32, 32, color.RGBA{0, 0, 0, 255}),
-			"walkLT":  render.NewColorBox(32, 32, color.RGBA{255, 255, 255, 255}),
-		},
-	}
-	e, err := testEC.NewEnemy()
-	if err != nil {
-		dlog.Error(err)
-	} else {
+	fieldX := floatrange.NewLinear(0, float64(oak.ScreenWidth))
+	fieldY := floatrange.NewLinear(float64(oak.ScreenHeight)*1/3, float64(oak.ScreenHeight)-64)
+
+	enemyDist := alg.RemainingWeights(plan.enemyDistribution[:])
+
+	for i := 0; i < plan.enemyCount.Poll(); i++ {
+		typ := alg.WeightedChooseOne(enemyDist)
+		cs := enemies.Constructors[typ]
+		e, err := cs.NewEnemy()
+		if delta < 0 {
+			e.Trigger("RunBack", nil)
+		}
+		dlog.ErrorCheck(err)
+		e.SetPos(fieldX.Poll(), fieldY.Poll())
 		st.entities = append(st.entities, e)
+
 	}
 
 	if st.sectionsDeep == 1 {
@@ -142,9 +147,11 @@ func (st *Tracker) Produce(delta int64) *Section {
 		d.SetPos(0, 0)
 		st.entities = append(st.entities, d)
 	} else {
-		ch := doodads.NewChest(1)
-		ch.SetPos(800, 500)
-		st.entities = append(st.entities, ch)
+		for i := 0; i < plan.chestCount.Poll(); i++ {
+			ch := doodads.NewChest(int64(plan.chestRange.Poll()))
+			ch.SetPos(fieldX.Poll(), fieldY.Poll())
+			st.entities = append(st.entities, ch)
+		}
 	}
 
 	return st.generate()

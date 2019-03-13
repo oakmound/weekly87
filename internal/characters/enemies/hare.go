@@ -22,7 +22,7 @@ func initHare() {
 	anims["standRT"] = sheet[0][0].Copy()
 	anims["standLT"] = sheet[0][0].Copy().Modify(mod.FlipX)
 	anims["walkRT"] = render.NewSequence(4, sheet[0][0].Copy(), sheet[1][0].Copy())
-	anims["walkRT"] = anims["walkRT"].Copy().Modify(mod.FlipX)
+	anims["walkLT"] = anims["walkRT"].Copy().Modify(mod.FlipX)
 
 	Constructors[Hare] = Constructor{
 		Dimensions:   floatgeom.Point2{32, 32},
@@ -35,9 +35,12 @@ func initHare() {
 					b.Speed = physics.NewVector(0, 0)
 				} else if f%70 == 0 {
 					b.Speed = physics.NewVector(
-						float64(rand.Intn(3)+1)*3,
-						float64(rand.Intn(2)+1),
+						-float64(rand.Intn(3)+1)*3,
+						float64(rand.Intn(4)-2),
 					)
+					if b.facing == "RT" {
+						b.Speed.Scale(-1)
+					}
 				}
 				return 0
 			},

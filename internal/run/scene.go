@@ -3,6 +3,8 @@ package run
 import (
 	"sync"
 
+	"github.com/oakmound/weekly87/internal/settings"
+
 	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
@@ -43,20 +45,29 @@ var Scene = scene.Scene{
 
 		// There should be some way to draw to a stack based
 		// on layer name
-		render.SetDrawStack(
-			// ground
-			render.NewCompositeR(),
-			// maybe background / parallax?
-			// wall
-			render.NewCompositeR(),
-			// entities
-			render.NewHeap(false),
-			// maybe effects?
-			// ui
-			render.NewHeap(true),
-			render.NewDrawFPS(),
-			render.NewLogicFPS(),
-		)
+		if settings.ShowFpsToggle {
+			render.SetDrawStack(
+				// ground
+				render.NewCompositeR(),
+				// maybe background / parallax?
+				// wall
+				render.NewCompositeR(),
+				// entities
+				render.NewHeap(false),
+				// maybe effects?
+				// ui
+				render.NewHeap(true),
+				render.NewDrawFPS(),
+				render.NewLogicFPS(),
+			)
+		} else {
+			render.SetDrawStack(
+				render.NewCompositeR(),
+				render.NewCompositeR(),
+				render.NewHeap(false),
+				render.NewHeap(true),
+			)
+		}
 
 		s, err := players.NewSpearman(
 			players.WallOffset, float64(oak.ScreenHeight/2),
@@ -133,6 +144,9 @@ var Scene = scene.Scene{
 				event.Trigger("RunBack", nil)
 
 				// Shift sections
+				if tracker.At() > 3 {
+					tracker.ShiftDepth(-1)
+				}
 				oldSct = nextSct
 				nextSct = tracker.Prev()
 				nextSct.SetBackgroundX(sct.X() - sct.W())
