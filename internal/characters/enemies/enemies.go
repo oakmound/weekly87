@@ -127,6 +127,7 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 			dlog.Error("On hit for basic enemy called on non-basic enemy")
 			return
 		}
+		// TODO: track changes?
 		be.Destroy()
 	})
 	for ev, b := range ec.Bindings {

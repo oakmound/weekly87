@@ -36,8 +36,11 @@ func initHare() {
 				} else if f%70 == 0 {
 					b.Speed = physics.NewVector(
 						-float64(rand.Intn(3)+1)*3,
-						-float64(rand.Intn(2)+1),
+						float64(rand.Intn(4)-2),
 					)
+					if b.facing == "RT" {
+						b.Speed.Scale(-1)
+					}
 				}
 				return 0
 			},
