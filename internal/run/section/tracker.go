@@ -55,6 +55,10 @@ func (st *Tracker) AtStart() bool {
 	return st.sectionsDeep == 1
 }
 
+func (st *Tracker) SectionsDeep() int64 {
+	return st.sectionsDeep
+}
+
 func (st *Tracker) At() int64 {
 	return st.sectionsDeep
 }
