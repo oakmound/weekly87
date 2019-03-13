@@ -5,6 +5,7 @@ import (
 
 	"github.com/oakmound/oak"
 
+	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/enemies"
 
@@ -132,25 +133,25 @@ func (st *Tracker) Produce(delta int64) *Section {
 	fieldY := floatrange.NewLinear(float64(oak.ScreenHeight)*1/3, float64(oak.ScreenHeight)-64)
 
 	enemyDist := alg.RemainingWeights(plan.enemyDistribution[:])
-
-	for i := 0; i < plan.enemyCount.Poll(); i++ {
-		typ := alg.WeightedChooseOne(enemyDist)
-		cs := enemies.Constructors[typ]
-		e, err := cs.NewEnemy()
-		if delta < 0 {
-			e.Trigger("RunBack", nil)
-		}
-		dlog.ErrorCheck(err)
-		e.SetPos(fieldX.Poll(), fieldY.Poll())
-		st.entities = append(st.entities, e)
-
-	}
-
 	if st.sectionsDeep == 1 {
 		d := doodads.NewOutDoor(delta < 0)
 		d.SetPos(0, 0)
-		st.entities = append(st.entities, d)
+		//st.entities = append(st.entities, d)
+
+		st.entities = []characters.Character{d}
 	} else {
+		for i := 0; i < plan.enemyCount.Poll(); i++ {
+			typ := alg.WeightedChooseOne(enemyDist)
+			cs := enemies.Constructors[typ]
+			e, err := cs.NewEnemy()
+			if delta < 0 {
+				e.Trigger("RunBack", nil)
+			}
+			dlog.ErrorCheck(err)
+			e.SetPos(fieldX.Poll(), fieldY.Poll())
+			st.entities = append(st.entities, e)
+
+		}
 		for i := 0; i < plan.chestCount.Poll(); i++ {
 			ch := doodads.NewChest(int64(plan.chestRange.Poll()))
 			ch.SetPos(fieldX.Poll(), fieldY.Poll())

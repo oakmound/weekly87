@@ -1,11 +1,13 @@
 package run
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/oakmound/weekly87/internal/settings"
 
 	"github.com/oakmound/weekly87/internal/characters/doodads"
+	"github.com/oakmound/weekly87/internal/characters/enemies"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/records"
@@ -80,12 +82,15 @@ var Scene = scene.Scene{
 		rs := s.GetReactiveSpace()
 
 		// Interaction with Enemies
-		rs.Add(labels.Enemy, func(s, _ *collision.Space) {
+		rs.Add(labels.Enemy, func(s, alt *collision.Space) {
 			ply, ok := s.CID.E().(*players.Player)
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
 				return
 			}
+
+			fmt.Println("Alt is ", alt.CID.E().(*enemies.BasicEnemy))
+
 			if ply.ForcedInvulnerable {
 				return
 			}
@@ -152,8 +157,10 @@ var Scene = scene.Scene{
 				if tracker.At() > 3 {
 					tracker.ShiftDepth(-1)
 				}
+				tmpSct := oldSct
 				oldSct = nextSct
-				nextSct = tracker.Prev()
+				// nextSct = tracker.Prev()
+				nextSct = tmpSct
 				nextSct.SetBackgroundX(sct.X() - sct.W())
 			} else {
 				facingLock.Unlock()

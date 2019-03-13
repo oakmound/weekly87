@@ -62,3 +62,8 @@ func (s *Section) W() float64 {
 	w, _ := s.wall.GetDims()
 	return float64(w)
 }
+
+// GetID gets the id of the section (usually used for debug)
+func (s *Section) GetID() int64 {
+	return s.id
+}
