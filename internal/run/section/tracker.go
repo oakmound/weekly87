@@ -55,6 +55,10 @@ func (st *Tracker) AtStart() bool {
 	return st.sectionsDeep == 1
 }
 
+func (st *Tracker) At() int64 {
+	return st.sectionsDeep
+}
+
 func (st *Tracker) Prev() *Section {
 	return st.Produce(-1)
 }
@@ -129,6 +133,9 @@ func (st *Tracker) Produce(delta int64) *Section {
 		typ := alg.WeightedChooseOne(enemyDist)
 		cs := enemies.Constructors[typ]
 		e, err := cs.NewEnemy()
+		if delta < 0 {
+			e.Trigger("RunBack", nil)
+		}
 		dlog.ErrorCheck(err)
 		e.SetPos(fieldX.Poll(), fieldY.Poll())
 		st.entities = append(st.entities, e)

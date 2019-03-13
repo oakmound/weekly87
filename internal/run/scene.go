@@ -135,6 +135,9 @@ var Scene = scene.Scene{
 				event.Trigger("RunBack", nil)
 
 				// Shift sections
+				if tracker.At() > 3 {
+					tracker.ShiftDepth(-1)
+				}
 				oldSct = nextSct
 				nextSct = tracker.Prev()
 				nextSct.SetBackgroundX(sct.X() - sct.W())
