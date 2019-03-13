@@ -32,7 +32,11 @@ var EndScene = scene.Scene{
 		// Allows us to have text that shows up on a white background
 		fnt := render.DefFontGenerator.Copy()
 		fnt.Color = render.FontColor("Red")
+		fnt.Size = 16
 		redFnt := fnt.Generate()
+		fnt.Color = render.FontColor("Blue")
+		fnt.Size = 14
+		blueFnt := fnt.Generate()
 
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
 		menuBackground.Modify(mod.FlipX)
@@ -47,7 +51,7 @@ var EndScene = scene.Scene{
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) * 3 / 4
 
-		btn.New(menus.BtnCfgA, btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3), btn.Pos(menuX, menuY), btn.Text("Return To Menu"), btn.Binding(func(int, interface{}) int {
+		btn.New(menus.BtnCfgB, btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3), btn.Pos(menuX, menuY), btn.Text("Return To Menu"), btn.Binding(func(int, interface{}) int {
 			nextscene = "startup"
 			stayInGame = false
 			return 0
@@ -57,11 +61,15 @@ var EndScene = scene.Scene{
 
 		text := redFnt.NewStrText("Your Ending Statistics", float64(oak.ScreenWidth)/2-80, textY)
 		textY += 40
-		render.Draw(text, 0, 2)
+		render.Draw(text, 2, 2)
 
-		sectionText := redFnt.NewStrText("Sections Cleared: "+strconv.Itoa(runInfo.SectionsCleared), float64(oak.ScreenWidth)/2-80, textY)
+		sectionText := blueFnt.NewStrText("Sections Cleared: "+strconv.Itoa(runInfo.SectionsCleared), float64(oak.ScreenWidth)/2-80, textY)
 		textY += 40
-		render.Draw(sectionText, 0, 2)
+		render.Draw(sectionText, 2, 2)
+
+		enemy := blueFnt.NewStrText("Enemies Defeated: "+strconv.Itoa(runInfo.EnemiesDefeated), float64(oak.ScreenWidth)/2-80, textY)
+		textY += 40
+		render.Draw(enemy, 2, 2)
 
 		fmt.Println("Cleared out", runInfo.SectionsCleared)
 		chestTotal := 0
@@ -73,8 +81,8 @@ var EndScene = scene.Scene{
 				playerChestValue += int(j)
 			}
 			fmt.Println("Chesty Value :", playerChestValue)
-			charText := redFnt.NewStrText("Chests Acquired by Player:"+strconv.Itoa(playerChestValue), float64(textBackingX), textY)
-			render.Draw(charText, 1, 3)
+			charText := blueFnt.NewStrText("Chests Acquired by Player:"+strconv.Itoa(playerChestValue), float64(textBackingX), textY)
+			render.Draw(charText, 2, 3)
 			textY += 20
 
 			chestTotal += playerChestValue

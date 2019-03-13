@@ -90,7 +90,7 @@ var Scene = scene.Scene{
 			// Show pop up to go to endgame scene
 			menuX := (float64(oak.ScreenWidth) - 180) / 2
 			menuY := float64(oak.ScreenHeight) / 4
-			btn.New(menus.BtnCfgA, btn.Layers(3, 0),
+			btn.New(menus.BtnCfgB, btn.Layers(3, 0),
 				btn.Pos(menuX, menuY), btn.Text("Defeated! See Your Stats?"),
 				btn.Width(180),
 				btn.Binding(func(int, interface{}) int {
