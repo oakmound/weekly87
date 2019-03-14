@@ -1,6 +1,8 @@
 package section
 
 import (
+	"fmt"
+
 	"github.com/oakmound/oak/entities/x/move"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/weekly87/internal/characters"
@@ -36,6 +38,8 @@ func (s *Section) Shift(shift float64) {
 }
 
 func (s *Section) SetBackgroundX(x float64) {
+	fmt.Println(s)
+	fmt.Println(s.wall)
 	delta := x - s.wall.X()
 	s.wall.SetX(x)
 	for _, e := range s.entities {

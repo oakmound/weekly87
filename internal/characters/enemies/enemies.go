@@ -35,14 +35,16 @@ type Constructor struct {
 	// more may be added
 	AnimationMap map[string]render.Modifiable
 	Bindings     map[string]func(*BasicEnemy, interface{}) int
+	EType        string
 }
 
 var Constructors [TypeLimit]Constructor
 
 type BasicEnemy struct {
 	*entities.Interactive
-	facing string
-	swtch  *render.Switch
+	facing    string
+	swtch     *render.Switch
+	EnemyType string
 }
 
 func (be *BasicEnemy) Init() event.CID {
@@ -78,6 +80,7 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 		}
 	}
 	be := &BasicEnemy{}
+	be.EnemyType = ec.EType
 	be.swtch = render.NewSwitch("standLT", ec.AnimationMap)
 	be.Interactive = entities.NewInteractive(
 		ec.Position.X(),

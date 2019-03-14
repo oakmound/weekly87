@@ -30,5 +30,6 @@ func initMantis() {
 			-1 * ((rand.Float64() * 4) + 1),
 			-1 * ((rand.Float64() * 4) + 1),
 		},
+		EType: "Mantis",
 	}
 }

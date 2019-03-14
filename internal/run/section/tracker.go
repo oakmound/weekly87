@@ -5,7 +5,6 @@ import (
 
 	"github.com/oakmound/oak"
 
-	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/enemies"
 
@@ -54,10 +53,6 @@ func (st *Tracker) ShiftDepth(depth int64) {
 
 func (st *Tracker) AtStart() bool {
 	return st.sectionsDeep == 1
-}
-
-func (st *Tracker) SectionsDeep() int64 {
-	return st.sectionsDeep
 }
 
 func (st *Tracker) At() int64 {
@@ -136,9 +131,7 @@ func (st *Tracker) Produce(delta int64) *Section {
 	if st.sectionsDeep == 1 {
 		d := doodads.NewOutDoor(delta < 0)
 		d.SetPos(0, 0)
-		//st.entities = append(st.entities, d)
-
-		st.entities = []characters.Character{d}
+		st.entities = append(st.entities, d)
 	} else {
 		for i := 0; i < plan.enemyCount.Poll(); i++ {
 			typ := alg.WeightedChooseOne(enemyDist)
@@ -152,6 +145,7 @@ func (st *Tracker) Produce(delta int64) *Section {
 			st.entities = append(st.entities, e)
 
 		}
+
 		for i := 0; i < plan.chestCount.Poll(); i++ {
 			ch := doodads.NewChest(int64(plan.chestRange.Poll()))
 			ch.SetPos(fieldX.Poll(), fieldY.Poll())

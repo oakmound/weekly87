@@ -82,14 +82,15 @@ var Scene = scene.Scene{
 		rs := s.GetReactiveSpace()
 
 		// Interaction with Enemies
-		rs.Add(labels.Enemy, func(s, alt *collision.Space) {
+		rs.Add(labels.Enemy, func(s, ecid *collision.Space) {
 			ply, ok := s.CID.E().(*players.Player)
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
 				return
 			}
 
-			fmt.Println("Alt is ", alt.CID.E().(*enemies.BasicEnemy))
+			enem, _ := ecid.CID.E().(*enemies.BasicEnemy)
+			fmt.Println("Enem is ", enem.EnemyType)
 
 			if ply.ForcedInvulnerable {
 				return
