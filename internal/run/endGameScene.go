@@ -16,12 +16,14 @@ import (
 	"github.com/oakmound/weekly87/internal/records"
 )
 
+var stayInEndScene bool
+
 // EndScene is a scene in the same package as run to allow for easy variable access.
 //If there is time at the end we can look at what vbariables this touches and get them exported or passed onwards so this can have its own package
 var EndScene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
-		stayInGame = true
-		nextscene = "load"
+		stayInEndScene = true
+		nextscene = "inn"
 		render.SetDrawStack(
 			render.NewCompositeR(),
 			render.NewCompositeR(),
@@ -53,8 +55,7 @@ var EndScene = scene.Scene{
 		menuY := float64(oak.ScreenHeight) * 3 / 4
 
 		btn.New(menus.BtnCfgB, btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3), btn.Pos(menuX, menuY), btn.Text("Return To Menu"), btn.Binding(func(int, interface{}) int {
-			nextscene = "startup"
-			stayInGame = false
+			stayInEndScene = false
 			return 0
 		}))
 
@@ -119,7 +120,7 @@ var EndScene = scene.Scene{
 		BaseSeed += int64(runInfo.SectionsCleared) + 1
 		r.Store()
 	},
-	Loop: scene.BooleanLoop(&stayInGame),
+	Loop: scene.BooleanLoop(&stayInEndScene),
 	// scene.GoTo("inn"),
 	End: scene.GoToPtr(&nextscene),
 }
