@@ -4,4 +4,9 @@
 
 Game created for the weekly jam 87.
 
-This README will be fleshed out either near the end of the jam or right after.
+
+run the game with go run main.go
+Start the Game
+Walk to the right of the inn
+Dont hit enemies hit a chest
+Run Back to the Inn to return alive with your chests
