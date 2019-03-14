@@ -44,9 +44,9 @@ var sectionPlans [13]sectionPlan
 
 func Init() {
 	dir := filepath.Join("assets", "images")
-	wallSheet, err := render.LoadSprites(dir, filepath.Join("16x16", "wallTiles.png"), 16, 16, 0)
+	wallSheet, err := render.LoadSprites(dir, filepath.Join("16x16", "walltiles.png"), 16, 16, 0)
 	dlog.ErrorCheck(err)
-	groundSheet, err := render.LoadSprites(dir, filepath.Join("16x16", "floorTiles.png"), 16, 16, 0)
+	groundSheet, err := render.LoadSprites(dir, filepath.Join("16x16", "floortiles.png"), 16, 16, 0)
 	dlog.ErrorCheck(err)
 
 	entityPlanA := entityPlan{
