@@ -52,6 +52,7 @@ func (be *BasicEnemy) Init() event.CID {
 func (be *BasicEnemy) Destroy() {
 	collision.DefTree.Delete(be.RSpace.Space)
 	be.Interactive.Destroy()
+	be.R.Undraw()
 }
 
 func (be *BasicEnemy) CheckedBind(bnd func(*BasicEnemy, interface{}) int, ev string) {
@@ -112,6 +113,10 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 				// Adjust so we don't exist in the wall for a frame
 				be.ShiftPos(0, be.Speed.Y())
 			}
+		} else if be.facing == "LT" && be.X() <= float64(oak.ScreenWidth+oak.ViewPos.X) ||
+			be.facing == "RT" && be.X()+be.W >= float64(oak.ViewPos.X) {
+			be.Destroy()
+			return 0
 		}
 		if be.Delta.X() != 0 || be.Delta.Y() != 0 {
 			be.swtch.Set("walk" + be.facing)
