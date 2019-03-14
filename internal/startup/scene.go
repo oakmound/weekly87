@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/oakmound/weekly87/internal/run"
+
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities/x/btn"
@@ -32,7 +34,8 @@ var Scene = scene.Scene{
 		)
 
 		if prevScene == "loading" {
-			records.Load()
+			r := records.Load()
+			run.BaseSeed = r.BaseSeed
 			players.Init()
 			section.Init()
 			enemies.Init()

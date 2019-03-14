@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/oakmound/weekly87/internal/records"
+
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
@@ -108,6 +110,15 @@ var EndScene = scene.Scene{
 
 		// partyJson, _ := json.Marshal(runInfo.Party)
 
+		r := records.Load()
+		sc := int64(runInfo.SectionsCleared)
+		r.SectionsCleared += sc
+		if sc > r.FarthestGoneInSections {
+			r.FarthestGoneInSections = sc
+		}
+		// For the next run
+		BaseSeed += int64(runInfo.SectionsCleared) + 1
+		r.Store()
 	},
 	Loop: scene.BooleanLoop(&stayInGame),
 	// scene.GoTo("inn"),
