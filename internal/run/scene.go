@@ -1,9 +1,14 @@
 package run
 
 import (
+	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/oakmound/weekly87/internal/settings"
+
+	klg "github.com/200sc/klangsynthese/audio"
+	"github.com/200sc/klangsynthese/audio/filter"
 
 	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/labels"
@@ -11,6 +16,7 @@ import (
 	"github.com/oakmound/weekly87/internal/records"
 
 	"github.com/oakmound/oak"
+	"github.com/oakmound/oak/audio"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities/x/btn"
@@ -24,6 +30,7 @@ import (
 var stayInGame bool
 var nextscene string
 var baseSeed int64
+var music klg.Audio
 
 var runInfo records.RunInfo
 
@@ -214,6 +221,24 @@ var Scene = scene.Scene{
 			return 0
 		}, "EnterFrame")
 
+		music, err = audio.Load(filepath.Join("assets", "audio"), "runIntro.wav")
+		dlog.ErrorCheck(err)
+		music = music.MustFilter(
+			filter.Volume(0.5 * settings.MusicVolume * settings.MasterVolume),
+		)
+
+		music.Play()
+		go func() {
+			time.Sleep(music.PlayLength())
+			music, err = audio.Load(filepath.Join("assets", "audio"), "runLoop.wav")
+			dlog.ErrorCheck(err)
+			music = music.MustFilter(
+				filter.Volume(0.5*settings.MusicVolume*settings.MasterVolume),
+				filter.LoopOn(),
+			)
+			music.Play()
+		}()
+
 		// Maybe there's a countdown timer
 
 		// The state of the game is generated based on combining a base seed
@@ -252,5 +277,8 @@ var Scene = scene.Scene{
 		// infinitely, eventually there should be an upgrade thing
 	},
 	Loop: scene.BooleanLoop(&stayInGame),
-	End:  scene.GoToPtr(&nextscene),
+	End: func() (string, *scene.Result) {
+		music.Stop()
+		return nextscene, nil
+	},
 }
