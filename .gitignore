@@ -1,2 +1,4 @@
 logs/*
 save.json
+*.exe
+screenshot*
