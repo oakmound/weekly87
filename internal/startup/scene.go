@@ -12,6 +12,7 @@ import (
 	"github.com/oakmound/weekly87/internal/characters/enemies"
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/menus"
+	"github.com/oakmound/weekly87/internal/records"
 	"github.com/oakmound/weekly87/internal/run/section"
 	"golang.org/x/image/colornames"
 )
@@ -31,6 +32,7 @@ var Scene = scene.Scene{
 		)
 
 		if prevScene == "loading" {
+			records.Load()
 			players.Init()
 			section.Init()
 			enemies.Init()
