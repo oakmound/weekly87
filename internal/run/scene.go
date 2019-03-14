@@ -226,6 +226,8 @@ var Scene = scene.Scene{
 
 		music, err = audio.Load(filepath.Join("assets", "audio"), "runIntro.wav")
 		dlog.ErrorCheck(err)
+		music, err = music.Copy()
+		dlog.ErrorCheck(err)
 		music = music.MustFilter(
 			filter.Volume(0.5 * settings.MusicVolume * settings.MasterVolume),
 		)
@@ -234,6 +236,8 @@ var Scene = scene.Scene{
 		go func() {
 			time.Sleep(music.PlayLength())
 			music, err = audio.Load(filepath.Join("assets", "audio"), "runLoop.wav")
+			dlog.ErrorCheck(err)
+			music, err = music.Copy()
 			dlog.ErrorCheck(err)
 			music = music.MustFilter(
 				filter.Volume(0.5*settings.MusicVolume*settings.MasterVolume),

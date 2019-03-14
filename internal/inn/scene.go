@@ -49,6 +49,8 @@ var Scene = scene.Scene{
 		var err error
 		music, err = audio.Load(filepath.Join("assets", "audio"), "inn1.wav")
 		dlog.ErrorCheck(err)
+		music, err = music.Copy()
+		dlog.ErrorCheck(err)
 		music = music.MustFilter(
 			filter.Volume(0.5*settings.MusicVolume*settings.MasterVolume),
 			filter.LoopOn(),
