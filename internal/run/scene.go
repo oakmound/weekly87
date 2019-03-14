@@ -171,10 +171,9 @@ var Scene = scene.Scene{
 			d.CID.Trigger("RibbonCut", nil)
 			go func() {
 				time.Sleep(500 * time.Millisecond)
+				nextscene = "endGame"
 				stayInGame = false
 			}()
-			runInfo = records.RunInfo{Party: []*players.Player{s}}
-
 		})
 
 		// Section creation bind to support infinite* hallway
