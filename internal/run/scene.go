@@ -208,6 +208,7 @@ var Scene = scene.Scene{
 				s.ShiftX(-w)
 				go func() {
 					nextSct = tracker.Produce(int64(facing))
+					s.RunSpeed += 1
 					//fmt.Println("Sec", nextSct.GetID(), "total", tracker.SectionsDeep())
 					nextSct.SetBackgroundX(sct.X() + w)
 					nextSct.Draw()
