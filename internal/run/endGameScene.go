@@ -17,13 +17,14 @@ import (
 )
 
 var stayInEndScene bool
+var endSceneNextScene string
 
 // EndScene is a scene in the same package as run to allow for easy variable access.
 //If there is time at the end we can look at what vbariables this touches and get them exported or passed onwards so this can have its own package
 var EndScene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
 		stayInEndScene = true
-		nextscene = "inn"
+		endSceneNextScene = "inn"
 		render.SetDrawStack(
 			render.NewCompositeR(),
 			render.NewCompositeR(),
@@ -122,5 +123,5 @@ var EndScene = scene.Scene{
 	},
 	Loop: scene.BooleanLoop(&stayInEndScene),
 	// scene.GoTo("inn"),
-	End: scene.GoToPtr(&nextscene),
+	End: scene.GoToPtr(&endSceneNextScene),
 }
