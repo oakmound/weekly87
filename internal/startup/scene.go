@@ -71,8 +71,8 @@ var Scene = scene.Scene{
 
 		btn.New(menus.BtnCfgB, btn.Color(colornames.Green), btn.Pos(menuX, menuY), btn.Text("Start Game"), bindNewScene("inn"))
 		menuY += menus.BtnHeightB * 1.5
-		btn.New(menus.BtnCfgB, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Load Game"), bindNewScene("load"))
-		menuY += menus.BtnHeightB * 1.5
+		// btn.New(menus.BtnCfgB, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Load Game"), bindNewScene("load"))
+		// menuY += menus.BtnHeightB * 1.5
 		btn.New(menus.BtnCfgB, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Settings"), bindNewScene("settings"))
 		menuY += menus.BtnHeightB * 1.5
 		btn.New(menus.BtnCfgB, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Credits"), bindNewScene("credits"))
