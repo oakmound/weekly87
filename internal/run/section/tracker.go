@@ -151,7 +151,7 @@ func (st *Tracker) Produce(delta int64) *Section {
 		d := doodads.NewOutDoor(delta < 0)
 		d.SetPos(0, 0)
 		st.entities = append(st.entities, d)
-	} else {
+	} else if st.sectionsDeep > 2 {
 		for i := 0; i < plan.chestCount.Poll(); i++ {
 			ch := doodads.NewChest(int64(plan.chestRange.Poll()))
 			ch.SetPos(fieldX.Poll(), fieldY.Poll())

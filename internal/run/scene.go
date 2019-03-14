@@ -113,7 +113,6 @@ var Scene = scene.Scene{
 				}))
 		})
 
-		// TODO: populate baseseed
 		tracker := section.NewTracker(BaseSeed)
 		sct := tracker.Next()
 		sct.Draw()
