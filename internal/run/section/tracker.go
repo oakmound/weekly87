@@ -133,17 +133,18 @@ func (st *Tracker) Produce(delta int64) *Section {
 
 	enemyDist := alg.RemainingWeights(plan.enemyDistribution[:])
 
-	for i := 0; i < plan.enemyCount.Poll(); i++ {
-		typ := alg.WeightedChooseOne(enemyDist)
-		cs := enemies.Constructors[typ]
-		e, err := cs.NewEnemy()
-		if delta < 0 {
-			e.Trigger("RunBack", nil)
+	if !(st.sectionsDeep == 1 && delta > 0) {
+		for i := 0; i < plan.enemyCount.Poll(); i++ {
+			typ := alg.WeightedChooseOne(enemyDist)
+			cs := enemies.Constructors[typ]
+			e, err := cs.NewEnemy()
+			if delta < 0 {
+				e.Trigger("RunBack", nil)
+			}
+			dlog.ErrorCheck(err)
+			e.SetPos(fieldX.Poll(), fieldY.Poll())
+			st.entities = append(st.entities, e)
 		}
-		dlog.ErrorCheck(err)
-		e.SetPos(fieldX.Poll(), fieldY.Poll())
-		st.entities = append(st.entities, e)
-
 	}
 
 	if st.sectionsDeep == 1 {
