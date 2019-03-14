@@ -3,6 +3,8 @@ package doodads
 import (
 	"path/filepath"
 
+	"github.com/oakmound/oak/dlog"
+
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
@@ -27,11 +29,30 @@ func NewOutDoor(runback bool) *OutDoor {
 
 	d := &OutDoor{}
 
-	asset, _ := render.LoadSprite("", filepath.Join("raw", "goal.png"))
+	tiles, err := render.LoadSprites(filepath.Join("assets", "images"),
+		filepath.Join("raw", "goal.png"), 16, 400, 0)
+	dlog.ErrorCheck(err)
 
-	d.Reactive = entities.NewReactive(0, float64(oak.ScreenHeight/3), width, height, asset, nil, d.Init())
+	swtch := render.NewSwitch(
+		"uncut",
+		map[string]render.Modifiable{
+			"uncut": tiles[0][0],
+			"cut":   tiles[1][0],
+		},
+	)
 
-	// d.Reactive = entities.NewReactive(0, 0, width, height, render.NewColorBox(int(width), int(height), color.RGBA{0, 0, 255, 255}), nil, d.Init())
+	d.Reactive = entities.NewReactive(0, 0, width, height, swtch, nil, d.Init())
+
+	d.Bind(func(id int, _ interface{}) int {
+		dr, ok := event.GetEntity(id).(*OutDoor)
+		if ok {
+			dr.R.(*render.Switch).Set("cut")
+		} else {
+			return event.UnbindSingle
+		}
+		return 0
+	}, "RibbonCut")
+
 	if runback {
 		d.RSpace.UpdateLabel(labels.Door)
 	}

@@ -167,8 +167,12 @@ var Scene = scene.Scene{
 		})
 
 		// Player got back to the Inn!
-		rs.Add(labels.Door, func(_, _ *collision.Space) {
-			stayInGame = false
+		rs.Add(labels.Door, func(_, d *collision.Space) {
+			d.CID.Trigger("RibbonCut", nil)
+			go func() {
+				time.Sleep(500 * time.Millisecond)
+				stayInGame = false
+			}()
 			runInfo = records.RunInfo{Party: []*players.Player{s}}
 
 		})

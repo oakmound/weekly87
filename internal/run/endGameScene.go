@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/oakmound/weekly87/internal/records"
-
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
@@ -15,6 +13,7 @@ import (
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/menus"
+	"github.com/oakmound/weekly87/internal/records"
 )
 
 // EndScene is a scene in the same package as run to allow for easy variable access.

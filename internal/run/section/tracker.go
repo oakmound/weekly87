@@ -149,7 +149,7 @@ func (st *Tracker) Produce(delta int64) *Section {
 
 	if st.sectionsDeep == 1 {
 		d := doodads.NewOutDoor(delta < 0)
-		d.SetPos(0, 0)
+		d.SetPos(0, float64(oak.ScreenHeight-10)*1/3)
 		st.entities = append(st.entities, d)
 	} else if st.sectionsDeep > 2 {
 		for i := 0; i < plan.chestCount.Poll(); i++ {
