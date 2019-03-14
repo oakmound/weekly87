@@ -51,6 +51,15 @@ var Scene = scene.Scene{
 		// 3. Settings
 		// 4. Credits
 		// 5. Exit game
+		//get the title
+		fnt := render.DefFontGenerator.Copy()
+		fnt.Color = render.FontColor("Blue")
+		fnt.Size = 40
+		blueFnt := fnt.Generate()
+
+		title := blueFnt.NewStrText("Chest Stacker", float64(oak.ScreenWidth)/2-120, 80)
+
+		render.Draw(title, 2, 12)
 
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) / 4
