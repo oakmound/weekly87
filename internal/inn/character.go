@@ -6,7 +6,6 @@ import (
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities"
-	"github.com/oakmound/oak/entities/x/move"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
@@ -29,17 +28,46 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 	)
 
 	s.Bind(func(id int, _ interface{}) int {
-		ply, ok := event.GetEntity(id).(*entities.Interactive)
+		p, ok := event.GetEntity(id).(*entities.Interactive)
 		if !ok {
 			dlog.Error("Non-player sent to player binding")
 		}
 
-		move.WASD(ply)
-		move.Limit(ply, innSpace)
+		p.Delta.Zero()
+
+		if oak.IsDown("W") {
+			p.Delta.Add(physics.NewVector(0, -p.Speed.Y()))
+		}
+		if oak.IsDown("S") {
+			p.Delta.Add(physics.NewVector(0, p.Speed.Y()))
+		}
+		if oak.IsDown("A") {
+			p.Delta.Add(physics.NewVector(-p.Speed.X(), 0))
+		}
+		if oak.IsDown("D") {
+			p.Delta.Add(physics.NewVector(p.Speed.X(), 0))
+		}
+
+		p.Vector.Add(p.Delta)
+		// This is 6, when it should be 32
+		//_, h := r.GetDims()
+		hf := 32.0
+		if p.Vector.Y() < float64(oak.ScreenHeight)*1/3 {
+			p.Vector.SetY(float64(oak.ScreenHeight) * 1 / 3)
+		} else if p.Vector.Y() > (float64(oak.ScreenHeight) - hf) {
+			p.Vector.SetY((float64(oak.ScreenHeight) - hf))
+		}
+		if p.Vector.X() < 220 {
+			p.Vector.SetX(220)
+		} else if p.Vector.X()+p.W > float64(oak.ScreenWidth) {
+			p.Vector.SetX(float64(oak.ScreenWidth) - p.W)
+		}
+		p.R.SetPos(p.Vector.X(), p.Vector.Y())
+		p.RSpace.Update(p.Vector.X(), p.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
 		<-s.RSpace.CallOnHits()
-		swch := ply.R.(*render.Switch)
-		if ply.Delta.X() != 0 || ply.Delta.Y() != 0 {
-			if ply.Delta.X() > 0 {
+		swch := p.R.(*render.Switch)
+		if p.Delta.X() != 0 || p.Delta.Y() != 0 {
+			if p.Delta.X() > 0 {
 				swch.Set("walkRT")
 			} else {
 				swch.Set("walkLT")
