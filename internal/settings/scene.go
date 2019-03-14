@@ -17,9 +17,9 @@ import (
 )
 
 var (
-	SFXVolume     int
-	MusicVolume   int
-	MasterVolume  int
+	SFXVolume     float64 = 1.0
+	MusicVolume   float64 = 1.0
+	MasterVolume  float64 = 1.0
 	ShowFpsToggle bool
 )
 var (
@@ -127,9 +127,9 @@ var Scene = scene.Scene{
 		//if save == nil {
 		//	save = &stat.Save{}
 		//}
-		SFXVolume = int(*sfxLevel * 100)
-		MusicVolume = int(*musicLevel * 100)
-		MasterVolume = int(*masterLevel * 100)
+		SFXVolume = *sfxLevel
+		MusicVolume = *musicLevel
+		MasterVolume = *masterLevel
 		//dlog.ErrorCheck(stat.EncodeSave(save, stat.Savefile))
 		//dlog.Error("Savefile", save)
 		return "startup", nil
