@@ -32,3 +32,9 @@ func NewChest(value int64) *Chest {
 	ch.Value = value
 	return ch
 }
+
+func (c *Chest) Destroy() {
+	c.Doodad.Destroy()
+	c.Tree.Remove(c.RSpace.Space)
+	c.RSpace.Space.UpdateLabel(0)
+}

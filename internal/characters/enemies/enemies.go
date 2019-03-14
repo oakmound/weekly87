@@ -52,6 +52,7 @@ func (be *BasicEnemy) Init() event.CID {
 func (be *BasicEnemy) Destroy() {
 	collision.DefTree.Delete(be.RSpace.Space)
 	be.Interactive.Destroy()
+	be.RSpace.Space.UpdateLabel(0)
 	be.R.Undraw()
 }
 

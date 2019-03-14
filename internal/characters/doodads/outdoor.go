@@ -1,7 +1,7 @@
 package doodads
 
 import (
-	"image/color"
+	"path/filepath"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/entities"
@@ -22,11 +22,16 @@ func (d *OutDoor) Init() event.CID {
 
 func NewOutDoor(runback bool) *OutDoor {
 
-	width := float64(oak.ScreenWidth / 8)
-	height := float64(oak.ScreenHeight)
+	width := 10.0
+	height := float64(oak.ScreenHeight * 2 / 3)
 
 	d := &OutDoor{}
-	d.Reactive = entities.NewReactive(0, 0, width, height, render.NewColorBox(int(width), int(height), color.RGBA{0, 0, 255, 255}), nil, d.Init())
+
+	asset, _ := render.LoadSprite("", filepath.Join("raw", "goal.png"))
+
+	d.Reactive = entities.NewReactive(0, float64(oak.ScreenHeight/3), width, height, asset, nil, d.Init())
+
+	// d.Reactive = entities.NewReactive(0, 0, width, height, render.NewColorBox(int(width), int(height), color.RGBA{0, 0, 255, 255}), nil, d.Init())
 	if runback {
 		d.RSpace.UpdateLabel(labels.Door)
 	}
