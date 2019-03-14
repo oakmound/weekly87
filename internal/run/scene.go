@@ -1,6 +1,7 @@
 package run
 
 import (
+	"fmt"
 	"path/filepath"
 	"sync"
 	"time"
@@ -95,12 +96,14 @@ var Scene = scene.Scene{
 				dlog.Error("Non-player sent to player binding")
 				return
 			}
-			en, ok := s.CID.E().(*enemies.BasicEnemy)
+			en, ok := e.CID.E().(*enemies.BasicEnemy)
 			if !ok {
 				dlog.Error("Non-enemy sent to enemy binding")
+				fmt.Printf("%T\n", s.CID.E())
 				return
 			}
 			if en.Dead {
+				fmt.Println("Enemy is dead, not dying")
 				return
 			}
 			if ply.ForcedInvulnerable {
