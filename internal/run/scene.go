@@ -29,7 +29,7 @@ import (
 
 var stayInGame bool
 var nextscene string
-var baseSeed int64
+var BaseSeed int64
 var music klg.Audio
 
 var runInfo records.RunInfo
@@ -114,7 +114,7 @@ var Scene = scene.Scene{
 		})
 
 		// TODO: populate baseseed
-		tracker := section.NewTracker(baseSeed)
+		tracker := section.NewTracker(BaseSeed)
 		sct := tracker.Next()
 		sct.Draw()
 		nextSct := tracker.Next()
