@@ -5,6 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/oakmound/weekly87/internal/characters/enemies"
+
 	"github.com/oakmound/weekly87/internal/settings"
 
 	klg "github.com/200sc/klangsynthese/audio"
@@ -87,10 +89,18 @@ var Scene = scene.Scene{
 		rs := s.GetReactiveSpace()
 
 		// Interaction with Enemies
-		rs.Add(labels.Enemy, func(s, _ *collision.Space) {
+		rs.Add(labels.Enemy, func(s, e *collision.Space) {
 			ply, ok := s.CID.E().(*players.Player)
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
+				return
+			}
+			en, ok := s.CID.E().(*enemies.BasicEnemy)
+			if !ok {
+				dlog.Error("Non-enemy sent to enemy binding")
+				return
+			}
+			if en.Dead {
 				return
 			}
 			if ply.ForcedInvulnerable {

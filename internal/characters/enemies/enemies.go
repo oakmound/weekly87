@@ -43,6 +43,7 @@ type BasicEnemy struct {
 	*entities.Interactive
 	facing string
 	swtch  *render.Switch
+	Dead   bool
 }
 
 func (be *BasicEnemy) Init() event.CID {
@@ -50,9 +51,10 @@ func (be *BasicEnemy) Init() event.CID {
 }
 
 func (be *BasicEnemy) Destroy() {
+	be.Dead = true
+	be.RSpace.Space.UpdateLabel(0)
 	collision.DefTree.Delete(be.RSpace.Space)
 	be.Interactive.Destroy()
-	be.RSpace.Space.UpdateLabel(0)
 	be.R.Undraw()
 }
 
