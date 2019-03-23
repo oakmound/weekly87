@@ -4,11 +4,14 @@ import (
 	"os"
 	"path/filepath"
 
+	"golang.org/x/image/colornames"
+
 	"github.com/oakmound/weekly87/internal/run"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities/x/btn"
+	"github.com/oakmound/oak/entities/x/btn/grid"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/characters/enemies"
@@ -16,7 +19,6 @@ import (
 	"github.com/oakmound/weekly87/internal/menus"
 	"github.com/oakmound/weekly87/internal/records"
 	"github.com/oakmound/weekly87/internal/run/section"
-	"golang.org/x/image/colornames"
 )
 
 var stayInMenu bool
@@ -69,18 +71,24 @@ var Scene = scene.Scene{
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) / 4
 
-		btn.New(menus.BtnCfgB, btn.Color(colornames.Green), btn.Pos(menuX, menuY), btn.Text("Start Game"), bindNewScene("inn"))
-		menuY += menus.BtnHeightB * 1.5
-		// btn.New(menus.BtnCfgB, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Load Game"), bindNewScene("load"))
-		// menuY += menus.BtnHeightB * 1.5
-		btn.New(menus.BtnCfgB, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Settings"), bindNewScene("settings"))
-		menuY += menus.BtnHeightB * 1.5
-		btn.New(menus.BtnCfgB, btn.Color(colornames.Blueviolet), btn.Pos(menuX, menuY), btn.Text("Credits"), bindNewScene("credits"))
-		menuY += menus.BtnHeightB * 1.5
-		btn.New(menus.BtnCfgB, btn.Pos(menuX, menuY), btn.Text("Exit Game"), btn.Binding(func(int, interface{}) int {
-			os.Exit(3)
-			return 0
-		}))
+		grid.New(
+			grid.Defaults(btn.And(menus.BtnCfgB, btn.Pos(menuX, menuY))),
+			grid.YGap(menus.BtnHeightB*1.5),
+			grid.Content(
+				[][]btn.Option{
+					{
+						btn.And(btn.Color(colornames.Green), btn.Text("Start Game"), bindNewScene("inn")),
+						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Load Game"), bindNewScene("load")),
+						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Settings"), bindNewScene("settings")),
+						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Credits"), bindNewScene("credits")),
+						btn.And(btn.Text("Exit Game"), btn.Binding(func(int, interface{}) int {
+							os.Exit(3)
+							return 0
+						})),
+					},
+				},
+			),
+		)
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
 	End:  scene.GoToPtr(&nextscene),

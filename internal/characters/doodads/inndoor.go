@@ -28,6 +28,3 @@ func NewInnDoor() *InnDoor {
 	d.UpdateLabel(collision.Label(labels.Door))
 	return d
 }
-
-func (d *InnDoor) Flip() {
-}

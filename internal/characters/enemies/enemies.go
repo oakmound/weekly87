@@ -52,8 +52,6 @@ func (be *BasicEnemy) Init() event.CID {
 
 func (be *BasicEnemy) Destroy() {
 	be.Dead = true
-	be.RSpace.Space.UpdateLabel(0)
-	collision.DefTree.Delete(be.RSpace.Space)
 	be.Interactive.Destroy()
 	be.R.Undraw()
 }
@@ -128,7 +126,7 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 		}
 		<-be.RSpace.CallOnHits()
 		return 0
-	}, "EnterFrame")
+	}, "EnterFrame") 
 	be.RSpace.Add(labels.PlayerAttack, func(s, _ *collision.Space) {
 		be, ok := s.CID.E().(*BasicEnemy)
 		if !ok {

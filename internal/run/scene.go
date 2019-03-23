@@ -103,8 +103,7 @@ var Scene = scene.Scene{
 				return
 			}
 			if en.Dead {
-				fmt.Println("Enemy is dead, not dying")
-				return
+				fmt.Println("Enemy is dead, still dying")
 			}
 			if ply.ForcedInvulnerable {
 				return
