@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/oakmound/oak/mouse"
+
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
@@ -55,10 +57,13 @@ var EndScene = scene.Scene{
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) * 3 / 4
 
-		btn.New(menus.BtnCfgB, btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3), btn.Pos(menuX, menuY), btn.Text("Return To Menu"), btn.Binding(func(int, interface{}) int {
-			stayInEndScene = false
-			return 0
-		}))
+		btn.New(menus.BtnCfgB,
+			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
+			btn.Pos(menuX, menuY), btn.Text("Return To Menu"),
+			btn.Binding(mouse.ClickOn, func(int, interface{}) int {
+				stayInEndScene = false
+				return 0
+			}))
 
 		textY := 60.0
 

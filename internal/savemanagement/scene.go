@@ -3,6 +3,8 @@ package savemanagement
 import (
 	"path/filepath"
 
+	"github.com/oakmound/oak/mouse"
+
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
@@ -29,11 +31,14 @@ var Scene = scene.Scene{
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
 		render.Draw(menuBackground, 0)
 
-		btn.New(menus.BtnCfgA, btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3), btn.Pos(menuX, menuY), btn.Text("Return To Menu"), btn.Binding(func(int, interface{}) int {
-			nextscene = "startup"
-			stayInMenu = false
-			return 0
-		}))
+		btn.New(menus.BtnCfgA,
+			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
+			btn.Pos(menuX, menuY),
+			btn.Text("Return To Menu"), btn.Binding(mouse.ClickOn, func(int, interface{}) int {
+				nextscene = "startup"
+				stayInMenu = false
+				return 0
+			}))
 
 		text := render.DefFont().NewStrText("Save Management is under construction", float64(oak.ScreenWidth)/2-100, float64(oak.ScreenHeight)/4)
 		render.Draw(text, 0, 1)

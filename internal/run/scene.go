@@ -6,6 +6,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/oakmound/oak/mouse"
+
 	"github.com/oakmound/weekly87/internal/characters/enemies"
 
 	"github.com/oakmound/weekly87/internal/settings"
@@ -117,7 +119,7 @@ var Scene = scene.Scene{
 			btn.New(menus.BtnCfgB, btn.Layers(3, 0),
 				btn.Pos(menuX, menuY), btn.Text("Defeated! See Your Stats?"),
 				btn.Width(180),
-				btn.Binding(func(int, interface{}) int {
+				btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 					nextscene = "endGame"
 					stayInGame = false
 

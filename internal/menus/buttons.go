@@ -1,8 +1,14 @@
 package menus
 
 import (
+	"github.com/oakmound/oak/dlog"
+
+	"github.com/oakmound/oak/event"
+	"github.com/oakmound/oak/render"
+
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/entities/x/mods"
+	"github.com/oakmound/oak/mouse"
 	"github.com/oakmound/oak/render/mod"
 	"golang.org/x/image/colornames"
 
@@ -22,8 +28,23 @@ var (
 	BtnHeightB = 32.0
 	BtnWidthB  = 128.0
 	BtnCfgB    = btn.And(
-		btn.Width(BtnWidthA),
-		btn.Height(BtnHeightA),
+		BtnCfgC,
+		btn.Binding(mouse.Start, func(id int, _ interface{}) int {
+			r := event.GetEntity(id).(btn.Btn).GetRenderable()
+			m := r.(render.Modifiable)
+			m.Filter(mod.Brighten(25))
+			return 0
+		}),
+		btn.Binding(mouse.Stop, func(id int, _ interface{}) int {
+			b := event.GetEntity(id).(btn.Btn)
+			err := btn.Revert(b, 1)
+			dlog.ErrorCheck(err)
+			return 0
+		}),
+	)
+	BtnCfgC = btn.And(
+		btn.Width(BtnWidthB),
+		btn.Height(BtnHeightB),
 		btn.Mod(mod.And(
 			mod.CutRound(.05, .25),
 			mods.Inset(func(c color.Color) color.Color {

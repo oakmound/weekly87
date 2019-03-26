@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/oakmound/oak/mouse"
+
 	"golang.org/x/image/colornames"
 
 	"github.com/oakmound/weekly87/internal/run"
@@ -81,7 +83,7 @@ var Scene = scene.Scene{
 						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Load Game"), bindNewScene("load")),
 						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Settings"), bindNewScene("settings")),
 						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Credits"), bindNewScene("credits")),
-						btn.And(btn.Text("Exit Game"), btn.Binding(func(int, interface{}) int {
+						btn.And(btn.Text("Exit Game"), btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 							os.Exit(3)
 							return 0
 						})),
@@ -95,9 +97,9 @@ var Scene = scene.Scene{
 }
 
 func bindNewScene(newScene string) btn.Option {
-	return (btn.Binding(func(int, interface{}) int {
+	return btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 		nextscene = newScene
 		stayInMenu = false
 		return 0
-	}))
+	})
 }
