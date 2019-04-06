@@ -2,6 +2,7 @@ package players
 
 import (
 	"errors"
+	"math"
 	"strconv"
 
 	"github.com/oakmound/oak"
@@ -18,10 +19,22 @@ type Party struct {
 	event.CID
 	Players      []*Player
 	Acceleration float64
+	speedUps     float64
 }
 
 func (p *Party) Init() event.CID {
 	return event.NextID(p)
+}
+
+func (p *Party) SpeedUp() {
+	// 100 sections to get to 20 accel
+	// 50 sections to get to 15 accel
+	// 25 sections to get to 10 accel
+	// 12 sections to get to 5 accel
+	p.speedUps++
+	p.Acceleration = math.Log(math.Log(
+		math.Pow(p.speedUps+10, 2),
+	)) * 30
 }
 
 func (p *Party) CheckedBind(bnd func(*Party, interface{}) int, ev string) {
