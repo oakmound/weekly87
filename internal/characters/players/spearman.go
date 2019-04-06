@@ -50,9 +50,3 @@ func Init() {
 		RunSpeed:   3.0,
 	}
 }
-
-func NewSpearman(x, y float64) (*Player, error) {
-	cs := SpearmanConstructor.Copy()
-	cs.Position = floatgeom.Point2{x, y}
-	return cs.NewPlayer()
-}

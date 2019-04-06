@@ -14,10 +14,16 @@ type Chest struct {
 	*entities.Reactive
 	Unmoving
 	Value int64
+	Dead  bool
 }
 
 func (c *Chest) Init() event.CID {
 	return event.NextID(c)
+}
+
+func (c *Chest) Destroy() {
+	c.Dead = true
+	c.Reactive.Destroy()
 }
 
 func NewChest(value int64) *Chest {

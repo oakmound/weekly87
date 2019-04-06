@@ -21,6 +21,7 @@ import (
 	"github.com/oakmound/weekly87/internal/records"
 
 	"github.com/oakmound/oak"
+	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/audio"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
@@ -81,51 +82,23 @@ var Scene = scene.Scene{
 			)
 		}
 
-		s, err := players.NewSpearman(
-			players.WallOffset, float64(oak.ScreenHeight/2),
-		)
+		ptycon := players.PartyConstructor{
+			Players: []players.Constructor{
+				*players.SpearmanConstructor.Copy(),
+				*players.SpearmanConstructor.Copy(),
+				*players.SpearmanConstructor.Copy(),
+				*players.SpearmanConstructor.Copy(),
+			},
+		}
+		ptycon.Players[0].Position = floatgeom.Point2{players.WallOffset, float64(oak.ScreenHeight / 2)}
+		pty, err := ptycon.NewParty()
 		if err != nil {
 			dlog.Error(err)
 			return
 		}
-		render.Draw(s.R, 2, 2)
-		rs := s.GetReactiveSpace()
 
-		// Interaction with Enemies
-		rs.Add(labels.Enemy, func(s, e *collision.Space) {
-			ply, ok := s.CID.E().(*players.Player)
-			if !ok {
-				dlog.Error("Non-player sent to player binding")
-				return
-			}
-			en, ok := e.CID.E().(*enemies.BasicEnemy)
-			if !ok {
-				dlog.Error("Non-enemy sent to enemy binding")
-				fmt.Printf("%T\n", s.CID.E())
-				return
-			}
-			if en.Dead {
-				fmt.Println("Enemy is dead, still dying")
-			}
-			if ply.ForcedInvulnerable {
-				return
-			}
-			ply.Alive = false
-			ply.Trigger("Kill", nil)
-			// Todo: Logic has to change once there are multiple characters
-			// Show pop up to go to endgame scene
-			menuX := (float64(oak.ScreenWidth) - 180) / 2
-			menuY := float64(oak.ScreenHeight) / 4
-			btn.New(menus.BtnCfgB, btn.Layers(3, 0),
-				btn.Pos(menuX, menuY), btn.Text("Defeated! See Your Stats?"),
-				btn.Width(180),
-				btn.Binding(mouse.ClickOn, func(int, interface{}) int {
-					nextscene = "endGame"
-					stayInGame = false
-
-					return 0
-				}))
-		})
+		endLock := sync.Mutex{}
+		defeatedShowing := false
 
 		tracker := section.NewTracker(BaseSeed)
 		sct := tracker.Next()
@@ -135,60 +108,108 @@ var Scene = scene.Scene{
 		nextSct.Draw()
 		var oldSct *section.Section
 
-		chestHeight := 0.0
-
 		facingLock := sync.Mutex{}
 
-		rs.Add(labels.Chest, func(s, s2 *collision.Space) {
-			p, ok := s.CID.E().(*players.Player)
-			if !ok {
-				dlog.Error("Non-player sent to player binding")
-				return
-			}
-			ch, ok := s2.CID.E().(*doodads.Chest)
-			if !ok {
-				dlog.Error("Non-chest sent to chest binding")
-				return
-			}
-			r := ch.R.(render.Modifiable).Copy()
-			_, h := r.GetDims()
+		for _, p := range pty.Players {
+			render.Draw(p.R, 2, 2)
+			rs := p.GetReactiveSpace()
 
-			chestHeight += float64(h + 1)
-
-			r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -chestHeight)
-			p.ChestValues = append(p.ChestValues, ch.Value)
-
-			ch.Destroy()
-			render.Draw(r, 2, 2)
-			facingLock.Lock()
-			if facing == 1 {
-
-				facing = -1
-				facingLock.Unlock()
-
-				event.Trigger("RunBack", nil)
-
-				// Shift sections
-				if tracker.At() > 3 {
-					tracker.ShiftDepth(-1)
+			// Interaction with Enemies
+			rs.Add(labels.Enemy, func(s, e *collision.Space) {
+				ply, ok := s.CID.E().(*players.Player)
+				if !ok {
+					dlog.Error("Non-player sent to player binding")
+					return
 				}
-				oldSct = nextSct
-				nextSct = tracker.Prev()
-				nextSct.SetBackgroundX(sct.X() - sct.W())
-			} else {
-				facingLock.Unlock()
-			}
-		})
+				en, ok := e.CID.E().(*enemies.BasicEnemy)
+				if !ok {
+					dlog.Error("Non-enemy sent to enemy binding")
+					fmt.Printf("%T\n", s.CID.E())
+					return
+				}
+				if ply.ForcedInvulnerable || en.Dead {
+					return
+				}
+				ply.Alive = false
+				ply.Trigger("Kill", nil)
 
-		// Player got back to the Inn!
-		rs.Add(labels.Door, func(_, d *collision.Space) {
-			d.CID.Trigger("RibbonCut", nil)
-			go func() {
-				time.Sleep(500 * time.Millisecond)
-				nextscene = "endGame"
-				stayInGame = false
-			}()
-		})
+				endLock.Lock()
+				defer endLock.Unlock()
+				if pty.Defeated() && !defeatedShowing {
+					for _, ply := range pty.Players {
+						ply.RunSpeed = 0
+					}
+					pty.Acceleration = 0
+					defeatedShowing = true
+					// Show pop up to go to endgame scene
+					menuX := (float64(oak.ScreenWidth) - 180) / 2
+					menuY := float64(oak.ScreenHeight) / 4
+					btn.New(menus.BtnCfgB, btn.Layers(3, 0),
+						btn.Pos(menuX, menuY), btn.Text("Defeated! See Your Stats?"),
+						btn.Width(180),
+						btn.Binding(mouse.ClickOn, func(int, interface{}) int {
+							nextscene = "endGame"
+							stayInGame = false
+
+							return 0
+						}))
+				}
+			})
+
+			rs.Add(labels.Chest, func(s, s2 *collision.Space) {
+				p, ok := s.CID.E().(*players.Player)
+				if !ok {
+					dlog.Error("Non-player sent to player binding")
+					return
+				}
+				ch, ok := s2.CID.E().(*doodads.Chest)
+				if !ok {
+					dlog.Error("Non-chest sent to chest binding")
+					return
+				}
+				if ch.Dead {
+					return
+				}
+				r := ch.R.(render.Modifiable).Copy()
+				_, h := r.GetDims()
+
+				chestHeight := (len(p.ChestValues) + 1) * (h + 1)
+
+				r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -float64(chestHeight))
+				p.ChestValues = append(p.ChestValues, ch.Value)
+
+				ch.Destroy()
+				render.Draw(r, 2, 2)
+				facingLock.Lock()
+				if facing == 1 {
+
+					facing = -1
+					facingLock.Unlock()
+
+					event.Trigger("RunBack", nil)
+
+					// Shift sections
+					if tracker.At() > 3 {
+						tracker.ShiftDepth(-1)
+					}
+					oldSct = nextSct
+					nextSct = tracker.Prev()
+					nextSct.SetBackgroundX(sct.X() - sct.W())
+				} else {
+					facingLock.Unlock()
+				}
+			})
+
+			// Player got back to the Inn!
+			rs.Add(labels.Door, func(_, d *collision.Space) {
+				d.CID.Trigger("RibbonCut", nil)
+				go func() {
+					time.Sleep(500 * time.Millisecond)
+					nextscene = "endGame"
+					stayInGame = false
+				}()
+			})
+		}
 
 		// Section creation bind to support infinite* hallway
 		event.GlobalBind(func(int, interface{}) int {
@@ -220,11 +241,10 @@ var Scene = scene.Scene{
 				// Or a way to fake it so there isn't a blip
 				oak.ViewPos.X = offLeft
 				nextSct.Shift(-w)
-				// Todo: shift player, not locally stored s
-				s.ShiftX(-w)
+				pty.ShiftX(-w)
 				go func() {
 					nextSct = tracker.Produce(int64(facing))
-					s.RunSpeed += 1
+					pty.Acceleration += 1
 					//fmt.Println("Sec", nextSct.GetID(), "total", tracker.SectionsDeep())
 					nextSct.SetBackgroundX(sct.X() + w)
 					nextSct.Draw()
