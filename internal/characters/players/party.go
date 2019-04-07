@@ -35,6 +35,13 @@ func (p *Party) SpeedUp() {
 	p.Acceleration = math.Log(math.Log(
 		math.Pow(p.speedUps+10, 2),
 	)) * 30
+	// p.Acceleration = math.Min(p.speedUps+math.Log(p.speedUps), 100)
+	// Safe the defeat metrics
+	if p.Players[0].RunSpeed == 0 {
+		p.Acceleration = 0
+	}
+	// fmt.Println("Accel ", p.Acceleration)
+
 }
 
 func (p *Party) CheckedBind(bnd func(*Party, interface{}) int, ev string) {
@@ -184,6 +191,7 @@ func (pc *PartyConstructor) NewParty() (*Party, error) {
 			// or other awkward bits to moving around.
 			if i != 0 {
 				p.Vector.Add(p0.Delta)
+				p.Vector.SetY(p0.Vector.Y())
 			}
 			p.R.SetPos(p.Vector.X(), p0.Vector.Y())
 
