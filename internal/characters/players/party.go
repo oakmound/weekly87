@@ -168,10 +168,10 @@ func (pc *PartyConstructor) NewParty() (*Party, error) {
 
 		p0.Delta.SetX(pty.RunSpeed())
 		if oak.IsDown("W") {
-			p0.Delta.Add(physics.NewVector(0, -pty.Speed().Y()))
+			p0.Delta.ShiftY(-pty.Speed().Y())
 		}
 		if oak.IsDown("S") {
-			p0.Delta.Add(physics.NewVector(0, pty.Speed().Y()))
+			p0.Delta.ShiftY(pty.Speed().Y())
 		}
 
 		p0.Vector.Add(p0.Delta)
