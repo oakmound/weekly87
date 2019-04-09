@@ -32,15 +32,11 @@ func (p *Party) SpeedUp() {
 	// 25 sections to get to 10 accel
 	// 12 sections to get to 5 accel
 	p.speedUps++
-	p.Acceleration = math.Log(math.Log(
-		math.Pow(p.speedUps+10, 2),
-	)) * 30
-	// p.Acceleration = math.Min(p.speedUps+math.Log(p.speedUps), 100)
-	// Safe the defeat metrics
+	p.Acceleration = math.Log10(math.Pow(
+		math.Log10(p.speedUps+10), 2)) * 15
 	if p.Players[0].RunSpeed == 0 {
 		p.Acceleration = 0
 	}
-	// fmt.Println("Accel ", p.Acceleration)
 
 }
 
@@ -55,11 +51,11 @@ func (p *Party) CheckedBind(bnd func(*Party, interface{}) int, ev string) {
 	}, ev)
 }
 
-func (p *Party) RunSpeed() float64 {
+func (p *Party) RunSpeed() int {
 	if p.Players[0].facing == "LT" {
-		return p.Players[0].RunSpeed - p.Acceleration
+		return int(p.Players[0].RunSpeed - p.Acceleration)
 	}
-	return p.Players[len(p.Players)-1].RunSpeed + p.Acceleration
+	return int(p.Players[len(p.Players)-1].RunSpeed + p.Acceleration)
 }
 
 func (p *Party) Speed() physics.Vector {
@@ -155,7 +151,7 @@ func (pc *PartyConstructor) NewParty() (*Party, error) {
 					p.ForcedInvulnerable = false
 					return event.UnbindSingle
 				}
-				p.ShiftX(-pty.RunSpeed() * 2)
+				p.ShiftX(float64(-pty.RunSpeed()) * 2)
 				return 0
 			}, "EnterFrame")
 		}
@@ -166,7 +162,7 @@ func (pc *PartyConstructor) NewParty() (*Party, error) {
 		p0 := pty.Players[0]
 		p0.Delta.Zero()
 
-		p0.Delta.SetX(pty.RunSpeed())
+		p0.Delta.SetX(float64(pty.RunSpeed()))
 		if oak.IsDown("W") {
 			p0.Delta.ShiftY(-pty.Speed().Y())
 		}

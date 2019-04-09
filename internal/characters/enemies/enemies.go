@@ -41,9 +41,10 @@ var Constructors [TypeLimit]Constructor
 
 type BasicEnemy struct {
 	*entities.Interactive
-	facing string
-	swtch  *render.Switch
-	Dead   bool
+	facing        string
+	swtch         *render.Switch
+	Dead          bool
+	beenDisplayed bool
 }
 
 func (be *BasicEnemy) Init() event.CID {
@@ -53,7 +54,11 @@ func (be *BasicEnemy) Init() event.CID {
 func (be *BasicEnemy) Destroy() {
 	be.Dead = true
 	be.Interactive.Destroy()
-	be.R.Undraw()
+	// be.R.Undraw()
+	// be.UnbindAll()
+	// be.swtch.Filter(mod.Brighten(79))
+	// be.Tree.Remove(be.RSpace.Space)
+	// be.R.Undraw()
 }
 
 func (be *BasicEnemy) CheckedBind(bnd func(*BasicEnemy, interface{}) int, ev string) {
@@ -80,7 +85,11 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 		}
 	}
 	be := &BasicEnemy{}
-	be.swtch = render.NewSwitch("standLT", ec.AnimationMap)
+	newMp := map[string]render.Modifiable{}
+	for animKey, anim := range ec.AnimationMap {
+		newMp[animKey] = anim.Copy()
+	}
+	be.swtch = render.NewSwitch("standLT", newMp)
 	be.Interactive = entities.NewInteractive(
 		ec.Position.X(),
 		ec.Position.Y(),
@@ -126,7 +135,7 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 		}
 		<-be.RSpace.CallOnHits()
 		return 0
-	}, "EnterFrame") 
+	}, "EnterFrame")
 	be.RSpace.Add(labels.PlayerAttack, func(s, _ *collision.Space) {
 		be, ok := s.CID.E().(*BasicEnemy)
 		if !ok {
@@ -140,4 +149,10 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 		be.CheckedBind(b, ev)
 	}
 	return be, nil
+}
+
+func (be *BasicEnemy) RunBackwards() {
+	be.facing = "RT"
+	be.Speed = be.Speed.Scale(-1)
+
 }
