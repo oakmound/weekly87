@@ -98,8 +98,8 @@ var Scene = scene.Scene{
 		ptycon := players.PartyConstructor{
 			Players: []players.Constructor{
 				*players.SpearmanConstructor.Copy(),
-				*players.SpearmanConstructor.Copy(),
-				*players.SpearmanConstructor.Copy(),
+				*players.MageConstructor.Copy(),
+				*players.MageConstructor.Copy(),
 				*players.SpearmanConstructor.Copy(),
 			},
 		}
