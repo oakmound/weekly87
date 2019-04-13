@@ -56,7 +56,6 @@ func (be *BasicEnemy) Activate() {
 }
 
 func (be *BasicEnemy) Destroy() {
-	be.RSpace.Label = labels.InactiveEnemy
 	be.Active = false
 	be.Interactive.Destroy()
 	// be.R.Undraw()
