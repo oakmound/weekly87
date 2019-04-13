@@ -62,3 +62,9 @@ func (s *Section) W() float64 {
 	w, _ := s.wall.GetDims()
 	return float64(w)
 }
+
+func (s *Section) ActivateEntities() {
+	for _, e := range s.entities {
+		e.Activate()
+	}
+}

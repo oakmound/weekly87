@@ -18,6 +18,8 @@ func (d *InnDoor) Init() event.CID {
 	return event.NextID(d)
 }
 
+func (d *InnDoor) Activate() {}
+
 func NewInnDoor() *InnDoor {
 
 	width := 83.0

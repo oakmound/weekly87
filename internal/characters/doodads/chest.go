@@ -13,8 +13,8 @@ import (
 type Chest struct {
 	*entities.Reactive
 	Unmoving
-	Value int64
-	Dead  bool
+	Value  int64
+	Active bool
 }
 
 func (c *Chest) Init() event.CID {
@@ -22,8 +22,12 @@ func (c *Chest) Init() event.CID {
 }
 
 func (c *Chest) Destroy() {
-	c.Dead = true
+	c.Active = false
 	c.Reactive.Destroy()
+}
+
+func (c *Chest) Activate() {
+	c.Active = true
 }
 
 func NewChest(value int64) *Chest {

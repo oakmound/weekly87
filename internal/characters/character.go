@@ -9,4 +9,5 @@ type Character interface {
 	move.Mover
 	Destroy()
 	GetReactiveSpace() *collision.ReactiveSpace
+	Activate()
 }

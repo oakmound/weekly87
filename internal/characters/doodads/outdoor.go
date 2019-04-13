@@ -22,6 +22,8 @@ func (d *OutDoor) Init() event.CID {
 	return event.NextID(d)
 }
 
+func (d *OutDoor) Activate() {}
+
 func NewOutDoor(runback bool) *OutDoor {
 
 	width := 10.0

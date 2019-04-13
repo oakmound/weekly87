@@ -43,7 +43,7 @@ type BasicEnemy struct {
 	*entities.Interactive
 	facing        string
 	swtch         *render.Switch
-	Dead          bool
+	Active        bool
 	beenDisplayed bool
 }
 
@@ -51,8 +51,13 @@ func (be *BasicEnemy) Init() event.CID {
 	return event.NextID(be)
 }
 
+func (be *BasicEnemy) Activate() {
+	be.Active = true
+}
+
 func (be *BasicEnemy) Destroy() {
-	be.Dead = true
+	be.RSpace.Label = labels.InactiveEnemy
+	be.Active = false
 	be.Interactive.Destroy()
 	// be.R.Undraw()
 	// be.UnbindAll()
@@ -102,7 +107,7 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 	)
 	be.Speed = physics.NewVector(ec.Speed.X(), ec.Speed.Y())
 	be.facing = "LT"
-	be.RSpace.UpdateLabel(labels.Enemy)
+	be.RSpace.Label = labels.Enemy
 	be.CheckedBind(func(be *BasicEnemy, _ interface{}) int {
 		be.facing = "RT"
 		be.Speed = be.Speed.Scale(-1)
@@ -115,6 +120,7 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 		// Todo: on screen helper in oak
 		if be.X() <= float64(oak.ScreenWidth+oak.ViewPos.X) &&
 			be.X()+be.W >= float64(oak.ViewPos.X) {
+			//be.RSpace.Label = labels.Enemy
 			be.ShiftPos(be.Delta.X(), be.Delta.Y())
 			// Default behavior is to flip when hitting the ceiling
 			if be.Y() < float64(oak.ScreenHeight)*1/3 ||

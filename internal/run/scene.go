@@ -2,6 +2,7 @@ package run
 
 import (
 	"fmt"
+	"image/color"
 	"path/filepath"
 	"sync"
 	"time"
@@ -29,6 +30,7 @@ import (
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
+	"github.com/oakmound/weekly87/internal/dtools"
 	"github.com/oakmound/weekly87/internal/menus"
 	"github.com/oakmound/weekly87/internal/run/section"
 )
@@ -82,6 +84,17 @@ var Scene = scene.Scene{
 			)
 		}
 
+		debugTree := dtools.NewRTree(collision.DefTree)
+		debugTree.ColorMap = map[collision.Label]color.RGBA{
+			labels.Chest:        color.RGBA{255, 255, 0, 255},
+			labels.Door:         color.RGBA{125, 125, 125, 255},
+			labels.Enemy:        color.RGBA{0, 0, 255, 255},
+			labels.EnemyAttack:  color.RGBA{255, 0, 0, 255},
+			labels.PC:           color.RGBA{125, 0, 255, 255},
+			labels.PlayerAttack: color.RGBA{255, 0, 125, 255},
+		}
+		render.Draw(debugTree, 2, 1000)
+
 		ptycon := players.PartyConstructor{
 			Players: []players.Constructor{
 				*players.SpearmanConstructor.Copy(),
@@ -106,6 +119,7 @@ var Scene = scene.Scene{
 		nextSct := tracker.Next()
 		nextSct.SetBackgroundX(sct.X() + sct.W())
 		nextSct.Draw()
+		nextSct.ActivateEntities()
 		var oldSct *section.Section
 
 		facingLock := sync.Mutex{}
@@ -127,7 +141,7 @@ var Scene = scene.Scene{
 					fmt.Printf("%T\n", s.CID.E())
 					return
 				}
-				if ply.ForcedInvulnerable || en.Dead {
+				if ply.ForcedInvulnerable || !en.Active {
 					return
 				}
 				ply.Alive = false
@@ -167,7 +181,7 @@ var Scene = scene.Scene{
 					dlog.Error("Non-chest sent to chest binding")
 					return
 				}
-				if ch.Dead {
+				if !ch.Active {
 					return
 				}
 				r := ch.R.(render.Modifiable).Copy()
@@ -240,14 +254,18 @@ var Scene = scene.Scene{
 				// We need a way to make these actions draw-level atomic
 				// Or a way to fake it so there isn't a blip
 				oak.ViewPos.X = offLeft
-				nextSct.Shift(-w)
 				pty.ShiftX(-w)
+				// event.DefaultBus.Pause()
+				// time.Sleep(5 * time.Second)
+				// event.DefaultBus.Resume()
+				nextSct.Shift(-w)
 				go func() {
 					nextSct = tracker.Produce(int64(facing))
 					pty.SpeedUp()
 					//fmt.Println("Sec", nextSct.GetID(), "total", tracker.SectionsDeep())
 					nextSct.SetBackgroundX(sct.X() + w)
 					nextSct.Draw()
+					nextSct.ActivateEntities()
 					if tracker.AtStart() {
 						oak.SetViewportBounds(0, 0, 4000, 4000)
 					}
