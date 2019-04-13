@@ -28,10 +28,11 @@ func Init() {
 	dlog.ErrorCheck(err)
 	walkHold = walkHold.Copy().Modify(mod.FlipX).(*render.Sequence)
 
-	deadRT := sheet[0][0].Copy()
-	deadRT.Filter(mod.Fade(125))
-	deadRT.Filter(mod.ColorBalance(-50, -50, -50))
+	ghostFilePath := filepath.Join("16x32", "warriorghost.png")
+	dlog.ErrorCheck(err)
 
+	deadRT, err := render.LoadSheetSequence(ghostFilePath, 16, 32, 0, 8, []int{0, 0, 1, 0}...)
+	dlog.ErrorCheck(err)
 	deadLT := deadRT.Copy().Modify(mod.FlipX)
 
 	SpearmanConstructor = &Constructor{
