@@ -62,6 +62,7 @@ type Player struct {
 	ForcedInvulnerable bool
 	RunSpeed           float64
 	ChestValues        []int64
+	Chests             []render.Renderable
 }
 
 func (p *Player) Init() event.CID {

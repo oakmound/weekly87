@@ -145,6 +145,10 @@ var Scene = scene.Scene{
 					return
 				}
 				ply.Alive = false
+				for _, r := range ply.Chests {
+					r.Undraw()
+				}
+				ply.ChestValues = []int64{}
 				ply.Trigger("Kill", nil)
 
 				endLock.Lock()
@@ -191,6 +195,7 @@ var Scene = scene.Scene{
 
 				r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -float64(chestHeight))
 				p.ChestValues = append(p.ChestValues, ch.Value)
+				p.Chests = append(p.Chests, r)
 
 				ch.Destroy()
 				render.Draw(r, 2, 2)
