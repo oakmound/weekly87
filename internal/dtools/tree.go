@@ -11,6 +11,7 @@ import (
 	"github.com/oakmound/oak/collision"
 )
 
+// NewRTree creates a wrapper around a tree that supports coloring the spaces
 func NewRTree(t *collision.Tree) *Rtree {
 	rt := new(Rtree)
 	rt.Tree = t

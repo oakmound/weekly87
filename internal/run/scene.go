@@ -100,7 +100,7 @@ var Scene = scene.Scene{
 				*players.SpearmanConstructor.Copy(),
 				*players.MageConstructor.Copy(),
 				*players.MageConstructor.Copy(),
-				*players.SpearmanConstructor.Copy(),
+				*players.SwordsmanConstructor.Copy(),
 			},
 		}
 		ptycon.Players[0].Position = floatgeom.Point2{players.WallOffset, float64(oak.ScreenHeight / 2)}
