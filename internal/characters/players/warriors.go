@@ -3,6 +3,7 @@ package players
 import (
 	"path/filepath"
 
+	"github.com/oakmound/weekly87/internal/abilities"
 	"github.com/oakmound/weekly87/internal/recolor"
 
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -56,6 +57,8 @@ func WarriorsInit() {
 		AnimationMap: warriorMap,
 		Dimensions:   floatgeom.Point2{16, 32},
 		Speed:        floatgeom.Point2{0, 5},
+		Special1:     abilities.SpearStab,
+		Special2:     abilities.SpearStab,
 		RunSpeed:     3.0,
 	}
 

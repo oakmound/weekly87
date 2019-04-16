@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"time"
 
@@ -96,11 +97,17 @@ var Scene = scene.Scene{
 		render.Draw(debugTree, 2, 1000)
 
 		ptycon := players.PartyConstructor{
+			// Players: []players.Constructor{
+			// 	*players.SpearmanConstructor.Copy(),
+			// 	*players.MageConstructor.Copy(),
+			// 	*players.MageConstructor.Copy(),
+			// 	*players.SwordsmanConstructor.Copy(),
+			// },
 			Players: []players.Constructor{
 				*players.SpearmanConstructor.Copy(),
-				*players.MageConstructor.Copy(),
-				*players.MageConstructor.Copy(),
-				*players.SwordsmanConstructor.Copy(),
+				*players.SpearmanConstructor.Copy(),
+				*players.SpearmanConstructor.Copy(),
+				*players.SpearmanConstructor.Copy(),
 			},
 		}
 		ptycon.Players[0].Position = floatgeom.Point2{players.WallOffset, float64(oak.ScreenHeight / 2)}
@@ -124,7 +131,7 @@ var Scene = scene.Scene{
 
 		facingLock := sync.Mutex{}
 
-		for _, p := range pty.Players {
+		for i, p := range pty.Players {
 			render.Draw(p.R, 2, 2)
 			rs := p.GetReactiveSpace()
 
@@ -228,6 +235,61 @@ var Scene = scene.Scene{
 					stayInGame = false
 				}()
 			})
+
+			const aRendDims = 64.0
+			const aPad = aRendDims + 12.0 //Size of ability image plus padding
+			const cornerPad = 20
+			abilityKeys := []string{
+				"Q", "W", "E", "R", "T",
+			}
+			abilityX := float64(cornerPad + i*aPad)
+
+			btnOpts := btn.And(menus.BtnCfgB, btn.Layers(3, 0),
+				btn.Pos(abilityX, cornerPad),
+				btn.Height(aRendDims),
+				btn.Width(aRendDims),
+				btn.Text(""),
+			)
+
+			// Set up abilities
+			if p.Special1 != nil {
+				p.Special1.Renderable().SetPos(abilityX, cornerPad)
+				btnOpts = btn.And(btnOpts, btn.Renderable(p.Special1.Renderable()),
+					btn.Binding(mouse.ClickOn, func(int, interface{}) int {
+						p.Special1.Trigger()
+						return 0
+					}))
+				keyToBind := strconv.Itoa(i)
+				if i < 10 {
+					btnOpts = btn.And(btn.Binding(keyToBind, func(int, interface{}) int {
+						p.Special1.Trigger()
+						return 0
+					}), btnOpts)
+				}
+				btn.New(btnOpts)
+
+				// render.Draw(p.Special1.Renderable(), 3)
+				// a1Sp := collision.NewUnassignedSpace(abilityX, cornerPad, aRendDims, aRendDims)
+
+			}
+			if p.Special2 != nil {
+				p.Special2.Renderable().SetPos(abilityX, cornerPad+aPad)
+
+				btnOpts = btn.And(btnOpts, btn.Renderable(p.Special1.Renderable()),
+					btn.Pos(abilityX, cornerPad+aPad),
+					btn.Binding(mouse.ClickOn, func(int, interface{}) int {
+						p.Special1.Trigger()
+						return 0
+					}))
+
+				btnOpts = btn.And(btn.Binding(abilityKeys[i], func(int, interface{}) int {
+					p.Special1.Trigger()
+					return 0
+				}), btnOpts)
+
+				btn.New(btnOpts)
+			}
+
 		}
 
 		// Section creation bind to support infinite* hallway

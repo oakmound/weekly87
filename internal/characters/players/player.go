@@ -2,6 +2,7 @@ package players
 
 import (
 	"github.com/oakmound/oak/alg/floatgeom"
+	"github.com/oakmound/weekly87/internal/abilities"
 
 	"github.com/oakmound/oak/dlog"
 
@@ -33,8 +34,8 @@ type Constructor struct {
 	// more may be added
 	AnimationMap map[string]render.Modifiable
 	Bindings     map[string]func(*Player, interface{}) int
-	Special1     func() // Todo: flesh out specials
-	Special2     func()
+	Special1     abilities.Ability
+	Special2     abilities.Ability
 	RunSpeed     float64
 }
 
@@ -58,6 +59,8 @@ type Player struct {
 	*entities.Interactive
 	facing             string
 	Swtch              *render.Switch
+	Special1           abilities.Ability
+	Special2           abilities.Ability
 	Alive              bool
 	ForcedInvulnerable bool
 	RunSpeed           float64
@@ -78,6 +81,14 @@ func (p *Player) CheckedBind(bnd func(*Player, interface{}) int, ev string) {
 		}
 		return bnd(be, data)
 	}, ev)
+}
+
+func (p *Player) Direction() string {
+	return p.facing
+}
+
+func (p *Player) Ready() bool {
+	return p.Alive
 }
 
 const WallOffset = 50

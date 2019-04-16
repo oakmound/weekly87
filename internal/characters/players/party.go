@@ -105,6 +105,14 @@ func (pc *PartyConstructor) NewParty() (*Party, error) {
 		}
 		p := Player{}
 
+		if pcon.Special1 != nil {
+			p.Special1 = pcon.Special1.SetUser(&p)
+
+		}
+		if pcon.Special2 != nil {
+			p.Special2 = pcon.Special2.SetUser(&p)
+		}
+
 		p.Swtch = render.NewSwitch("walkRT", pcon.AnimationMap)
 		p.Interactive = entities.NewInteractive(
 			pc.Players[0].Position.X()+float64(i)*PlayerGap,
