@@ -15,6 +15,7 @@ import (
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/weekly87/internal/characters/labels"
+	"github.com/oakmound/weekly87/internal/joys"
 )
 
 type Party struct {
@@ -22,6 +23,7 @@ type Party struct {
 	Players      []*Player
 	Acceleration float64
 	speedUps     float64
+	joystickID   uint32
 }
 
 func (p *Party) Init() event.CID {
@@ -150,6 +152,16 @@ func (pc *PartyConstructor) NewParty() (*Party, error) {
 
 	pty.CID = pty.Init()
 
+	lowestID := uint32(math.MaxInt32)
+	for id := range joys.JoyStickStates {
+		if id < lowestID {
+			lowestID = id
+		}
+	}
+	if lowestID != math.MaxInt32 {
+		pty.joystickID = lowestID
+	}
+
 	pty.CheckedBind(func(pty *Party, _ interface{}) int {
 		for i, p := range pty.Players {
 			i := i
@@ -172,11 +184,13 @@ func (pc *PartyConstructor) NewParty() (*Party, error) {
 		p0 := pty.Players[0]
 		p0.Delta.Zero()
 
+		js := joys.JoyStickStates[pty.joystickID]
+
 		p0.Delta.SetX(float64(pty.RunSpeed()))
-		if oak.IsDown(key.UpArrow) {
+		if oak.IsDown(key.UpArrow) || js.StickLY > 8000 {
 			p0.Delta.ShiftY(-pty.Speed().Y())
 		}
-		if oak.IsDown(key.DownArrow) {
+		if oak.IsDown(key.DownArrow) || js.StickLY < -8000 {
 			p0.Delta.ShiftY(pty.Speed().Y())
 		}
 

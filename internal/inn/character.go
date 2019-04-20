@@ -1,6 +1,8 @@
 package inn
 
 import (
+	"math"
+
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/collision"
@@ -12,6 +14,7 @@ import (
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
+	"github.com/oakmound/weekly87/internal/joys"
 )
 
 func NewInnWalker(innSpace floatgeom.Rect2) {
@@ -28,6 +31,13 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 		0,
 	)
 
+	lowestID := uint32(math.MaxInt32)
+	for id := range joys.JoyStickStates {
+		if id < lowestID {
+			lowestID = id
+		}
+	}
+
 	s.Bind(func(id int, _ interface{}) int {
 		p, ok := event.GetEntity(id).(*entities.Interactive)
 		if !ok {
@@ -36,16 +46,19 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 
 		p.Delta.Zero()
 
-		if oak.IsDown(key.UpArrow) {
+		js := joys.JoyStickStates[lowestID]
+		// Todo: support full analog control
+
+		if oak.IsDown(key.UpArrow) || js.StickLY > 8000 {
 			p.Delta.Add(physics.NewVector(0, -p.Speed.Y()))
 		}
-		if oak.IsDown(key.DownArrow) {
+		if oak.IsDown(key.DownArrow) || js.StickLY < -8000 {
 			p.Delta.Add(physics.NewVector(0, p.Speed.Y()))
 		}
-		if oak.IsDown(key.LeftArrow) {
+		if oak.IsDown(key.LeftArrow) || js.StickLX < -8000 {
 			p.Delta.Add(physics.NewVector(-p.Speed.X(), 0))
 		}
-		if oak.IsDown(key.RightArrow) {
+		if oak.IsDown(key.RightArrow) || js.StickLX > 8000 {
 			p.Delta.Add(physics.NewVector(p.Speed.X(), 0))
 		}
 

@@ -8,6 +8,7 @@ import (
 
 	"golang.org/x/image/colornames"
 
+	"github.com/oakmound/weekly87/internal/joys"
 	"github.com/oakmound/weekly87/internal/run"
 
 	"github.com/oakmound/oak"
@@ -41,6 +42,7 @@ var Scene = scene.Scene{
 		if prevScene == "loading" {
 			r := records.Load()
 			run.BaseSeed = r.BaseSeed
+			joys.Init()
 			players.Init()
 			section.Init()
 			enemies.Init()
@@ -51,6 +53,8 @@ var Scene = scene.Scene{
 
 			dlog.Info("Starting game")
 		}
+
+		// Todo: joystick mouse
 
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
 		render.Draw(menuBackground, 0)
