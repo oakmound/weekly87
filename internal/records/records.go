@@ -19,32 +19,34 @@ type Records struct {
 	FarthestGoneInSections int64 `json:"farthestGoneInSections"`
 }
 
-func (r *Records) Store() {
-	f, err := os.Open("save.json")
-	if err != nil {
-		f, _ = os.Create("save.json")
-	}
-	dc := json.NewDecoder(f)
-	dlog.ErrorCheck(dc.Decode(r))
+func (s *Records) Store() {
+	f, err := os.Create(recordsFile)
+	data, err := json.Marshal(s)
+	dlog.ErrorCheck(err)
+	_, err = f.Write(data)
+	dlog.ErrorCheck(err)
+	dlog.ErrorCheck(f.Close())
 }
+
 func Load() *Records {
 	r := &Records{}
 
-	f, err := os.Open("save.json")
+	f, err := os.Open(recordsFile)
 	if err != nil {
-		f, err := os.Create("save.json")
-		if err != nil {
-			dlog.Error(err)
-		}
+		f, err := os.Create(recordsFile)
+		dlog.ErrorCheck(err)
 		r.BaseSeed = rand.Int63()
 		data, err := json.Marshal(r)
-		if err != nil {
-			dlog.ErrorCheck(err)
-		}
-		f.Write(data)
+		dlog.ErrorCheck(err)
+		_, err = f.Write(data)
+		dlog.ErrorCheck(err)
 	} else {
 		dc := json.NewDecoder(f)
 		dlog.ErrorCheck(dc.Decode(r))
 	}
+	if f != nil {
+		dlog.ErrorCheck(f.Close())
+	}
+
 	return r
 }
