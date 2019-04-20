@@ -81,7 +81,7 @@ var Scene = scene.Scene{
 		)
 		btn.New(showFps)
 
-		sfxVolume := menus.NewSlider(0, x, y+50, sliderWidth, sliderHeight, 10, 10, nil,
+		sfxVolume := menus.NewSlider(0, x, y+50, sliderWidth, sliderHeight, 10, 20, nil,
 			volBackground.Copy(), 0, 100, 100*(*sfxLevel),
 			render.NewColorBox(5, 15, color.RGBA{255, 0, 0, 255}), 1, 1)
 
@@ -90,7 +90,7 @@ var Scene = scene.Scene{
 			*sfxLevel = val * 0.01
 		}
 
-		musicVolume := menus.NewSlider(0, x, y+100, sliderWidth, sliderHeight, 10, 10, nil,
+		musicVolume := menus.NewSlider(0, x, y+100, sliderWidth, sliderHeight, 10, 20, nil,
 			volBackground.Copy(), 0, 100, 100*(*musicLevel),
 			render.NewColorBox(5, 15, color.RGBA{255, 0, 0, 255}), 1, 1)
 
@@ -99,7 +99,7 @@ var Scene = scene.Scene{
 			*musicLevel = val * 0.01
 		}
 
-		masterVolume := menus.NewSlider(0, x, y+150, 150, 32, 10, 10, nil,
+		masterVolume := menus.NewSlider(0, x, y+150, sliderWidth, sliderHeight, 10, 20, nil,
 			volBackground.Copy(), 0, 100, 100*(*masterLevel),
 			render.NewColorBox(5, 15, color.RGBA{255, 0, 0, 255}), 1, 1)
 
