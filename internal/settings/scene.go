@@ -57,7 +57,9 @@ var Scene = scene.Scene{
 			mods.Highlight(color.RGBA{170, 170, 170, 200}, 1),
 			mods.HighlightOff(color.RGBA{0, 0, 0, 100}, 1, 2, 1))
 
-		volBackground := render.NewVerticalGradientBox(150, 42, color.RGBA{0, 210, 90, 255}, color.RGBA{0, 170, 50, 255})
+		sliderWidth := 150.0
+		sliderHeight := 42.0
+		volBackground := render.NewVerticalGradientBox(int(sliderWidth), int(sliderHeight), color.RGBA{0, 210, 90, 255}, color.RGBA{0, 170, 50, 255})
 		volBackground.Modify(mod.CutRound(.05, .25),
 			mods.Highlight(color.RGBA{170, 170, 170, 200}, 1),
 			mods.HighlightOff(color.RGBA{0, 0, 0, 100}, 1, 2, 1))
@@ -89,7 +91,7 @@ var Scene = scene.Scene{
 		)
 		btn.New(showFps)
 
-		sfxVolume := menus.NewSlider(0, x, y+50, 150, 32, 10, 10, nil,
+		sfxVolume := menus.NewSlider(0, x, y+50, sliderWidth, sliderHeight, 10, 10, nil,
 			volBackground.Copy(), 0, 100, 100*(*sfxLevel),
 			render.NewColorBox(5, 15, color.RGBA{255, 0, 0, 255}), 1, 1)
 
@@ -98,7 +100,7 @@ var Scene = scene.Scene{
 			*sfxLevel = val * 0.01
 		}
 
-		musicVolume := menus.NewSlider(0, x, y+100, 150, 32, 10, 10, nil,
+		musicVolume := menus.NewSlider(0, x, y+100, sliderWidth, sliderHeight, 10, 10, nil,
 			volBackground.Copy(), 0, 100, 100*(*musicLevel),
 			render.NewColorBox(5, 15, color.RGBA{255, 0, 0, 255}), 1, 1)
 
