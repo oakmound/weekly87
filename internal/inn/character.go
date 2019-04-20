@@ -7,6 +7,7 @@ import (
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
+	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/weekly87/internal/characters/labels"
@@ -35,23 +36,22 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 
 		p.Delta.Zero()
 
-		if oak.IsDown("W") {
+		if oak.IsDown(key.UpArrow) {
 			p.Delta.Add(physics.NewVector(0, -p.Speed.Y()))
 		}
-		if oak.IsDown("S") {
+		if oak.IsDown(key.DownArrow) {
 			p.Delta.Add(physics.NewVector(0, p.Speed.Y()))
 		}
-		if oak.IsDown("A") {
+		if oak.IsDown(key.LeftArrow) {
 			p.Delta.Add(physics.NewVector(-p.Speed.X(), 0))
 		}
-		if oak.IsDown("D") {
+		if oak.IsDown(key.RightArrow) {
 			p.Delta.Add(physics.NewVector(p.Speed.X(), 0))
 		}
 
 		p.Vector.Add(p.Delta)
-		// This is 6, when it should be 32
-		//_, h := r.GetDims()
-		hf := 32.0
+		_, h := p.R.GetDims()
+		hf := float64(h)
 		if p.Vector.Y() < float64(oak.ScreenHeight)*1/3 {
 			p.Vector.SetY(float64(oak.ScreenHeight) * 1 / 3)
 		} else if p.Vector.Y() > (float64(oak.ScreenHeight) - hf) {

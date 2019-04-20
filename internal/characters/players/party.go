@@ -5,6 +5,8 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/oakmound/oak/key"
+
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
@@ -171,10 +173,10 @@ func (pc *PartyConstructor) NewParty() (*Party, error) {
 		p0.Delta.Zero()
 
 		p0.Delta.SetX(float64(pty.RunSpeed()))
-		if oak.IsDown("W") {
+		if oak.IsDown(key.UpArrow) {
 			p0.Delta.ShiftY(-pty.Speed().Y())
 		}
-		if oak.IsDown("S") {
+		if oak.IsDown(key.DownArrow) {
 			p0.Delta.ShiftY(pty.Speed().Y())
 		}
 
