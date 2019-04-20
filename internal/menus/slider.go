@@ -88,11 +88,18 @@ func (sl *Slider) SetPos(x float64, y float64) {
 
 	rwidth, rheight := sl.knub.GetDims()
 
+	startingX := x + float64(rwidth)
+	startingY := y + float64(rheight) + sl.textY/2
 	if sl.knub != nil {
-		sl.knub.SetPos(x+float64(rwidth)+sl.val, y+float64(rheight)+sl.textY)
+		sl.knub.SetPos(startingX+sl.val, startingY)
+		knubX, knubY := sl.knub.GetDims()
+		startingY += float64(knubY) / 2
+		startingX += float64(knubX)
+	} else {
+		startingY += sl.textY
 	}
 	if sl.knubLine != nil {
-		sl.knubLine.SetPos(x+float64(rwidth)+5, y+float64(rheight)+sl.textY*2)
+		sl.knubLine.SetPos(startingX, startingY)
 	}
 
 	if sl.Space != nil {
@@ -140,6 +147,6 @@ func sliderDrag(sl int, nothing interface{}) int {
 	} else {
 		slider.val = x
 	}
-	slider.knub.SetPos(slider.X()+slider.val, slider.knub.Y())
+	slider.knub.SetPos(slider.X()+slider.val+float64(w), slider.knub.Y())
 	return 0
 }
