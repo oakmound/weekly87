@@ -52,7 +52,7 @@ var Scene = scene.Scene{
 		music, err = music.Copy()
 		dlog.ErrorCheck(err)
 		music = music.MustFilter(
-			filter.Volume(0.5*settings.MusicVolume*settings.MasterVolume),
+			filter.Volume(0.5*settings.Active.MusicVolume*settings.Active.MasterVolume),
 			filter.LoopOn(),
 		)
 

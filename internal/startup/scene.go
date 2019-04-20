@@ -21,6 +21,7 @@ import (
 	"github.com/oakmound/weekly87/internal/menus"
 	"github.com/oakmound/weekly87/internal/records"
 	"github.com/oakmound/weekly87/internal/run/section"
+	"github.com/oakmound/weekly87/internal/settings"
 )
 
 var stayInMenu bool
@@ -43,12 +44,12 @@ var Scene = scene.Scene{
 			players.Init()
 			section.Init()
 			enemies.Init()
+			settings.Load()
+
 			// The game has just started, maybe do some
 			// intro visual stuff
 
-			//Maybe load? Maybe set seed?
 			dlog.Info("Starting game")
-
 		}
 
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))

@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"fmt"
 	"image/color"
 	"path/filepath"
 
@@ -19,13 +20,8 @@ import (
 )
 
 var (
-	SFXVolume     float64 = 1.0
-	MusicVolume   float64 = 1.0
-	MasterVolume  float64 = 1.0
-	ShowFpsToggle bool
-)
-var (
 	stayInMenu bool
+	Active     Settings
 )
 
 var (
@@ -33,12 +29,6 @@ var (
 	sfxLevel    = new(float64)
 	masterLevel = new(float64)
 )
-
-func init() {
-	*musicLevel = 1.0
-	*sfxLevel = 1.0
-	*masterLevel = 1.0
-}
 
 var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
@@ -83,7 +73,7 @@ var Scene = scene.Scene{
 		showFps := btn.And(
 			menus.BtnCfgB,
 			btn.Toggle(infR2, infR1,
-				&ShowFpsToggle),
+				&Active.ShowFpsToggle),
 			btn.Pos(x, y),
 			btn.Text("Show FPS"),
 		)
@@ -130,14 +120,15 @@ var Scene = scene.Scene{
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
 	End: func() (string, *scene.Result) {
-		//if save == nil {
-		//	save = &stat.Save{}
-		//}
-		SFXVolume = *sfxLevel
-		MusicVolume = *musicLevel
-		MasterVolume = *masterLevel
-		//dlog.ErrorCheck(stat.EncodeSave(save, stat.Savefile))
-		//dlog.Error("Savefile", save)
+
+		Active.SFXVolume = *sfxLevel
+		Active.MusicVolume = *musicLevel
+		Active.MasterVolume = *masterLevel
+
+		fmt.Println(Active)
+
+		Active.Store()
+
 		return "startup", nil
 	},
 }

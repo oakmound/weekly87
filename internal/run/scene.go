@@ -8,6 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/oakmound/oak/key"
+
 	"github.com/oakmound/oak/mouse"
 
 	"github.com/oakmound/weekly87/internal/characters/enemies"
@@ -61,7 +63,7 @@ var Scene = scene.Scene{
 
 		// There should be some way to draw to a stack based
 		// on layer name
-		if settings.ShowFpsToggle {
+		if settings.Active.ShowFpsToggle {
 			render.SetDrawStack(
 				// ground
 				render.NewCompositeR(),
@@ -253,16 +255,19 @@ var Scene = scene.Scene{
 
 			// Set up abilities
 			if p.Special1 != nil {
+
+				trg := p.Special1.Trigger
+
 				p.Special1.Renderable().SetPos(abilityX, cornerPad)
 				btnOpts = btn.And(btnOpts, btn.Renderable(p.Special1.Renderable()),
 					btn.Binding(mouse.ClickOn, func(int, interface{}) int {
-						p.Special1.Trigger()
+						trg()
 						return 0
 					}))
-				keyToBind := strconv.Itoa(i)
+				keyToBind := key.Down + strconv.Itoa(i)
 				if i < 10 {
 					btnOpts = btn.And(btn.Binding(keyToBind, func(int, interface{}) int {
-						p.Special1.Trigger()
+						trg()
 						return 0
 					}), btnOpts)
 				}
@@ -275,15 +280,17 @@ var Scene = scene.Scene{
 			if p.Special2 != nil {
 				p.Special2.Renderable().SetPos(abilityX, cornerPad+aPad)
 
+				trg := p.Special2.Trigger
+
 				btnOpts = btn.And(btnOpts, btn.Renderable(p.Special1.Renderable()),
 					btn.Pos(abilityX, cornerPad+aPad),
 					btn.Binding(mouse.ClickOn, func(int, interface{}) int {
-						p.Special1.Trigger()
+						trg()
 						return 0
 					}))
 
-				btnOpts = btn.And(btn.Binding(abilityKeys[i], func(int, interface{}) int {
-					p.Special1.Trigger()
+				btnOpts = btn.And(btn.Binding(key.Down+abilityKeys[i], func(int, interface{}) int {
+					trg()
 					return 0
 				}), btnOpts)
 
@@ -348,7 +355,7 @@ var Scene = scene.Scene{
 		music, err = music.Copy()
 		dlog.ErrorCheck(err)
 		music = music.MustFilter(
-			filter.Volume(0.5 * settings.MusicVolume * settings.MasterVolume),
+			filter.Volume(0.5 * settings.Active.MusicVolume * settings.Active.MasterVolume),
 		)
 
 		music.Play()
@@ -359,7 +366,7 @@ var Scene = scene.Scene{
 			music, err = music.Copy()
 			dlog.ErrorCheck(err)
 			music = music.MustFilter(
-				filter.Volume(0.5*settings.MusicVolume*settings.MasterVolume),
+				filter.Volume(0.5*settings.Active.MusicVolume*settings.Active.MasterVolume),
 				filter.LoopOn(),
 			)
 			music.Play()
