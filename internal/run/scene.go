@@ -259,7 +259,7 @@ var Scene = scene.Scene{
 				trg := p.Special1.Trigger
 
 				p.Special1.Renderable().SetPos(abilityX, cornerPad)
-				btnOpts = btn.And(btnOpts, btn.Renderable(p.Special1.Renderable()),
+				btnOpts := btn.And(btnOpts, btn.Renderable(p.Special1.Renderable()),
 					btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 						trg()
 						return 0
@@ -272,17 +272,13 @@ var Scene = scene.Scene{
 					}), btnOpts)
 				}
 				btn.New(btnOpts)
-
-				// render.Draw(p.Special1.Renderable(), 3)
-				// a1Sp := collision.NewUnassignedSpace(abilityX, cornerPad, aRendDims, aRendDims)
-
 			}
 			if p.Special2 != nil {
 				p.Special2.Renderable().SetPos(abilityX, cornerPad+aPad)
 
 				trg := p.Special2.Trigger
 
-				btnOpts = btn.And(btnOpts, btn.Renderable(p.Special1.Renderable()),
+				btnOpts := btn.And(btnOpts, btn.Renderable(p.Special2.Renderable()),
 					btn.Pos(abilityX, cornerPad+aPad),
 					btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 						trg()

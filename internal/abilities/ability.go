@@ -41,14 +41,12 @@ func (a *ability) Cooldown() time.Duration {
 	return a.renderable.Get(1).(*cooldown).totalTime
 }
 func (a *ability) SetUser(newUser User) Ability {
-
 	composite := a.renderable.Copy().(*render.CompositeM)
-
+	composite.Get(1).(*cooldown).ResetTiming()
 	return &ability{
 		renderable: composite,
-
-		user:    newUser,
-		trigger: a.trigger,
+		user:       newUser,
+		trigger:    a.trigger,
 	}
 }
 func NewAbility(r render.Modifiable, c time.Duration, t func(User)) *ability {

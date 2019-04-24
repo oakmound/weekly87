@@ -2,6 +2,7 @@ package abilities
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"image/draw"
 	"time"
@@ -11,7 +12,7 @@ import (
 
 type cooldown struct {
 	*render.Sprite
-	triggeredTime time.Time
+	triggeredTime *time.Time
 	totalTime     time.Duration
 }
 
@@ -19,17 +20,19 @@ type cooldown struct {
 func NewCooldown(w, h int, totalTime time.Duration) *cooldown {
 	s := render.NewEmptySprite(0, 0, w, h)
 
-	return &cooldown{s, time.Time{}, totalTime}
+	return &cooldown{s, &time.Time{}, totalTime}
+}
+
+func (c *cooldown) ResetTiming() {
+	c.triggeredTime = &time.Time{}
 }
 
 func (c *cooldown) Trigger() bool {
-	fmt.Println("time is at ", c.triggeredTime)
-	if time.Since(c.triggeredTime) < c.totalTime {
+	if time.Since(*c.triggeredTime) < c.totalTime {
 		return false
 	}
 	// Start the cooldown
-	c.triggeredTime = time.Now()
-	fmt.Println("triggered at ", c.triggeredTime)
+	*c.triggeredTime = time.Now()
 	return true
 }
 
@@ -39,18 +42,18 @@ func (c *cooldown) Draw(buff draw.Image) {
 
 func (c *cooldown) DrawOffset(buff draw.Image, xOff, yOff float64) {
 
-	if time.Since(c.triggeredTime) >= c.totalTime {
-		fmt.Println("Triggered at ", c.triggeredTime, "which has been ", time.Since(c.triggeredTime), c.totalTime)
+	if time.Since(*c.triggeredTime) >= c.totalTime {
 		return
 	}
-	fmt.Println("Drawing a cooldown")
 
-	cooldownColor := color.RGBA{155, 155, 155, 255}
+	cooldownColor := color.RGBA{125, 125, 125, 125}
 
-	percentRecovered := 1 - (time.Since(c.triggeredTime) / c.totalTime)
+	percentRecovered := float64(time.Since(*c.triggeredTime)) / float64(c.totalTime)
 
 	w, h := c.GetDims()
-	recoveredPerimPoints := (w*2 + h*2) * int(percentRecovered)
+	c.Sprite.SetRGBA(image.NewRGBA(image.Rect(0, 0, w, h)))
+
+	recoveredPerimPoints := int((float64(w)*2 + float64(h)*2) * percentRecovered)
 
 	pEvaluated := 0
 
@@ -60,7 +63,6 @@ func (c *cooldown) DrawOffset(buff draw.Image, xOff, yOff float64) {
 	// O1
 	for x := w / 2; x < w; x++ {
 		if pEvaluated > recoveredPerimPoints {
-			fmt.Println("Drawingt Line")
 			render.DrawLine(c.GetRGBA(), centerX, centerY, x, 0, cooldownColor)
 		}
 		pEvaluated++
@@ -69,16 +71,14 @@ func (c *cooldown) DrawOffset(buff draw.Image, xOff, yOff float64) {
 	// o2  o3
 	for y := 0; y < h; y++ {
 		if pEvaluated > recoveredPerimPoints {
-			fmt.Println("Drawingt Line")
 			render.DrawLine(c.GetRGBA(), centerX, centerY, w, y, cooldownColor)
 		}
 		pEvaluated++
 	}
 
 	// o4  o5
-	for x := w; w > 0; x-- {
+	for x := w; x > 0; x-- {
 		if pEvaluated > recoveredPerimPoints {
-			fmt.Println("Drawingt Line")
 			render.DrawLine(c.GetRGBA(), centerX, centerY, x, h, cooldownColor)
 		}
 		pEvaluated++
@@ -88,7 +88,6 @@ func (c *cooldown) DrawOffset(buff draw.Image, xOff, yOff float64) {
 	for y := h; y > 0; y-- {
 
 		if pEvaluated > recoveredPerimPoints {
-			fmt.Println("Drawingt Line")
 			render.DrawLine(c.GetRGBA(), centerX, centerY, 0, y, cooldownColor)
 		}
 		pEvaluated++
@@ -98,7 +97,6 @@ func (c *cooldown) DrawOffset(buff draw.Image, xOff, yOff float64) {
 	for x := 0; x < w/2; x++ {
 
 		if pEvaluated > recoveredPerimPoints {
-			fmt.Println("Drawingt Line")
 			render.DrawLine(c.GetRGBA(), centerX, centerY, x, 0, cooldownColor)
 		}
 		pEvaluated++
