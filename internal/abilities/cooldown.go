@@ -23,10 +23,12 @@ func NewCooldown(w, h int, totalTime time.Duration) *cooldown {
 	return &cooldown{s, &time.Time{}, totalTime}
 }
 
+// ResetTiming clears the triggered time for a cooldown
 func (c *cooldown) ResetTiming() {
 	c.triggeredTime = &time.Time{}
 }
 
+// Trigger tries to trigger the cooldown and returns whether it was succesful
 func (c *cooldown) Trigger() bool {
 	if time.Since(*c.triggeredTime) < c.totalTime {
 		return false
@@ -36,10 +38,12 @@ func (c *cooldown) Trigger() bool {
 	return true
 }
 
+// Draw the cooldown
 func (c *cooldown) Draw(buff draw.Image) {
 	c.DrawOffset(buff, 0, 0)
 }
 
+// DrawOffset draws the cooldown with the given offset
 func (c *cooldown) DrawOffset(buff draw.Image, xOff, yOff float64) {
 
 	if time.Since(*c.triggeredTime) >= c.totalTime {

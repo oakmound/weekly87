@@ -8,12 +8,14 @@ import (
 	"github.com/oakmound/oak/render"
 )
 
+// User is something that can use abilities
 type User interface {
 	Vec() physics.Vector //Position
 	Direction() string   //Facing
 	Ready() bool         // Currently are you alive
 }
 
+// Ability is an action with an associated UI element that can be invoked
 type Ability interface {
 	Renderable() render.Modifiable
 	Trigger()
@@ -32,7 +34,8 @@ func (a *ability) Renderable() render.Modifiable {
 	return a.renderable
 }
 func (a *ability) Trigger() {
-	if a.renderable.Get(1).(*cooldown).Trigger() {
+
+	if a.user.Ready() && a.renderable.Get(1).(*cooldown).Trigger() {
 		a.trigger(a.user)
 	}
 }
