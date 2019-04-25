@@ -7,6 +7,7 @@ import (
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/mod"
+	"github.com/oakmound/weekly87/internal/abilities"
 )
 
 var MageConstructor *Constructor
@@ -51,5 +52,7 @@ func MageInit() {
 		Dimensions:   floatgeom.Point2{16, 32},
 		Speed:        floatgeom.Point2{0, 5},
 		RunSpeed:     3.0,
+		Special1:     abilities.Fireball,
+		Special2:     abilities.Fireball,
 	}
 }

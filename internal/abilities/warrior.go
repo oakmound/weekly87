@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	//SpearStab tries to stab in front of the warrior
 	SpearStab = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{200, 200, 0, 255}),
 		time.Second*5,

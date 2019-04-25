@@ -99,18 +99,18 @@ var Scene = scene.Scene{
 		render.Draw(debugTree, 2, 1000)
 
 		ptycon := players.PartyConstructor{
-			// Players: []players.Constructor{
-			// 	*players.SpearmanConstructor.Copy(),
-			// 	*players.MageConstructor.Copy(),
-			// 	*players.MageConstructor.Copy(),
-			// 	*players.SwordsmanConstructor.Copy(),
-			// },
 			Players: []players.Constructor{
 				*players.SpearmanConstructor.Copy(),
-				*players.SpearmanConstructor.Copy(),
-				*players.SpearmanConstructor.Copy(),
-				*players.SpearmanConstructor.Copy(),
+				*players.MageConstructor.Copy(),
+				*players.MageConstructor.Copy(),
+				*players.SwordsmanConstructor.Copy(),
 			},
+			// Players: []players.Constructor{
+			// 	*players.SpearmanConstructor.Copy(),
+			// 	*players.SpearmanConstructor.Copy(),
+			// 	*players.SpearmanConstructor.Copy(),
+			// 	*players.SpearmanConstructor.Copy(),
+			// },
 		}
 		ptycon.Players[0].Position = floatgeom.Point2{players.WallOffset, float64(oak.ScreenHeight / 2)}
 		pty, err := ptycon.NewParty()

@@ -68,6 +68,7 @@ func WarriorsInit() {
 		AnimationMap: swordsmanMap,
 		Dimensions:   floatgeom.Point2{16, 32},
 		Speed:        floatgeom.Point2{0, 5},
+		Special1:     abilities.SpearStab,
 		RunSpeed:     3.0,
 	}
 
