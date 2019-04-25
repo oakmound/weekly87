@@ -30,9 +30,12 @@ type ability struct {
 	trigger func(User)
 }
 
+// Renderable gets the renderable underlyting the ability
 func (a *ability) Renderable() render.Modifiable {
 	return a.renderable
 }
+
+// Trigger checks if the user is ready and if the ability is off cooldown and then performs the ability if so
 func (a *ability) Trigger() {
 
 	if a.user.Ready() && a.renderable.Get(1).(*cooldown).Trigger() {
@@ -40,9 +43,12 @@ func (a *ability) Trigger() {
 	}
 }
 
+// Cooldown gets the total cooldown time  for the ability
 func (a *ability) Cooldown() time.Duration {
 	return a.renderable.Get(1).(*cooldown).totalTime
 }
+
+// SetUser copies the ability and sets the user on it making a nice unique instance
 func (a *ability) SetUser(newUser User) Ability {
 	composite := a.renderable.Copy().(*render.CompositeM)
 	composite.Get(1).(*cooldown).ResetTiming()
@@ -52,6 +58,8 @@ func (a *ability) SetUser(newUser User) Ability {
 		trigger:    a.trigger,
 	}
 }
+
+// NewAbility creates an ability
 func NewAbility(r render.Modifiable, c time.Duration, t func(User)) *ability {
 
 	w, h := r.GetDims()
