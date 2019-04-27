@@ -56,11 +56,6 @@ var Scene = scene.Scene{
 		nextscene = "endGame"
 		facing = 1
 
-		runInfo = records.RunInfo{
-			Party:           []*players.Player{},
-			SectionsCleared: 0,
-		}
-
 		// There should be some way to draw to a stack based
 		// on layer name
 		if settings.Active.ShowFpsToggle {
@@ -86,7 +81,13 @@ var Scene = scene.Scene{
 				render.NewHeap(true),
 			)
 		}
-
+		debugInvuln := false
+		oak.AddCommand("invuln", func(args []string) {
+			debugInvuln = true
+			if len(args) > 0 && (args[0][0:0] == "f" || args[0][0:0] == "F") {
+				debugInvuln = false
+			}
+		})
 		debugTree := dtools.NewRTree(collision.DefTree)
 		debugTree.ColorMap = map[collision.Label]color.RGBA{
 			labels.Chest:        color.RGBA{255, 255, 0, 255},
@@ -118,7 +119,11 @@ var Scene = scene.Scene{
 			dlog.Error(err)
 			return
 		}
-
+		runInfo = records.RunInfo{
+			Party:           pty,
+			SectionsCleared: 0,
+			EnemiesDefeated: 0,
+		}
 		endLock := sync.Mutex{}
 		defeatedShowing := false
 
@@ -150,7 +155,7 @@ var Scene = scene.Scene{
 					fmt.Printf("%T\n", s.CID.E())
 					return
 				}
-				if ply.ForcedInvulnerable || !en.Active {
+				if debugInvuln || ply.ForcedInvulnerable || !en.Active {
 					return
 				}
 				ply.Alive = false

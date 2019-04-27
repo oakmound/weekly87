@@ -81,24 +81,22 @@ var EndScene = scene.Scene{
 
 		fmt.Println("Cleared out", runInfo.SectionsCleared)
 		chestTotal := 0
-		for i := 0; i < len(runInfo.Party); i++ {
+		for _, pl := range runInfo.Party.Players {
 			// playerJson, _ := json.Marshal(runInfo.Party[i].ChestValues)
 
 			playerChestValue := 0
-			for _, j := range runInfo.Party[i].ChestValues {
+			for _, j := range pl.ChestValues {
 				playerChestValue += int(j)
 			}
-			fmt.Println("Chesty Value :", playerChestValue)
+			chestTotal += playerChestValue
+			fmt.Println("Chest Value :", playerChestValue)
 			charText := blueFnt.NewStrText("Chests Acquired by Player:"+strconv.Itoa(playerChestValue), float64(textBackingX), textY)
 			render.Draw(charText, 2, 3)
-			textY += 20
-
-			chestTotal += playerChestValue
+			textY += 16
 
 			chestMin := oak.ScreenWidth/2 - textBackingX/2
 			textX := chestMin
-
-			for _, j := range runInfo.Party[i].ChestValues {
+			for _, j := range pl.ChestValues {
 				ch := doodads.NewChest(j)
 
 				xInc, _ := ch.R.GetDims()
@@ -106,12 +104,16 @@ var EndScene = scene.Scene{
 				textX += xInc + 10
 				if textX > chestMin+textBackingX {
 					textX = chestMin
-					textY += 40
+					textY += 15
 				}
 
 				ch.SetPos(float64(textX), float64(textY))
 				render.Draw(ch.GetRenderable(), 2, 1)
 			}
+			if len(pl.ChestValues) > 0 {
+				textY += 30
+			}
+
 		}
 
 		// partyJson, _ := json.Marshal(runInfo.Party)
