@@ -19,6 +19,7 @@ type Records struct {
 	FarthestGoneInSections int64 `json:"farthestGoneInSections"`
 }
 
+// Store a record to a file
 func (s *Records) Store() {
 	f, err := os.Create(recordsFile)
 	data, err := json.Marshal(s)
@@ -28,6 +29,7 @@ func (s *Records) Store() {
 	dlog.ErrorCheck(f.Close())
 }
 
+// Load a record from a file
 func Load() *Records {
 	r := &Records{}
 

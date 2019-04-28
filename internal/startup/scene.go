@@ -27,6 +27,7 @@ import (
 
 var stayInMenu bool
 var nextscene string
+var saveHistory records.Records
 
 // Scene  to display at startup
 var Scene = scene.Scene{
@@ -40,8 +41,8 @@ var Scene = scene.Scene{
 		)
 
 		if prevScene == "loading" {
-			r := records.Load()
-			run.BaseSeed = r.BaseSeed
+			saveHistory := records.Load()
+			run.BaseSeed = saveHistory.BaseSeed
 			joys.Init()
 			players.Init()
 			section.Init()
@@ -85,7 +86,8 @@ var Scene = scene.Scene{
 				[][]btn.Option{
 					{
 						btn.And(btn.Color(colornames.Green), btn.Text("Start Game"), bindNewScene("inn")),
-						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Load Game"), bindNewScene("load")),
+						// btn.And(btn.Color(colornames.Blueviolet), btn.Text("Load Game"), bindNewScene("load")),
+						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Game History"), bindNewScene("history")),
 						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Settings"), bindNewScene("settings")),
 						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Credits"), bindNewScene("credits")),
 						btn.And(btn.Text("Exit Game"), btn.Binding(mouse.ClickOn, func(int, interface{}) int {
