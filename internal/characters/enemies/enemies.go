@@ -58,11 +58,6 @@ func (be *BasicEnemy) Activate() {
 func (be *BasicEnemy) Destroy() {
 	be.Active = false
 	be.Interactive.Destroy()
-	// be.R.Undraw()
-	// be.UnbindAll()
-	// be.swtch.Filter(mod.Brighten(79))
-	// be.Tree.Remove(be.RSpace.Space)
-	// be.R.Undraw()
 }
 
 func (be *BasicEnemy) CheckedBind(bnd func(*BasicEnemy, interface{}) int, ev string) {
