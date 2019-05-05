@@ -1,12 +1,14 @@
 package inn
 
 import (
+	"image/color"
 	"path/filepath"
 
 	klg "github.com/200sc/klangsynthese/audio"
 	"github.com/200sc/klangsynthese/audio/filter"
 
 	"github.com/oakmound/oak/audio"
+	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 
 	"github.com/oakmound/oak"
@@ -14,6 +16,8 @@ import (
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/characters/doodads"
+	"github.com/oakmound/weekly87/internal/characters/labels"
+	"github.com/oakmound/weekly87/internal/dtools"
 	"github.com/oakmound/weekly87/internal/settings"
 )
 
@@ -34,6 +38,12 @@ var Scene = scene.Scene{
 			// ui
 			render.NewHeap(true),
 		)
+		debugTree := dtools.NewThickRTree(collision.DefTree, 4)
+		debugTree.ColorMap = map[collision.Label]color.RGBA{
+			labels.Door: color.RGBA{200, 0, 100, 255},
+			labels.PC:   color.RGBA{125, 0, 255, 255},
+		}
+		render.Draw(debugTree, 2, 1000)
 
 		// Make the Inn backing
 		innBackground, _ := render.LoadSprite("", filepath.Join("raw", "placeholder_inn.png"))
