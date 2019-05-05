@@ -22,7 +22,7 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 
 	s := entities.NewInteractive(
 		float64(oak.ScreenWidth/2),
-		float64(oak.ScreenHeight/2),
+		float64(oak.ScreenHeight/2)+40,
 		16,
 		32,
 		render.NewSwitch("standRT", anims),
@@ -95,6 +95,11 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 	s.Speed = physics.NewVector(5, 5) // We actually allow players to move around in the inn!
 
 	s.RSpace.Add(collision.Label(labels.Door),
+		(func(s1, s2 *collision.Space) {
+			nextscene = "run"
+			stayInMenu = false
+		}))
+	s.RSpace.Add(collision.Label(labels.Blocking),
 		(func(s1, s2 *collision.Space) {
 			nextscene = "run"
 			stayInMenu = false

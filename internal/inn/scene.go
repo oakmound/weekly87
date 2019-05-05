@@ -40,8 +40,9 @@ var Scene = scene.Scene{
 		)
 		debugTree := dtools.NewThickRTree(collision.DefTree, 4)
 		debugTree.ColorMap = map[collision.Label]color.RGBA{
-			labels.Door: color.RGBA{200, 0, 100, 255},
-			labels.PC:   color.RGBA{125, 0, 255, 255},
+			labels.Door:     color.RGBA{200, 0, 100, 255},
+			labels.PC:       color.RGBA{125, 0, 255, 255},
+			labels.Blocking: color.RGBA{125, 200, 10, 255},
 		}
 		render.Draw(debugTree, 2, 1000)
 
@@ -54,8 +55,16 @@ var Scene = scene.Scene{
 
 		innSpace := floatgeom.NewRect2(0, 0, float64(oak.ScreenWidth), float64(oak.ScreenHeight)-32) //Adjusted for the current size of the spearman
 
+		//Create an example person to navigate the space
 		NewInnWalker(innSpace)
 
+		// Additional inn aspects
+		doodads.NewFurniture(130, 130, 100, float64(oak.ScreenHeight)-130) // Left Table
+
+		doodads.NewFurniture(480, 225, 195, 70) // top Table
+		doodads.NewFurniture(480, 430, 185, 70) // bottom Table
+
+		// Set up the audio
 		var err error
 		music, err = audio.Load(filepath.Join("assets", "audio"), "inn1.wav")
 		dlog.ErrorCheck(err)

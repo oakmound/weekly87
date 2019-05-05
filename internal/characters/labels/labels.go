@@ -8,4 +8,5 @@ const (
 	Enemy
 	PlayerAttack
 	EnemyAttack
+	Blocking
 )
