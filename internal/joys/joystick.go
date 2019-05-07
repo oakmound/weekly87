@@ -1,14 +1,42 @@
 package joys
 
 import (
+	"math"
+	"sync"
 	"time"
 
 	"github.com/oakmound/oak/joystick"
 )
 
 var (
-	JoyStickStates map[uint32]joystick.State = make(map[uint32]joystick.State)
+	joyStickStates    map[uint32]joystick.State = make(map[uint32]joystick.State)
+	joyStickStateLock sync.RWMutex
 )
+
+func LowestID() uint32 {
+	lowestID := uint32(math.MaxInt32)
+	joyStickStateLock.RLock()
+	for id := range joyStickStates {
+		if id < lowestID {
+			lowestID = id
+		}
+	}
+	joyStickStateLock.RUnlock()
+	return lowestID
+}
+
+func StickState(v uint32) joystick.State {
+	joyStickStateLock.RLock()
+	st := joyStickStates[v]
+	joyStickStateLock.RUnlock()
+	return st
+}
+
+func SetStickState(k uint32, v joystick.State) {
+	joyStickStateLock.Lock()
+	joyStickStates[k] = v
+	joyStickStateLock.Unlock()
+}
 
 type handler struct{}
 
@@ -16,7 +44,7 @@ func (h *handler) Trigger(ev string, state interface{}) {
 	if ev == joystick.Disconnected {
 		id, ok := state.(uint32)
 		if ok {
-			JoyStickStates[id] = joystick.State{}
+			SetStickState(id, joystick.State{})
 		}
 		return
 	}
@@ -24,20 +52,24 @@ func (h *handler) Trigger(ev string, state interface{}) {
 	if !ok {
 		return
 	}
-	JoyStickStates[st.ID] = *st
+	SetStickState(st.ID, *st)
 }
 
-func Init() {
-	joystick.Init()
+var initOnce = sync.Once{}
 
-	go func() {
-		jCh, _ := joystick.WaitForJoysticks(3 * time.Second)
-		for {
-			select {
-			case j := <-jCh:
-				j.Handler = &handler{}
-				j.Listen(nil)
+func Init() {
+	initOnce.Do(func() {
+		joystick.Init()
+
+		go func() {
+			jCh, _ := joystick.WaitForJoysticks(3 * time.Second)
+			for {
+				select {
+				case j := <-jCh:
+					j.Handler = &handler{}
+					j.Listen(nil)
+				}
 			}
-		}
-	}()
+		}()
+	})
 }

@@ -1,8 +1,6 @@
 package inn
 
 import (
-	"math"
-
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/collision"
@@ -32,12 +30,7 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 		0,
 	)
 
-	lowestID := uint32(math.MaxInt32)
-	for id := range joys.JoyStickStates {
-		if id < lowestID {
-			lowestID = id
-		}
-	}
+	lowestID := joys.LowestID()
 
 	s.Bind(func(id int, _ interface{}) int {
 		p, ok := event.GetEntity(id).(*entities.Interactive)
@@ -47,7 +40,7 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 
 		p.Delta.Zero()
 
-		js := joys.JoyStickStates[lowestID]
+		js := joys.StickState(lowestID)
 		// Todo: support full analog control
 
 		if oak.IsDown(key.UpArrow) || js.StickLY > 8000 {

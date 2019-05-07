@@ -152,12 +152,7 @@ func (pc *PartyConstructor) NewParty() (*Party, error) {
 
 	pty.CID = pty.Init()
 
-	lowestID := uint32(math.MaxInt32)
-	for id := range joys.JoyStickStates {
-		if id < lowestID {
-			lowestID = id
-		}
-	}
+	lowestID := joys.LowestID()
 	if lowestID != math.MaxInt32 {
 		pty.joystickID = lowestID
 	}
@@ -184,7 +179,7 @@ func (pc *PartyConstructor) NewParty() (*Party, error) {
 		p0 := pty.Players[0]
 		p0.Delta.Zero()
 
-		js := joys.JoyStickStates[pty.joystickID]
+		js := joys.StickState(pty.joystickID)
 
 		p0.Delta.SetX(float64(pty.RunSpeed()))
 		if oak.IsDown(key.UpArrow) || js.StickLY > 8000 {
