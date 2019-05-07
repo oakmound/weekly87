@@ -13,6 +13,7 @@ import (
 	"github.com/oakmound/oak/mouse"
 
 	"github.com/oakmound/weekly87/internal/characters/enemies"
+	"github.com/oakmound/weekly87/internal/restrictor"
 
 	"github.com/oakmound/weekly87/internal/settings"
 
@@ -99,6 +100,9 @@ var Scene = scene.Scene{
 		}
 		render.Draw(debugTree, 2, 1000)
 
+		restrictor.ResetDefault()
+		restrictor.Start(1)
+ 
 		ptycon := players.PartyConstructor{
 			Players: []players.Constructor{
 				*players.SpearmanConstructor.Copy(),
@@ -413,6 +417,8 @@ var Scene = scene.Scene{
 	Loop: scene.BooleanLoop(&stayInGame),
 	End: func() (string, *scene.Result) {
 		music.Stop()
+		restrictor.Stop()
+		restrictor.Clear()
 		return nextscene, nil
 	},
 }

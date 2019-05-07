@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/oakmound/weekly87/internal/characters/labels"
+	"github.com/oakmound/weekly87/internal/restrictor"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/physics"
@@ -123,10 +124,6 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 				// Adjust so we don't exist in the wall for a frame
 				be.ShiftPos(0, be.Speed.Y())
 			}
-		} else if be.facing == "LT" && be.X() <= float64(oak.ScreenWidth+oak.ViewPos.X) ||
-			be.facing == "RT" && be.X()+be.W >= float64(oak.ViewPos.X) {
-			be.Destroy()
-			return 0
 		}
 		if be.Delta.X() != 0 || be.Delta.Y() != 0 {
 			be.swtch.Set("walk" + be.facing)
@@ -148,11 +145,15 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 	for ev, b := range ec.Bindings {
 		be.CheckedBind(b, ev)
 	}
+	restrictor.Add(be)
 	return be, nil
 }
 
 func (be *BasicEnemy) RunBackwards() {
 	be.facing = "RT"
 	be.Speed = be.Speed.Scale(-1)
+}
 
+func (be *BasicEnemy) GetDims() (int, int) {
+	return be.swtch.GetDims()
 }
