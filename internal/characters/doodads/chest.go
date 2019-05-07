@@ -8,6 +8,7 @@ import (
 	"github.com/oakmound/oak/render"
 
 	"github.com/oakmound/weekly87/internal/characters/labels"
+	"github.com/oakmound/weekly87/internal/restrictor"
 )
 
 type Chest struct {
@@ -27,7 +28,12 @@ func (c *Chest) Destroy() {
 }
 
 func (c *Chest) Activate() {
+	restrictor.Add(c)
 	c.Active = true
+}
+
+func (c *Chest) GetDims() (int, int) {
+	return c.Reactive.R.GetDims()
 }
 
 func NewChest(value int64) *Chest {
