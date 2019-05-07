@@ -17,6 +17,7 @@ import (
 	"github.com/oakmound/weekly87/internal/joys"
 )
 
+// NewInnWalker creates a special character for the inn
 func NewInnWalker(innSpace floatgeom.Rect2) {
 	anims := players.SpearmanConstructor.AnimationMap
 
@@ -78,6 +79,12 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 		p.R.SetPos(p.Vector.X(), p.Vector.Y())
 		p.RSpace.Update(p.Vector.X(), p.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
 		<-s.RSpace.CallOnHits()
+		if collision.HitLabel(s.RSpace.Space, labels.Blocking) != nil {
+			p.Vector.Sub(p.Delta)
+			p.R.SetPos(p.Vector.X(), p.Vector.Y())
+			p.RSpace.Update(p.Vector.X(), p.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
+		}
+
 		swch := p.R.(*render.Switch)
 		if p.Delta.X() != 0 || p.Delta.Y() != 0 {
 			if p.Delta.X() > 0 {
@@ -95,11 +102,6 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 	s.Speed = physics.NewVector(5, 5) // We actually allow players to move around in the inn!
 
 	s.RSpace.Add(collision.Label(labels.Door),
-		(func(s1, s2 *collision.Space) {
-			nextscene = "run"
-			stayInMenu = false
-		}))
-	s.RSpace.Add(collision.Label(labels.Blocking),
 		(func(s1, s2 *collision.Space) {
 			nextscene = "run"
 			stayInMenu = false
