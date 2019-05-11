@@ -49,6 +49,9 @@ func Load() *Records {
 	} else {
 		dc := json.NewDecoder(f)
 		dlog.ErrorCheck(dc.Decode(r))
+		if r.PartyComp == nil {
+			r.PartyComp = []int{players.Spearman}
+		}
 	}
 	if f != nil {
 		dlog.ErrorCheck(f.Close())

@@ -102,10 +102,12 @@ var Scene = scene.Scene{
 
 		restrictor.ResetDefault()
 		restrictor.Start(1)
+		r := records.Load()
 
 		ptycon := players.PartyConstructor{
 			Players: players.ClassConstructor(
-				[]int{players.Spearman, players.Mage, players.Mage, players.Swordsman}),
+				r.PartyComp),
+			// []int{players.Spearman, players.Mage, players.Mage, players.Swordsman}),
 
 			// []int{players.Spearman, players.Spearman, players.Spearman, players.Spearman}),
 		}
@@ -115,11 +117,11 @@ var Scene = scene.Scene{
 			dlog.Error(err)
 			return
 		}
-		runInfo = records.RunInfo{
-			Party:           pty,
-			SectionsCleared: 0,
-			EnemiesDefeated: 0,
-		}
+		// runInfo = records.RunInfo{
+		// 	Party:           pty,
+		// 	SectionsCleared: 0,
+		// 	EnemiesDefeated: 0,
+		// }
 		endLock := sync.Mutex{}
 		defeatedShowing := false
 

@@ -16,7 +16,7 @@ import (
 )
 
 // NewInnWalker creates a special character for the inn
-func NewInnWalker(innSpace floatgeom.Rect2) {
+func NewInnWalker(innSpace floatgeom.Rect2) *entities.Interactive {
 	anims := players.SpearmanConstructor.AnimationMap
 
 	s := entities.NewInteractive(
@@ -72,7 +72,7 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 		p.R.SetPos(p.Vector.X(), p.Vector.Y())
 		p.RSpace.Update(p.Vector.X(), p.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
 		<-s.RSpace.CallOnHits()
-		if collision.HitLabel(s.RSpace.Space, labels.Blocking) != nil {
+		if collision.HitLabel(s.RSpace.Space, labels.Blocking, labels.NPC) != nil {
 			p.Vector.Sub(p.Delta)
 			p.R.SetPos(p.Vector.X(), p.Vector.Y())
 			p.RSpace.Update(p.Vector.X(), p.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
@@ -101,4 +101,35 @@ func NewInnWalker(innSpace floatgeom.Rect2) {
 		}))
 
 	render.Draw(s.R, 2, 1)
+	return s
+}
+
+type NPC struct {
+	*entities.Interactive
+	Swtch *render.Switch
+	Class int
+}
+
+func (n *NPC) Init() event.CID {
+	return event.NextID(n)
+}
+
+// NewINnNPC creates a npc to interact with for setting up party
+func NewInnNPC(class int, x, y float64) {
+	pcon := players.ClassConstructor([]int{class})[0]
+	n := NPC{}
+	n.Class = class
+	n.Swtch = render.NewSwitch("standRT", pcon.AnimationMap)
+	n.Interactive = entities.NewInteractive(
+		x,
+		y,
+		pcon.Dimensions.X(),
+		pcon.Dimensions.Y(),
+		n.Swtch,
+		nil,
+		n.Init(),
+		0,
+	)
+	n.RSpace.UpdateLabel(labels.NPC)
+	render.Draw(n.R, 2, 1)
 }

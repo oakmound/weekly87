@@ -6,6 +6,8 @@ const (
 	Chest
 	PC
 	Enemy
+	NPC
+	Pickup
 	PlayerAttack
 	EnemyAttack
 	Blocking
