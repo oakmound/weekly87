@@ -102,23 +102,15 @@ var Scene = scene.Scene{
 
 		restrictor.ResetDefault()
 		restrictor.Start(1)
- 
+
 		ptycon := players.PartyConstructor{
-			Players: []players.Constructor{
-				*players.SpearmanConstructor.Copy(),
-				*players.MageConstructor.Copy(),
-				*players.MageConstructor.Copy(),
-				*players.SwordsmanConstructor.Copy(),
-			},
-			// Players: []players.Constructor{
-			// 	*players.SpearmanConstructor.Copy(),
-			// 	*players.SpearmanConstructor.Copy(),
-			// 	*players.SpearmanConstructor.Copy(),
-			// 	*players.SpearmanConstructor.Copy(),
-			// },
+			Players: players.ClassConstructor(
+				[]int{players.Spearman, players.Mage, players.Mage, players.Swordsman}),
+
+			// []int{players.Spearman, players.Spearman, players.Spearman, players.Spearman}),
 		}
 		ptycon.Players[0].Position = floatgeom.Point2{players.WallOffset, float64(oak.ScreenHeight / 2)}
-		pty, err := ptycon.NewParty()
+		pty, err := ptycon.NewRunningParty()
 		if err != nil {
 			dlog.Error(err)
 			return

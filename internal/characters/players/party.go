@@ -89,7 +89,12 @@ type PartyConstructor struct {
 	Bindings map[string]func(*Party, interface{}) int
 }
 
-func (pc *PartyConstructor) NewParty() (*Party, error) {
+// NewMovingParty creates a party for the run scene
+func (pc *PartyConstructor) NewRunningParty() (*Party, error) {
+	return pc.NewParty(false)
+}
+
+func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 	if len(pc.Players) == 0 {
 		return nil, errors.New("At least one player must be in a party")
 	}
@@ -156,7 +161,9 @@ func (pc *PartyConstructor) NewParty() (*Party, error) {
 	if lowestID != math.MaxInt32 {
 		pty.joystickID = lowestID
 	}
-
+	if unmoving {
+		return pty, nil
+	}
 	pty.CheckedBind(func(pty *Party, _ interface{}) int {
 		for i, p := range pty.Players {
 			i := i

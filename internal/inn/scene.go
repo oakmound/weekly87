@@ -17,6 +17,7 @@ import (
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/labels"
+	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/dtools"
 	"github.com/oakmound/weekly87/internal/settings"
 )
@@ -63,6 +64,22 @@ var Scene = scene.Scene{
 
 		doodads.NewFurniture(480, 225, 195, 70) // top Table
 		doodads.NewFurniture(480, 430, 185, 70) // bottom Table
+
+		ptycon := players.PartyConstructor{
+			Players: players.ClassConstructor(
+				[]int{players.Spearman, players.Mage, players.Mage, players.Swordsman}),
+
+			// []int{players.Spearman, players.Spearman, players.Spearman, players.Spearman}),
+		}
+		ptycon.Players[0].Position = floatgeom.Point2{players.WallOffset, 50}
+		pty, err2 := ptycon.NewParty(true)
+		if err2 != nil {
+			dlog.Error(err2)
+			return
+		}
+		for _, p := range pty.Players {
+			render.Draw(p.R, 2, 2)
+		}
 
 		// Set up the audio
 		var err error

@@ -5,18 +5,21 @@ import (
 	"math/rand"
 	"os"
 
+	"github.com/oakmound/weekly87/internal/characters/players"
+
 	"github.com/oakmound/oak/dlog"
 )
 
 const recordsFile = "save.json"
 
-// Records serves as our safe file and all variables we track across
+// Records serves as our save file and all variables we track across
 // multiple runs
 type Records struct {
 	SectionsCleared int64 `json:"sectionsCleared"`
 	BaseSeed        int64 `json:"baseSeed"`
 	// Todo: more
 	FarthestGoneInSections int64 `json:"farthestGoneInSections"`
+	PartyComp              []int `json:"partyComp"`
 }
 
 // Store a record to a file
@@ -38,6 +41,7 @@ func Load() *Records {
 		f, err := os.Create(recordsFile)
 		dlog.ErrorCheck(err)
 		r.BaseSeed = rand.Int63()
+		r.PartyComp = []int{players.Spearman}
 		data, err := json.Marshal(r)
 		dlog.ErrorCheck(err)
 		_, err = f.Write(data)
