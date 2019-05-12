@@ -2,6 +2,7 @@ package history
 
 import (
 	"fmt"
+	"image/color"
 	"path/filepath"
 	"strconv"
 
@@ -23,6 +24,9 @@ var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
 		fnt := render.DefFontGenerator.Copy()
 		fnt.Color = render.FontColor("Blue")
+		fnt.Size = 18
+		titleFnt := fnt.Generate()
+
 		fnt.Size = 14
 		blueFnt := fnt.Generate()
 
@@ -40,15 +44,32 @@ var Scene = scene.Scene{
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
 		render.Draw(menuBackground, 0)
 
+		textBackingX := oak.ScreenWidth / 3
+
+		textBacking := render.NewColorBox(textBackingX, oak.ScreenHeight*2/3, color.RGBA{120, 120, 120, 210})
+		textBacking.SetPos(float64(oak.ScreenWidth)*0.33, 40)
+		render.Draw(textBacking, 1)
+
 		r := records.Load()
 		fmt.Println(r)
 		textY := 60.0
 
-		cleared := strconv.FormatInt(r.SectionsCleared, 10)
-
-		sectionText := blueFnt.NewStrText("Sections Cleared: "+cleared, float64(oak.ScreenWidth)/2-80, textY)
+		historyTitle := titleFnt.NewStrText("Your Past Game Stats!", float64(oak.ScreenWidth)/2, textY)
+		historyTitle.Center()
+		render.Draw(historyTitle, 2, 2)
 		textY += 40
+
+		cleared := strconv.FormatInt(r.SectionsCleared, 10)
+		sectionText := blueFnt.NewStrText("Total Sections Cleared: "+cleared, float64(oak.ScreenWidth)/2, textY)
+		sectionText.Center()
 		render.Draw(sectionText, 2, 2)
+		textY += 40
+
+		farthest := strconv.FormatInt(r.FarthestGoneInSections, 10)
+		farthestText := blueFnt.NewStrText("Farthest Section Reached: "+farthest, float64(oak.ScreenWidth)/2, textY)
+		farthestText.Center()
+		render.Draw(farthestText, 2, 2)
+		textY += 40
 
 		btn.New(menus.BtnCfgA,
 			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
@@ -58,9 +79,6 @@ var Scene = scene.Scene{
 				stayInMenu = false
 				return 0
 			}))
-
-		text := render.DefFont().NewStrText("Save Management is under construction", float64(oak.ScreenWidth)/2-100, float64(oak.ScreenHeight)/4)
-		render.Draw(text, 0, 1)
 
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
