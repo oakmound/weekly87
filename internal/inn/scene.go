@@ -97,7 +97,7 @@ var Scene = scene.Scene{
 		pcLastInteract := time.Now()
 		interactLock := &sync.Mutex{}
 		//Create an example person to navigate the space
-		pc := NewInnWalker(innSpace)
+		pc := NewInnWalker(innSpace, pty.Players[0].Swtch.Copy().(*render.Switch))
 		pc.RSpace.Add(labels.NPC, func(_, n *collision.Space) {
 			// Limit interaction rate of player
 			interactLock.Lock()

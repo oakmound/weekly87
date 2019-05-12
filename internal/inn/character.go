@@ -16,15 +16,14 @@ import (
 )
 
 // NewInnWalker creates a special character for the inn
-func NewInnWalker(innSpace floatgeom.Rect2) *entities.Interactive {
-	anims := players.SpearmanConstructor.AnimationMap
+func NewInnWalker(innSpace floatgeom.Rect2, anim *render.Switch) *entities.Interactive {
 
 	s := entities.NewInteractive(
 		float64(oak.ScreenWidth/2),
 		float64(oak.ScreenHeight/2)+40,
 		16,
 		32,
-		render.NewSwitch("standRT", anims),
+		anim,
 		nil,
 		0,
 		0,
