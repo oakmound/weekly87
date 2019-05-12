@@ -33,6 +33,7 @@ type Rtree struct {
 	render.LayeredPoint
 	OutlineColor color.RGBA
 	ColorMap     map[collision.Label]color.RGBA
+	DrawDisabled bool
 }
 
 // GetDims retunrs the screen dimensions
@@ -47,6 +48,9 @@ func (r *Rtree) Draw(buff draw.Image) {
 
 // DrawOffset will draw the collision outlines
 func (r *Rtree) DrawOffset(buff draw.Image, xOff, yOff float64) {
+	if r.DrawDisabled {
+		return
+	}
 	// Get all spaces on screen
 	screen := collision.NewUnassignedSpace(
 		float64(oak.ViewPos.X),
