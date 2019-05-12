@@ -117,11 +117,11 @@ var Scene = scene.Scene{
 			dlog.Error(err)
 			return
 		}
-		// runInfo = records.RunInfo{
-		// 	Party:           pty,
-		// 	SectionsCleared: 0,
-		// 	EnemiesDefeated: 0,
-		// }
+		runInfo = records.RunInfo{
+			Party:           pty,
+			SectionsCleared: 0,
+			EnemiesDefeated: 0,
+		}
 		endLock := sync.Mutex{}
 		defeatedShowing := false
 
