@@ -140,7 +140,7 @@ var Scene = scene.Scene{
 			}
 
 		})
-
+		oak.ResetCommands()
 		oak.AddCommand("resetParty", func(args []string) {
 			r.PartyComp = []int{players.Spearman}
 			ptycon.Players = players.ClassConstructor(r.PartyComp)

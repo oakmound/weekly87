@@ -82,13 +82,6 @@ var Scene = scene.Scene{
 				render.NewHeap(true),
 			)
 		}
-		debugInvuln := false
-		oak.AddCommand("invuln", func(args []string) {
-			debugInvuln = true
-			if len(args) > 0 && (args[0][0:0] == "f" || args[0][0:0] == "F") {
-				debugInvuln = false
-			}
-		})
 		debugTree := dtools.NewRTree(collision.DefTree)
 		debugTree.ColorMap = map[collision.Label]color.RGBA{
 			labels.Chest:        color.RGBA{255, 255, 0, 255},
@@ -99,6 +92,24 @@ var Scene = scene.Scene{
 			labels.PlayerAttack: color.RGBA{255, 0, 125, 255},
 		}
 		render.Draw(debugTree, 2, 1000)
+
+		debugInvuln := false
+		oak.ResetCommands()
+		oak.AddCommand("invuln", func(args []string) {
+			dlog.Error("Cheating to set the invulnerability toggle")
+			debugInvuln = true
+			if len(args) > 0 && (args[0][0:0] == "f" || args[0][0:0] == "F") {
+				debugInvuln = false
+			}
+		})
+		oak.AddCommand("debug", func(args []string) {
+			dlog.Warn("Cheating to toggle debug mode")
+			if debugTree.DrawDisabled {
+				debugTree.DrawDisabled = false
+				return
+			}
+			debugTree.DrawDisabled = true
+		})
 
 		restrictor.ResetDefault()
 		restrictor.Start(1)
