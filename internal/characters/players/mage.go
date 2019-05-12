@@ -8,9 +8,11 @@ import (
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/mod"
 	"github.com/oakmound/weekly87/internal/abilities"
+	"github.com/oakmound/weekly87/internal/recolor"
 )
 
 var MageConstructor *Constructor
+var WhiteMageConstructor *Constructor
 
 func MageInit() {
 	animFilePath := (filepath.Join("16x32", "mage.png"))
@@ -55,4 +57,16 @@ func MageInit() {
 		Special1:     abilities.Fireball,
 		Special2:     abilities.Fireball,
 	}
+
+	whiteMageMap := filterCharMap(mageCharMap, recolor.Recolor(recolor.WhiteMage))
+
+	WhiteMageConstructor = &Constructor{
+		AnimationMap: whiteMageMap,
+		Dimensions:   floatgeom.Point2{16, 32},
+		Speed:        floatgeom.Point2{0, 5},
+		RunSpeed:     3.0,
+		Special1:     abilities.Fireball,
+		Special2:     abilities.Fireball,
+	}
+
 }

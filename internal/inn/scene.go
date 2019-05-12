@@ -69,7 +69,8 @@ var Scene = scene.Scene{
 		doodads.NewFurniture(480, 225, 195, 70) // top Table
 		doodads.NewFurniture(480, 430, 185, 70) // bottom Table
 		NewInnNPC(players.Mage, 460, 420)
-		NewInnNPC(players.Spearman, 460, 230)
+		NewInnNPC(players.WhiteMage, 680, 430).R.(*render.Switch).Set("standLT")
+		NewInnNPC(players.Spearman, 460, 240)
 		NewInnNPC(players.Swordsman, 680, 230).R.(*render.Switch).Set("standLT")
 
 		ptycon := players.PartyConstructor{
@@ -115,20 +116,24 @@ var Scene = scene.Scene{
 
 			dlog.Info("Adding a class to the party")
 			r.PartyComp = append(r.PartyComp, npc.Class)
+			for _, p := range pty.Players {
+				p.R.Undraw()
+				debugTree.Remove(p.RSpace.Space)
+			}
 			if len(r.PartyComp) > 4 {
 				r.PartyComp = r.PartyComp[1:]
 			}
 			ptycon.Players = players.ClassConstructor(r.PartyComp)
 			ptycon.Players[0].Position = ptyOffset
-			for _, p := range pty.Players {
-				p.R.Undraw()
-				debugTree.Remove(p.RSpace.Space)
-			}
+
 			pty, err2 := ptycon.NewParty(true)
 			if err2 != nil {
 				dlog.Error(err2)
 				return
 			}
+			pc.R.Undraw()
+			pc.R = pty.Players[0].Swtch.Copy()
+			render.Draw(pc.R, 2, 1)
 
 			for _, p := range pty.Players {
 				render.Draw(p.R, 2, 2)
