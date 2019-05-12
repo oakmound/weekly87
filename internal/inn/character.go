@@ -115,7 +115,7 @@ func (n *NPC) Init() event.CID {
 }
 
 // NewINnNPC creates a npc to interact with for setting up party
-func NewInnNPC(class int, x, y float64) {
+func NewInnNPC(class int, x, y float64) NPC {
 	pcon := players.ClassConstructor([]int{class})[0]
 	n := NPC{}
 	n.Class = class
@@ -132,4 +132,5 @@ func NewInnNPC(class int, x, y float64) {
 	)
 	n.RSpace.UpdateLabel(labels.NPC)
 	render.Draw(n.R, 2, 1)
+	return n
 }

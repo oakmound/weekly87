@@ -62,7 +62,7 @@ func WarriorsInit() {
 		RunSpeed:     3.0,
 	}
 
-	swordsmanMap := filterCharMap(warriorMap, recolor.Recolor(recolor.WarriorTestWhite))
+	swordsmanMap := filterCharMap(warriorMap, recolor.Recolor(recolor.WarriorSwordsman))
 
 	SwordsmanConstructor = &Constructor{
 		AnimationMap: swordsmanMap,

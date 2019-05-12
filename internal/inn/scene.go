@@ -1,9 +1,10 @@
 package inn
 
 import (
-	"fmt"
 	"image/color"
 	"path/filepath"
+	"sync"
+	"time"
 
 	klg "github.com/200sc/klangsynthese/audio"
 	"github.com/200sc/klangsynthese/audio/filter"
@@ -68,6 +69,8 @@ var Scene = scene.Scene{
 		doodads.NewFurniture(480, 225, 195, 70) // top Table
 		doodads.NewFurniture(480, 430, 185, 70) // bottom Table
 		NewInnNPC(players.Mage, 460, 420)
+		NewInnNPC(players.Spearman, 460, 230)
+		NewInnNPC(players.Swordsman, 680, 230).R.(*render.Switch).Set("standLT")
 
 		ptycon := players.PartyConstructor{
 			Players: players.ClassConstructor(
@@ -75,7 +78,11 @@ var Scene = scene.Scene{
 			// []int{players.Spearman, players.Mage, players.Mage, players.Swordsman}),
 			// []int{players.Spearman, players.Spearman, players.Spearman, players.Spearman}),
 		}
-		ptycon.Players[0].Position = floatgeom.Point2{players.WallOffset, 50}
+		partyBackground := render.NewColorBox(206, 52, color.RGBA{90, 90, 200, 255})
+		partyBackground.SetPos(30, 20)
+		render.Draw(partyBackground, 2, 1)
+		ptyOffset := floatgeom.Point2{players.WallOffset, 30}
+		ptycon.Players[0].Position = ptyOffset
 		pty, err2 := ptycon.NewParty(true)
 		if err2 != nil {
 			dlog.Error(err2)
@@ -85,33 +92,74 @@ var Scene = scene.Scene{
 			render.Draw(p.R, 2, 2)
 		}
 
+		interactDelay := time.Second
+		pcLastInteract := time.Now()
+		interactLock := &sync.Mutex{}
 		//Create an example person to navigate the space
 		pc := NewInnWalker(innSpace)
 		pc.RSpace.Add(labels.NPC, func(_, n *collision.Space) {
+			// Limit interaction rate of player
+			interactLock.Lock()
+			if pcLastInteract.Add(interactDelay).After(time.Now()) {
+				interactLock.Unlock()
+				return
+			}
 			npc, ok := n.CID.E().(*NPC)
 			if !ok {
+				interactLock.Unlock()
 				dlog.Error("Non-npc sent to npc binding")
 				return
 			}
-			if len(r.PartyComp) < 4 {
-				fmt.Println("Updating Party")
-				r.PartyComp = append(r.PartyComp, npc.Class)
-				ptycon.Players = players.ClassConstructor(r.PartyComp)
-				for _, p := range pty.Players {
-					p.R.Undraw()
-					debugTree.Remove(p.RSpace.Space)
-				}
-				pty, err2 := ptycon.NewParty(true)
-				if err2 != nil {
-					dlog.Error(err2)
-					return
-				}
+			pcLastInteract = time.Now()
+			interactLock.Unlock()
 
-				for _, p := range pty.Players {
-					render.Draw(p.R, 2, 2)
-				}
+			dlog.Info("Adding a class to the party")
+			r.PartyComp = append(r.PartyComp, npc.Class)
+			if len(r.PartyComp) > 4 {
+				r.PartyComp = r.PartyComp[1:]
+			}
+			ptycon.Players = players.ClassConstructor(r.PartyComp)
+			ptycon.Players[0].Position = ptyOffset
+			for _, p := range pty.Players {
+				p.R.Undraw()
+				debugTree.Remove(p.RSpace.Space)
+			}
+			pty, err2 := ptycon.NewParty(true)
+			if err2 != nil {
+				dlog.Error(err2)
+				return
 			}
 
+			for _, p := range pty.Players {
+				render.Draw(p.R, 2, 2)
+			}
+
+		})
+
+		oak.AddCommand("resetParty", func(args []string) {
+			r.PartyComp = []int{players.Spearman}
+			ptycon.Players = players.ClassConstructor(r.PartyComp)
+			ptycon.Players[0].Position = ptyOffset
+			for _, p := range pty.Players {
+				p.R.Undraw()
+				debugTree.Remove(p.RSpace.Space)
+			}
+			pty, err2 := ptycon.NewParty(true)
+			if err2 != nil {
+				dlog.Error(err2)
+				return
+			}
+
+			for _, p := range pty.Players {
+				render.Draw(p.R, 2, 2)
+			}
+		})
+		oak.AddCommand("debug", func(args []string) {
+			if debugTree.DrawDisabled {
+				debugTree.DrawDisabled = false
+				return
+			}
+			debugTree.DrawDisabled = true
 		})
 
 		// Set up the audio
