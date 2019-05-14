@@ -30,12 +30,12 @@ func (p *Party) Init() event.CID {
 	return event.NextID(p)
 }
 
-func (p *Party) SpeedUp() {
+func (p *Party) SpeedUp(n float64) {
 	// 100 sections to get to 20 accel
 	// 50 sections to get to 15 accel
 	// 25 sections to get to 10 accel
 	// 12 sections to get to 5 accel
-	p.speedUps++
+	p.speedUps += n
 	p.Acceleration = math.Log10(math.Pow(
 		math.Log10(p.speedUps+10), 2)) * 15
 	if p.Players[0].RunSpeed == 0 {

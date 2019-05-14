@@ -94,22 +94,6 @@ var Scene = scene.Scene{
 		render.Draw(debugTree, 2, 1000)
 
 		debugInvuln := false
-		oak.ResetCommands()
-		oak.AddCommand("invuln", func(args []string) {
-			dlog.Error("Cheating to set the invulnerability toggle")
-			debugInvuln = true
-			if len(args) > 0 && (args[0][0:0] == "f" || args[0][0:0] == "F") {
-				debugInvuln = false
-			}
-		})
-		oak.AddCommand("debug", func(args []string) {
-			dlog.Warn("Cheating to toggle debug mode")
-			if debugTree.DrawDisabled {
-				debugTree.DrawDisabled = false
-				return
-			}
-			debugTree.DrawDisabled = true
-		})
 
 		restrictor.ResetDefault()
 		restrictor.Start(1)
@@ -135,17 +119,9 @@ var Scene = scene.Scene{
 		}
 		endLock := sync.Mutex{}
 		defeatedShowing := false
+		runbackOnce := sync.Once{}
 
 		tracker := section.NewTracker(BaseSeed)
-		sct := tracker.Next()
-		sct.Draw()
-		nextSct := tracker.Next()
-		nextSct.SetBackgroundX(sct.X() + sct.W())
-		nextSct.Draw()
-		nextSct.ActivateEntities()
-		var oldSct *section.Section
-
-		facingLock := sync.Mutex{}
 
 		for i, p := range pty.Players {
 			render.Draw(p.R, 2, 2)
@@ -222,24 +198,11 @@ var Scene = scene.Scene{
 
 				ch.Destroy()
 				render.Draw(r, 2, 2)
-				facingLock.Lock()
-				if facing == 1 {
-
+				runbackOnce.Do(func() {
 					facing = -1
-					facingLock.Unlock()
-
 					event.Trigger("RunBack", nil)
-
-					// Shift sections
-					if tracker.At() > 3 {
-						tracker.ShiftDepth(-1)
-					}
-					oldSct = nextSct
-					nextSct = tracker.Prev()
-					nextSct.SetBackgroundX(sct.X() - sct.W())
-				} else {
-					facingLock.Unlock()
-				}
+					tracker.Prev()
+				})
 			})
 
 			// Player got back to the Inn!
@@ -306,57 +269,121 @@ var Scene = scene.Scene{
 
 				btn.New(btnOpts)
 			}
-
 		}
+
+		var sec1, sec2, sec3 *section.Section
+
+		sec1 = tracker.Next()
+		sec2 = tracker.Next()
+		sec3 = sec1.Copy()
+
+		sec2.SetBackgroundX(sec1.W())
+		sec3.SetBackgroundX(sec1.W() * 2)
+
+		sec1.Draw()
+		sec1.ActivateEntities()
+		sec2.Draw()
+		sec2.ActivateEntities()
+
+		const (
+			sec1Mid = 1120
+			sec2Mid = 1120 * 3
+			sec3Mid = 1120 * 5
+		)
+
+		var lastX float64
 
 		// Section creation bind to support infinite* hallway
 		event.GlobalBind(func(int, interface{}) int {
-			// This calculation needs to be modified based
-			// on how much of the screen a section takes up.
-			// If a section takes up more than one screen,
-			// this is fine, otherwise it needs to change a little
-			w := sct.W() * float64(facing)
-			var offLeft int
-			var shift bool
+			x := pty.Players[0].X()
+
 			if facing == 1 {
-				offLeft = oak.ViewPos.X - int(w)
-				shift = offLeft >= 0
-			} else {
-				offLeft = oak.ViewPos.X - int(w)
-				shift = offLeft <= -int(w)
-			}
-			if shift && !tracker.AtStart() {
-				if oldSct != nil {
-					nextSct.Shift(-w)
-					sct.Shift(-w)
-					oldSct.Destroy()
-					oldSct = nil
-				} else {
-					sct.Destroy()
-					sct = nextSct
-				}
-				// We need a way to make these actions draw-level atomic
-				// Or a way to fake it so there isn't a blip
-				oak.ViewPos.X = offLeft
-				pty.ShiftX(-w)
-				// event.DefaultBus.Pause()
-				// time.Sleep(5 * time.Second)
-				// event.DefaultBus.Resume()
-				nextSct.Shift(-w)
-				go func() {
-					nextSct = tracker.Produce(int64(facing))
-					pty.SpeedUp()
-					//fmt.Println("Sec", nextSct.GetID(), "total", tracker.SectionsDeep())
-					nextSct.SetBackgroundX(sct.X() + w)
-					nextSct.Draw()
-					nextSct.ActivateEntities()
-					if tracker.AtStart() {
-						oak.SetViewportBounds(0, 0, 4000, 4000)
+				if lastX <= sec2Mid {
+					if x > sec2Mid {
+						go func() {
+							// - A+=2
+							// - C+=2
+							sec1.Destroy()
+							sec3.Destroy()
+
+							sec3 = tracker.Next()
+							sec1 = sec3.Copy()
+							sec3.SetBackgroundX(sec1.W() * 2)
+
+							sec3.Draw()
+							sec3.ActivateEntities()
+							sec1.Draw()
+
+							runInfo.SectionsCleared++
+						}()
 					}
-					// fmt.Println("sections", runInfo.SectionsCleared)
-					runInfo.SectionsCleared++
-				}()
+				} else if lastX <= sec3Mid {
+					if x > sec3Mid {
+						// - Teleport all entities two section widths back (Including the viewport)
+						// - B+=2
+
+						pty.ShiftX(-sec1.W() * 2)
+						sec3.ShiftEntities(-sec1.W() * 2)
+						oak.ViewPos.X -= int(sec1.W()) * 2
+
+						go func() {
+							sec2.Destroy()
+							sec2 = tracker.Next()
+							sec2.SetBackgroundX(sec1.W())
+							sec2.Draw()
+							sec2.ActivateEntities()
+
+							pty.SpeedUp(1)
+							runInfo.SectionsCleared++
+						}()
+					}
+				}
+			} else {
+				if lastX >= sec2Mid {
+					if x < sec2Mid {
+						go func() {
+							// - A-=2
+							// - C-=2
+							sec1.Destroy()
+							sec3.Destroy()
+
+							sec1 = tracker.Prev()
+							sec3 = sec1.Copy()
+							sec3.SetBackgroundX(sec1.W() * 2)
+
+							sec3.Draw()
+							sec1.Draw()
+							sec1.ActivateEntities()
+
+							if tracker.AtStart() {
+								oak.SetViewportBounds(0, 0, 8000, 8000)
+							}
+							runInfo.SectionsCleared++
+						}()
+					}
+				} else if lastX >= sec1Mid {
+					if x < sec1Mid && !tracker.AtStart() {
+						go func() {
+							// - Teleport all entities two section widths forward (Including the viewport)
+							// - B-=2
+							sec2.Destroy()
+							sec2 = tracker.Prev()
+							sec2.SetBackgroundX(sec1.W())
+							sec2.Draw()
+							sec2.ActivateEntities()
+
+							pty.SpeedUp(1)
+							runInfo.SectionsCleared++
+						}()
+
+						pty.ShiftX(sec1.W() * 2)
+						sec1.ShiftEntities(sec1.W() * 2)
+						oak.ViewPos.X += int(sec1.W()) * 2
+					}
+				}
 			}
+
+			lastX = x
 			return 0
 		}, "EnterFrame")
 
@@ -418,6 +445,32 @@ var Scene = scene.Scene{
 
 		// for right now the one character can chain boxes behind them
 		// infinitely, eventually there should be an upgrade thing
+
+		oak.ResetCommands()
+		oak.AddCommand("invuln", func(args []string) {
+			dlog.Error("Cheating to set the invulnerability toggle")
+			debugInvuln = true
+			if len(args) > 0 && (args[0][0:0] == "f" || args[0][0:0] == "F") {
+				debugInvuln = false
+			}
+		})
+		oak.AddCommand("debug", func(args []string) {
+			dlog.Warn("Cheating to toggle debug mode")
+			if debugTree.DrawDisabled {
+				debugTree.DrawDisabled = false
+				return
+			}
+			debugTree.DrawDisabled = true
+		})
+		oak.AddCommand("speedup", func(args []string) {
+			up := 5.0
+			if len(args) > 0 {
+				var err error
+				up, err = strconv.ParseFloat(args[0], 64)
+				dlog.ErrorCheck(err)
+			}
+			pty.SpeedUp(up)
+		})
 	},
 	Loop: scene.BooleanLoop(&stayInGame),
 	End: func() (string, *scene.Result) {

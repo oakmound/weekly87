@@ -54,6 +54,7 @@ func (be *BasicEnemy) Init() event.CID {
 
 func (be *BasicEnemy) Activate() {
 	be.Active = true
+	restrictor.Add(be)
 }
 
 func (be *BasicEnemy) Destroy() {
@@ -112,7 +113,6 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 		// Enemies should only do anything if they are on screen
 		// Todo: other things could effect delta temporarily
 		be.Delta = be.Speed
-		// Todo: on screen helper in oak
 		if be.X() <= float64(oak.ScreenWidth+oak.ViewPos.X) &&
 			be.X()+be.W >= float64(oak.ViewPos.X) {
 			//be.RSpace.Label = labels.Enemy
@@ -145,7 +145,6 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 	for ev, b := range ec.Bindings {
 		be.CheckedBind(b, ev)
 	}
-	restrictor.Add(be)
 	return be, nil
 }
 

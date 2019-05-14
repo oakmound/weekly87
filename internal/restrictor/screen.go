@@ -137,18 +137,14 @@ type Restrictable interface {
 
 // Going Right
 // When player reaches y:
-// - A+=2
-// - C+=2
+
 
 // When player reaches x:
-// - Teleport all entities two section widths back (Including the viewport)
-// - B+=2
+
 
 // Going Left
 // When player reaches z:
-// - Teleport all entities two section widths forward (Including the viewport)
-// - B-=2
+
 
 // When player reaches y:
-// - A-=2
-// - C-=2
+

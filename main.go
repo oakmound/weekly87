@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/oakmound/oak"
-	"github.com/oakmound/weekly87/internal/assets"
 	"github.com/oakmound/weekly87/internal/credits"
 	"github.com/oakmound/weekly87/internal/history"
 	"github.com/oakmound/weekly87/internal/inn"
@@ -21,7 +20,9 @@ func main() {
 		Title:     "Chest Stacker",
 		BatchLoad: true,
 	}
-	oak.SetBinaryPayload(assets.Asset, assets.AssetDir)
+	//oak.SetBinaryPayload(assets.Asset, assets.AssetDir)
+
+	oak.SetupTopMost = true
 
 	// Add scenes
 	oak.AddScene("startup", startup.Scene)

@@ -7,8 +7,8 @@ import (
 )
 
 type compressor struct {
-	ground   [70][24]render.Modifiable
-	wall     [70][12]render.Modifiable
+	ground   [140][24]render.Modifiable
+	wall     [140][12]render.Modifiable
 	entities []characters.Character
 }
 

@@ -11,8 +11,6 @@ var (
 	currentSection int64
 )
 
-// Todo generate section
-
 type Section struct {
 	id       int64
 	ground   *render.Sprite
@@ -22,32 +20,28 @@ type Section struct {
 
 func (s *Section) Copy() *Section {
 	return &Section{
-		id:       s.id,
-		ground:   s.ground.Copy().(*render.Sprite),
-		wall:     s.wall.Copy().(*render.Sprite),
-		entities: s.entities,
+		id:     s.id,
+		ground: s.ground.Copy().(*render.Sprite),
+		wall:   s.wall.Copy().(*render.Sprite),
 	}
 }
 
 func (s *Section) Draw() {
 	render.Draw(s.ground, 0)
 	render.Draw(s.wall, 1)
-	for _, e := range s.entities {
-		render.Draw(e.GetRenderable(), 2, 1)
-	}
 }
 
 func (s *Section) Shift(shift float64) {
 	s.wall.ShiftX(shift)
-	s.ShiftEntites(shift)
+	s.ground.ShiftX(shift)
+	s.ShiftEntities(shift)
 }
 
 func (s *Section) SetBackgroundX(x float64) {
 	delta := x - s.wall.X()
 	s.wall.SetX(x)
-	for _, e := range s.entities {
-		move.ShiftX(e, delta)
-	}
+	s.ground.SetX(x)
+	s.ShiftEntities(delta)
 }
 
 func (s *Section) Destroy() {
@@ -73,10 +67,11 @@ func (s *Section) W() float64 {
 func (s *Section) ActivateEntities() {
 	for _, e := range s.entities {
 		e.Activate()
+		render.Draw(e.GetRenderable(), 2, 1)
 	}
 }
 
-func (s *Section) ShiftEntites(shift float64) {
+func (s *Section) ShiftEntities(shift float64) {
 	for _, e := range s.entities {
 		move.ShiftX(e, shift)
 	}

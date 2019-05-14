@@ -139,10 +139,7 @@ func (st *Tracker) Produce(delta int64) *Section {
 			cs := enemies.Constructors[typ]
 			e, err := cs.NewEnemy()
 			if delta < 0 {
-
 				e.RunBackwards()
-
-				// e.Trigger("RunBack", nil)
 			}
 			dlog.ErrorCheck(err)
 			e.SetPos(fieldX.Poll(), fieldY.Poll())
