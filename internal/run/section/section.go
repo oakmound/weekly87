@@ -20,6 +20,15 @@ type Section struct {
 	entities []characters.Character
 }
 
+func (s *Section) Copy() *Section {
+	return &Section{
+		id:       s.id,
+		ground:   s.ground.Copy().(*render.Sprite),
+		wall:     s.wall.Copy().(*render.Sprite),
+		entities: s.entities,
+	}
+}
+
 func (s *Section) Draw() {
 	render.Draw(s.ground, 0)
 	render.Draw(s.wall, 1)
@@ -30,9 +39,7 @@ func (s *Section) Draw() {
 
 func (s *Section) Shift(shift float64) {
 	s.wall.ShiftX(shift)
-	for _, e := range s.entities {
-		move.ShiftX(e, shift)
-	}
+	s.ShiftEntites(shift)
 }
 
 func (s *Section) SetBackgroundX(x float64) {
@@ -66,5 +73,11 @@ func (s *Section) W() float64 {
 func (s *Section) ActivateEntities() {
 	for _, e := range s.entities {
 		e.Activate()
+	}
+}
+
+func (s *Section) ShiftEntites(shift float64) {
+	for _, e := range s.entities {
+		move.ShiftX(e, shift)
 	}
 }
