@@ -1,8 +1,10 @@
 package inn
 
 import (
+	"fmt"
 	"image/color"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -12,6 +14,7 @@ import (
 	"github.com/oakmound/oak/audio"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
+	"github.com/oakmound/oak/render/mod"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -59,19 +62,23 @@ var Scene = scene.Scene{
 		render.Draw(innBackground, 0)
 
 		// A way to enter the run
-		doodads.NewInnDoor()
+		doodads.NewInnDoor("run")
+		doodads.NewCustomInnDoor("startup", 490, 40, 100, 102)
 
 		innSpace := floatgeom.NewRect2(0, 0, float64(oak.ScreenWidth), float64(oak.ScreenHeight)-32) //Adjusted for the current size of the spearman
+
+		doodads.NewFurniture(0, 0, float64(oak.ScreenWidth), 140) // top of inn
 
 		// Additional inn aspects
 		doodads.NewFurniture(130, 130, 100, float64(oak.ScreenHeight)-130) // Left Table
 
-		doodads.NewFurniture(480, 225, 195, 70) // top Table
-		doodads.NewFurniture(480, 430, 185, 70) // bottom Table
-		NewInnNPC(players.Mage, 460, 420)
-		NewInnNPC(players.WhiteMage, 680, 430).R.(*render.Switch).Set("standLT")
-		NewInnNPC(players.Spearman, 460, 240)
-		NewInnNPC(players.Swordsman, 680, 230).R.(*render.Switch).Set("standLT")
+		doodads.NewFurniture(470, 225, 205, 60) // top Table
+		doodads.NewFurniture(480, 430, 185, 55) // bottom Table
+		npcScale := 1.6
+		NewInnNPC(players.Mage, npcScale, 440, 420)
+		NewInnNPC(players.WhiteMage, npcScale, 680, 430).R.(*render.Switch).Set("standLT")
+		NewInnNPC(players.Spearman, npcScale, 450, 240)
+		NewInnNPC(players.Swordsman, npcScale, 680, 230).R.(*render.Switch).Set("standLT")
 
 		ptycon := players.PartyConstructor{
 			Players: players.ClassConstructor(
@@ -97,7 +104,7 @@ var Scene = scene.Scene{
 		pcLastInteract := time.Now()
 		interactLock := &sync.Mutex{}
 		//Create an example person to navigate the space
-		pc := NewInnWalker(innSpace, pty.Players[0].Swtch.Copy().(*render.Switch))
+		pc := NewInnWalker(innSpace, npcScale, pty.Players[0].Swtch.Copy().(*render.Switch))
 		pc.RSpace.Add(labels.NPC, func(_, n *collision.Space) {
 			// Limit interaction rate of player
 			interactLock.Lock()
@@ -132,7 +139,7 @@ var Scene = scene.Scene{
 				return
 			}
 			pc.R.Undraw()
-			pc.R = pty.Players[0].Swtch.Copy()
+			pc.R = pty.Players[0].Swtch.Copy().Modify(mod.Scale(npcScale, npcScale))
 			render.Draw(pc.R, 2, 1)
 
 			for _, p := range pty.Players {
@@ -140,6 +147,20 @@ var Scene = scene.Scene{
 			}
 
 		})
+
+		// Set up the audio
+		var err error
+		music, err = audio.Load(filepath.Join("assets", "audio"), "inn1.wav")
+		dlog.ErrorCheck(err)
+		music, err = music.Copy()
+		dlog.ErrorCheck(err)
+		music = music.MustFilter(
+			filter.Volume(0.5*settings.Active.MusicVolume*settings.Active.MasterVolume),
+			filter.LoopOn(),
+		)
+
+		music.Play()
+
 		oak.ResetCommands()
 		oak.AddCommand("resetParty", func(args []string) {
 			r.PartyComp = []int{players.Spearman}
@@ -166,19 +187,17 @@ var Scene = scene.Scene{
 			}
 			debugTree.DrawDisabled = true
 		})
-
-		// Set up the audio
-		var err error
-		music, err = audio.Load(filepath.Join("assets", "audio"), "inn1.wav")
-		dlog.ErrorCheck(err)
-		music, err = music.Copy()
-		dlog.ErrorCheck(err)
-		music = music.MustFilter(
-			filter.Volume(0.5*settings.Active.MusicVolume*settings.Active.MasterVolume),
-			filter.LoopOn(),
-		)
-
-		music.Play()
+		fullscreen := false
+		oak.AddCommand("fullscreen", func(args []string) {
+			fullscreen = !fullscreen
+			err := oak.SetFullScreen(fullscreen)
+			if err != nil {
+				fullscreen = !fullscreen
+				fmt.Println(err)
+			}
+			return
+		})
+		dlog.Info("Current Debug Commands are: ", strings.Join(oak.GetDebugKeys(), " , "))
 
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
