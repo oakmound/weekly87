@@ -55,8 +55,8 @@ func (r *Rtree) DrawOffset(buff draw.Image, xOff, yOff float64) {
 	screen := collision.NewUnassignedSpace(
 		float64(oak.ViewPos.X),
 		float64(oak.ViewPos.Y),
-		float64(oak.ScreenWidth),
-		float64(oak.ScreenHeight))
+		float64(oak.ScreenWidth+oak.ViewPos.X),
+		float64(oak.ScreenHeight+oak.ViewPos.Y))
 	hits := r.Tree.Hits(screen)
 	// Draw spaces that are on screen (as outlines)
 	for _, h := range hits {
@@ -66,14 +66,14 @@ func (r *Rtree) DrawOffset(buff draw.Image, xOff, yOff float64) {
 		}
 		for x := 0; x < int(h.GetW()); x++ {
 			for i := 0; i < r.Thickness; i++ {
-				buff.Set(x+int(h.X()+xOff)-oak.ViewPos.X, int(h.Y()+yOff)+i-oak.ViewPos.Y, c)
-				buff.Set(x+int(h.X()+xOff)-oak.ViewPos.X, int(h.Y()+yOff)+int(h.GetH())-i-oak.ViewPos.Y, c)
+				buff.Set(x+int(h.X()+xOff), int(h.Y()+yOff)+i, c)
+				buff.Set(x+int(h.X()+xOff), int(h.Y()+yOff)+int(h.GetH())-i, c)
 			}
 		}
 		for y := 0; y < int(h.GetH()); y++ {
 			for i := 0; i < r.Thickness; i++ {
-				buff.Set(int(h.X()+xOff)+i-oak.ViewPos.X, y+int(h.Y()+yOff)-oak.ViewPos.Y, c)
-				buff.Set(int(h.X()+xOff)+int(h.GetW())-i-oak.ViewPos.X, y+int(h.Y()+yOff)-oak.ViewPos.Y, c)
+				buff.Set(int(h.X()+xOff)+i, y+int(h.Y()+yOff), c)
+				buff.Set(int(h.X()+xOff)+int(h.GetW())-i, y+int(h.Y()+yOff), c)
 			}
 		}
 	}
