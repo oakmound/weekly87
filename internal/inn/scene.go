@@ -91,9 +91,9 @@ var Scene = scene.Scene{
 		render.Draw(partyBackground, 2, 1)
 		ptyOffset := floatgeom.Point2{players.WallOffset, 30}
 		ptycon.Players[0].Position = ptyOffset
-		pty, err2 := ptycon.NewParty(true)
-		if err2 != nil {
-			dlog.Error(err2)
+		pty, err := ptycon.NewParty(true)
+		if err != nil {
+			dlog.Error(err)
 			return
 		}
 		for _, p := range pty.Players {
@@ -124,8 +124,8 @@ var Scene = scene.Scene{
 			dlog.Info("Adding a class to the party")
 			r.PartyComp = append(r.PartyComp, npc.Class)
 			for _, p := range pty.Players {
+				p.Destroy()
 				p.R.Undraw()
-				debugTree.Remove(p.RSpace.Space)
 			}
 			if len(r.PartyComp) > 4 {
 				r.PartyComp = r.PartyComp[1:]
@@ -133,9 +133,9 @@ var Scene = scene.Scene{
 			ptycon.Players = players.ClassConstructor(r.PartyComp)
 			ptycon.Players[0].Position = ptyOffset
 
-			pty, err2 := ptycon.NewParty(true)
-			if err2 != nil {
-				dlog.Error(err2)
+			pty, err = ptycon.NewParty(true)
+			if err != nil {
+				dlog.Error(err)
 				return
 			}
 			pc.R.Undraw()
@@ -149,7 +149,6 @@ var Scene = scene.Scene{
 		})
 
 		// Set up the audio
-		var err error
 		music, err = audio.Load(filepath.Join("assets", "audio"), "inn1.wav")
 		dlog.ErrorCheck(err)
 		music, err = music.Copy()
