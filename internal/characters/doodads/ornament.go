@@ -59,6 +59,6 @@ func NewOrnament(x, y, w, h float64, img *render.Sprite) *Ornament {
 	}
 
 	o.R.SetPos(x+wOffset, y+hOffset)
-	render.Draw(o.R, 2, 3)
+	render.Draw(o.R, 2, 2)
 	return o
 }

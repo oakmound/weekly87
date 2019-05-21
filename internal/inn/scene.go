@@ -78,7 +78,7 @@ var Scene = scene.Scene{
 
 		noticeBoard, _ := render.LoadSprite("", filepath.Join("raw", "noteboard.png"))
 
-		doodads.NewOrnament(0, 0, float64(oak.ScreenWidth), 140, noticeBoard)
+		doodads.NewOrnament(0, 0, float64(oak.ScreenWidth)/2, 140, noticeBoard)
 
 		uglymugger, _ := render.LoadSprite("", filepath.Join("16x16", "ugly_mugger.png"))
 		for i := 0; i < 10; i++ {
@@ -99,7 +99,7 @@ var Scene = scene.Scene{
 		}
 		partyBackground := render.NewColorBox(206, 52, color.RGBA{90, 90, 200, 255})
 		partyBackground.SetPos(30, 20)
-		render.Draw(partyBackground, 2, 1)
+		render.Draw(partyBackground, 2, 3)
 		ptyOffset := floatgeom.Point2{players.WallOffset, 30}
 		ptycon.Players[0].Position = ptyOffset
 		pty, err := ptycon.NewParty(true)
@@ -108,7 +108,7 @@ var Scene = scene.Scene{
 			return
 		}
 		for _, p := range pty.Players {
-			render.Draw(p.R, 2, 2)
+			render.Draw(p.R, 2, 4)
 		}
 
 		interactDelay := time.Second
@@ -151,10 +151,10 @@ var Scene = scene.Scene{
 			}
 			pc.R.Undraw()
 			pc.R = pty.Players[0].Swtch.Copy().Modify(mod.Scale(npcScale, npcScale))
-			render.Draw(pc.R, 2, 1)
+			render.Draw(pc.R, 2, 2)
 
 			for _, p := range pty.Players {
-				render.Draw(p.R, 2, 2)
+				render.Draw(p.R, 2, 4)
 			}
 
 		})
@@ -187,7 +187,7 @@ var Scene = scene.Scene{
 			}
 
 			for _, p := range pty.Players {
-				render.Draw(p.R, 2, 2)
+				render.Draw(p.R, 2, 4)
 			}
 		})
 		oak.AddCommand("debug", func(args []string) {
