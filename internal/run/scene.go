@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -471,6 +472,8 @@ var Scene = scene.Scene{
 			}
 			pty.SpeedUp(up)
 		})
+
+		dlog.Info("Current Debug Commands are: ", strings.Join(oak.GetDebugKeys(), " , "))
 	},
 	Loop: scene.BooleanLoop(&stayInGame),
 	End: func() (string, *scene.Result) {

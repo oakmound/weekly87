@@ -11,4 +11,5 @@ const (
 	PlayerAttack
 	EnemyAttack
 	Blocking
+	Ornament
 )
