@@ -51,6 +51,7 @@ var Scene = scene.Scene{
 			labels.Door:     color.RGBA{200, 0, 100, 255},
 			labels.PC:       color.RGBA{125, 0, 255, 255},
 			labels.Blocking: color.RGBA{200, 200, 10, 255},
+			labels.Ornament: color.RGBA{250, 200, 40, 255},
 			labels.NPC:      color.RGBA{125, 200, 10, 255},
 		}
 		render.Draw(debugTree, 2, 1000)
@@ -74,6 +75,16 @@ var Scene = scene.Scene{
 
 		doodads.NewFurniture(470, 225, 205, 60) // top Table
 		doodads.NewFurniture(480, 430, 185, 55) // bottom Table
+
+		noticeBoard, _ := render.LoadSprite("", filepath.Join("raw", "noteboard.png"))
+
+		doodads.NewOrnament(0, 0, float64(oak.ScreenWidth), 140, noticeBoard)
+
+		uglymugger, _ := render.LoadSprite("", filepath.Join("16x16", "ugly_mugger.png"))
+		for i := 0; i < 10; i++ {
+			doodads.NewOrnament(130, 130, 100, float64(oak.ScreenHeight)-130, uglymugger)
+		}
+
 		npcScale := 1.6
 		NewInnNPC(players.Mage, npcScale, 440, 420)
 		NewInnNPC(players.WhiteMage, npcScale, 680, 430).R.(*render.Switch).Set("standLT")
