@@ -3,7 +3,9 @@ package abilities
 import (
 	"time"
 
+	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/physics"
+	"github.com/oakmound/weekly87/internal/characters"
 
 	"github.com/oakmound/oak/render"
 )
@@ -27,7 +29,7 @@ type ability struct {
 	renderable *render.CompositeM
 
 	user    User
-	trigger func(User)
+	trigger func(User) []characters.Character
 }
 
 // Renderable gets the renderable underlyting the ability
@@ -39,7 +41,8 @@ func (a *ability) Renderable() render.Modifiable {
 func (a *ability) Trigger() {
 
 	if a.user.Ready() && a.renderable.Get(1).(*cooldown).Trigger() {
-		a.trigger(a.user)
+		artifcats := a.trigger(a.user)
+		event.Trigger("AbilityFired", artifcats)
 	}
 }
 
@@ -60,7 +63,7 @@ func (a *ability) SetUser(newUser User) Ability {
 }
 
 // NewAbility creates an ability
-func NewAbility(r render.Modifiable, c time.Duration, t func(User)) *ability {
+func NewAbility(r render.Modifiable, c time.Duration, t func(User) []characters.Character) *ability {
 
 	w, h := r.GetDims()
 	cool := NewCooldown(w, h, c)
@@ -69,3 +72,5 @@ func NewAbility(r render.Modifiable, c time.Duration, t func(User)) *ability {
 	return &ability{renderable: cr, trigger: t}
 
 }
+
+//Make produced ability type that captures a created ability

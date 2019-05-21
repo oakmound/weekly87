@@ -1,6 +1,8 @@
 package section
 
 import (
+	"sync"
+
 	"github.com/oakmound/oak/entities/x/move"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/weekly87/internal/characters"
@@ -12,17 +14,19 @@ var (
 )
 
 type Section struct {
-	id       int64
-	ground   *render.Sprite
-	wall     *render.Sprite
-	entities []characters.Character
+	id          int64
+	ground      *render.Sprite
+	wall        *render.Sprite
+	entities    []characters.Character
+	entityMutex sync.Mutex
 }
 
 func (s *Section) Copy() *Section {
 	return &Section{
-		id:     s.id,
-		ground: s.ground.Copy().(*render.Sprite),
-		wall:   s.wall.Copy().(*render.Sprite),
+		id:          s.id,
+		ground:      s.ground.Copy().(*render.Sprite),
+		wall:        s.wall.Copy().(*render.Sprite),
+		entityMutex: sync.Mutex{},
 	}
 }
 
@@ -72,7 +76,19 @@ func (s *Section) ActivateEntities() {
 }
 
 func (s *Section) ShiftEntities(shift float64) {
+	s.entityMutex.Lock()
 	for _, e := range s.entities {
 		move.ShiftX(e, shift)
 	}
+	s.entityMutex.Unlock()
+}
+
+func (s *Section) AppendEntities(e ...characters.Character) {
+	s.entityMutex.Lock()
+	s.entities = append(s.entities, e...)
+	s.entityMutex.Unlock()
+}
+
+func (s *Section) GetId() int64 {
+	return s.id
 }

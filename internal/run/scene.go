@@ -13,6 +13,7 @@ import (
 
 	"github.com/oakmound/oak/mouse"
 
+	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/characters/enemies"
 	"github.com/oakmound/weekly87/internal/restrictor"
 
@@ -387,6 +388,39 @@ var Scene = scene.Scene{
 			lastX = x
 			return 0
 		}, "EnterFrame")
+
+		event.GlobalBind(func(cid int, data interface{}) int {
+			dlog.Info("An Enemy Died")
+
+			info := data.([]int64)
+			tracker.UpdateHistory(info[0],
+				section.Change{
+					Typ: section.EntityDestroyed,
+					Val: int(info[1])})
+			return 0
+		}, "EnemyDeath")
+
+		event.GlobalBind(func(cid int, data interface{}) int {
+			dlog.Info("A character fired an ability")
+			artifacts := data.([]characters.Character)
+
+			abilitySection := sec3
+			//Add to appropriate section and potentially to the tracker's changelog for the given section
+			if pty.Players[0].X() < (sec1.W()) { //In section 1
+				abilitySection = sec1
+			} else if pty.Players[0].X() < (2 * sec1.W()) { //In section 2
+				abilitySection = sec2
+			}
+			abilitySection.AppendEntities(artifacts...)
+
+			for _, a := range artifacts {
+				if p, ok := a.(Persistable); ok && p.ShouldPersist() {
+					tracker.UpdateHistory(abilitySection.GetId(), section.Change{})
+				}
+			}
+
+			return 0
+		}, "AbilityFired")
 
 		music, err = audio.Load(filepath.Join("assets", "audio"), "runIntro.wav")
 		dlog.ErrorCheck(err)

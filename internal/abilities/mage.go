@@ -5,9 +5,8 @@ import (
 	"image/color"
 	"time"
 
-	"github.com/oakmound/oak/dlog"
-
 	"github.com/oakmound/oak/render"
+	"github.com/oakmound/weekly87/internal/characters"
 )
 
 var (
@@ -15,23 +14,26 @@ var (
 	Fireball = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 255}),
 		time.Second*10,
-		func(u User) { fmt.Println("Just tried to burn a guy ", u) },
-	)
-	Invulnerability = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{255, 255, 125, 255}),
-		time.Second*10,
-		func(u User) {
-			c := Constructor{}
-			err := c.StartAt(u.Pos()).
-				ArcTo(pos2).
-				WithParticles(ps).
-				//WithRenderable().
-				//WithLabel().
-				ThenDrop(otherThing).
-				Fire()
-			dlog.ErrorCheck(err)
-
-			//c.StartAt(u.Pos()).LineTo(pos2)
+		func(u User) []characters.Character {
+			fmt.Println("Just tried to burn a guy ", u)
+			return nil
 		},
 	)
+	// Invulnerability = NewAbility(
+	// 	render.NewColorBox(64, 64, color.RGBA{255, 255, 125, 255}),
+	// 	time.Second*10,
+	// 	func(u User) {
+	// 		c := Constructor{}
+	// 		err := c.StartAt(u.Pos()).
+	// 			ArcTo(pos2).
+	// 			WithParticles(ps).
+	// 			//WithRenderable().
+	// 			//WithLabel().
+	// 			ThenDrop(otherThing).
+	// 			Fire()
+	// 		dlog.ErrorCheck(err)
+
+	// 		//c.StartAt(u.Pos()).LineTo(pos2)
+	// 	},
+	// )
 )

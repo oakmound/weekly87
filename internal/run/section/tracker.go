@@ -137,7 +137,7 @@ func (st *Tracker) Produce(delta int64) *Section {
 		for i := 0; i < plan.enemyCount.Poll(); i++ {
 			typ := alg.WeightedChooseOne(enemyDist)
 			cs := enemies.Constructors[typ]
-			e, err := cs.NewEnemy()
+			e, err := cs.NewEnemy(st.sectionsDeep, int64(len(st.entities)))
 			if delta < 0 {
 				e.RunBackwards()
 			}
@@ -159,5 +159,18 @@ func (st *Tracker) Produce(delta int64) *Section {
 		}
 	}
 
-	return st.generate()
+	// for i, e := range st.entities {
+	// 	e.SetIdx(i)
+	// }
+
+	newSection := st.generate()
+	for _, c := range st.changes[newSection.id] {
+		newSection.ApplyChange(c)
+	}
+
+	return newSection
+}
+
+func (st *Tracker) UpdateHistory(sectionID int64, change Change) {
+	st.changes[sectionID] = append(st.changes[sectionID], change)
 }

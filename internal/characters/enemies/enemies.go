@@ -76,7 +76,7 @@ func (be *BasicEnemy) CheckedBind(bnd func(*BasicEnemy, interface{}) int, ev str
 // NewEnemy creates an enemy that will animate walking or standing appropriately,
 // move according to its speed, flip its facing when the player picks up
 // a chest, and die when a player attack hits it
-func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
+func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 	if ec.Dimensions == (floatgeom.Point2{}) {
 		return nil, errors.New("Dimensions must be provided")
 	}
@@ -140,6 +140,7 @@ func (ec *Constructor) NewEnemy() (*BasicEnemy, error) {
 			return
 		}
 		// TODO: track changes?
+		event.Trigger("EnemyDeath", []int64{secid, idx})
 		be.Destroy()
 	})
 	for ev, b := range ec.Bindings {
