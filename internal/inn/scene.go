@@ -3,6 +3,7 @@ package inn
 import (
 	"fmt"
 	"image/color"
+	"math/rand"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -76,9 +77,16 @@ var Scene = scene.Scene{
 		doodads.NewFurniture(470, 225, 205, 60) // top Table
 		doodads.NewFurniture(480, 430, 185, 55) // bottom Table
 
-		noticeBoard, _ := render.LoadSprite("", filepath.Join("raw", "noteboard.png"))
+		c := render.NewColorBox(85, 65, color.RGBA{200, 200, 200, 255})
+		c.SetPos(240, 60)
+		render.Draw(c, 2, 2)
 
-		doodads.NewOrnament(0, 0, float64(oak.ScreenWidth)/2, 140, noticeBoard)
+		noteSpace := floatgeom.NewRect2WH(240, 60, 85, 65)
+
+		noteHeight := 3
+		for i := 0; i < 5+rand.Intn(5)*3; i++ {
+			noteHeight = doodads.NewNote(noteSpace, noteHeight)
+		}
 
 		uglymugger, _ := render.LoadSprite("", filepath.Join("16x16", "ugly_mugger.png"))
 		for i := 0; i < 10; i++ {
