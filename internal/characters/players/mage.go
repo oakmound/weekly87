@@ -55,7 +55,7 @@ func MageInit() {
 		Speed:        floatgeom.Point2{0, 5},
 		RunSpeed:     3.0,
 		Special1:     abilities.Fireball,
-		Special2:     abilities.Fireball,
+		Special2:     abilities.Invulnerability,
 	}
 
 	whiteMageMap := filterCharMap(mageCharMap, recolor.Recolor(recolor.WhiteMage))
