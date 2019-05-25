@@ -71,6 +71,7 @@ var Scene = scene.Scene{
 				// entities
 				render.NewHeap(false),
 				// maybe effects?
+				render.NewHeap(false),
 				// ui
 				render.NewHeap(true),
 				render.NewDrawFPS(),
@@ -225,7 +226,7 @@ var Scene = scene.Scene{
 			}
 			abilityX := float64(cornerPad + i*aPad)
 
-			btnOpts := btn.And(menus.BtnCfgB, btn.Layers(3, 0),
+			btnOpts := btn.And(menus.BtnCfgB, btn.Layers(4, 0),
 				btn.Pos(abilityX, cornerPad),
 				btn.Height(aRendDims),
 				btn.Width(aRendDims),
