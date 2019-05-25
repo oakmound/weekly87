@@ -41,8 +41,8 @@ func (a *ability) Renderable() render.Modifiable {
 func (a *ability) Trigger() {
 
 	if a.user.Ready() && a.renderable.Get(1).(*cooldown).Trigger() {
-		artifcats := a.trigger(a.user)
-		event.Trigger("AbilityFired", artifcats)
+		artifacts := a.trigger(a.user)
+		event.Trigger("AbilityFired", artifacts)
 	}
 }
 
