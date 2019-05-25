@@ -70,15 +70,19 @@ func (s *Section) W() float64 {
 
 func (s *Section) ActivateEntities() {
 	for _, e := range s.entities {
-		e.Activate()
-		render.Draw(e.GetRenderable(), 2, 1)
+		if e != nil {
+			e.Activate()
+			render.Draw(e.GetRenderable(), 2, 1)
+		}
 	}
 }
 
 func (s *Section) ShiftEntities(shift float64) {
 	s.entityMutex.Lock()
 	for _, e := range s.entities {
-		move.ShiftX(e, shift)
+		if e != nil {
+			move.ShiftX(e, shift)
+		}
 	}
 	s.entityMutex.Unlock()
 }
