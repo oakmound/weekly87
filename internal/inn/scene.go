@@ -77,9 +77,9 @@ var Scene = scene.Scene{
 		doodads.NewFurniture(470, 225, 205, 60) // top Table
 		doodads.NewFurniture(480, 430, 185, 55) // bottom Table
 
-		c := render.NewColorBox(85, 65, color.RGBA{200, 200, 200, 255})
-		c.SetPos(240, 60)
-		render.Draw(c, 2, 2)
+		// c := render.NewColorBox(85, 65, color.RGBA{200, 200, 200, 255})
+		// c.SetPos(240, 60)
+		// render.Draw(c, 2, 2)
 
 		noteSpace := floatgeom.NewRect2WH(240, 60, 85, 65)
 
@@ -88,16 +88,23 @@ var Scene = scene.Scene{
 			noteHeight = doodads.NewNote(noteSpace, noteHeight)
 		}
 
-		uglymugger, _ := render.LoadSprite("", filepath.Join("16x16", "ugly_mugger.png"))
+		uglymugger, _ := render.LoadSprites("", filepath.Join("16x16", "ugly_mugger.png"), 16, 16, 0)
+		prettyMugs := []*render.Sprite{uglymugger[0][0], uglymugger[0][1], uglymugger[1][0]}
 		for i := 0; i < 10; i++ {
-			doodads.NewOrnament(130, 130, 100, float64(oak.ScreenHeight)-130, uglymugger)
+			doodads.NewOrnament(130, 130, 100, float64(oak.ScreenHeight)-130, prettyMugs[rand.Intn(3)])
 		}
 
+		npcs := []NPC{}
+
 		npcScale := 1.6
-		NewInnNPC(players.Mage, npcScale, 440, 420)
-		NewInnNPC(players.WhiteMage, npcScale, 680, 430).R.(*render.Switch).Set("standLT")
-		NewInnNPC(players.Spearman, npcScale, 450, 240)
-		NewInnNPC(players.Swordsman, npcScale, 680, 230).R.(*render.Switch).Set("standLT")
+		npcs = append(npcs, NewInnNPC(players.Mage, npcScale, 440, 420))
+		n := NewInnNPC(players.WhiteMage, npcScale, 680, 430)
+		n.R.(*render.Switch).Set("standLT")
+		npcs = append(npcs, n)
+		npcs = append(npcs, NewInnNPC(players.Spearman, npcScale, 450, 240))
+		n2 := NewInnNPC(players.Swordsman, npcScale, 680, 230)
+		n2.R.(*render.Switch).Set("standLT")
+		npcs = append(npcs, n2)
 
 		ptycon := players.PartyConstructor{
 			Players: players.ClassConstructor(
@@ -166,6 +173,9 @@ var Scene = scene.Scene{
 			}
 
 		})
+
+		// err = mouse.PhaseCollision()
+		dlog.ErrorCheck(err)
 
 		// Set up the audio
 		music, err = audio.Load(filepath.Join("assets", "audio"), "inn1.wav")
