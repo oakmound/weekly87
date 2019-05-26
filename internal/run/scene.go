@@ -59,32 +59,27 @@ var Scene = scene.Scene{
 		nextscene = "endGame"
 		facing = 1
 
+		runLayers := []render.Stackable{
+			// ground groundLayer
+			render.NewCompositeR(),
+			// wall backgroundLayer
+			render.NewCompositeR(),
+			// entities 	playLayer
+			render.NewHeap(false),
+			// effects effectLayer
+			render.NewHeap(false),
+			// ui uiLayer
+			render.NewHeap(true),
+		}
+
 		// There should be some way to draw to a stack based
 		// on layer name
 		if settings.Active.ShowFpsToggle {
-			render.SetDrawStack(
-				// ground
-				render.NewCompositeR(),
-				// maybe background / parallax?
-				// wall
-				render.NewCompositeR(),
-				// entities
-				render.NewHeap(false),
-				// maybe effects?
-				render.NewHeap(false),
-				// ui
-				render.NewHeap(true),
-				render.NewDrawFPS(),
-				render.NewLogicFPS(),
-			)
-		} else {
-			render.SetDrawStack(
-				render.NewCompositeR(),
-				render.NewCompositeR(),
-				render.NewHeap(false),
-				render.NewHeap(true),
-			)
+			runLayers = append(runLayers, render.NewDrawFPS(), render.NewLogicFPS())
 		}
+
+		render.SetDrawStack(runLayers...)
+
 		debugTree := dtools.NewRTree(collision.DefTree)
 		debugTree.ColorMap = map[collision.Label]color.RGBA{
 			labels.Chest:        color.RGBA{255, 255, 0, 255},
