@@ -3,6 +3,7 @@ package inn
 import (
 	"fmt"
 	"image/color"
+	"math"
 	"math/rand"
 	"path/filepath"
 	"strings"
@@ -98,13 +99,24 @@ var Scene = scene.Scene{
 
 		npcScale := 1.6
 		npcs = append(npcs, NewInnNPC(players.Mage, npcScale, 440, 420))
-		n := NewInnNPC(players.WhiteMage, npcScale, 680, 430)
-		n.R.(*render.Switch).Set("standLT")
-		npcs = append(npcs, n)
+		npcs = append(npcs, NewInnNPC(players.WhiteMage, npcScale, 680, 430).FaceLeft(true))
 		npcs = append(npcs, NewInnNPC(players.Spearman, npcScale, 450, 240))
-		n2 := NewInnNPC(players.Swordsman, npcScale, 680, 230)
-		n2.R.(*render.Switch).Set("standLT")
-		npcs = append(npcs, n2)
+		npcs = append(npcs, NewInnNPC(players.Swordsman, npcScale, 680, 230).FaceLeft(true))
+
+		// For now lets use a combined metric for progress of npc unlocks
+		progress := int(math.Min(float64(r.SectionsCleared)/10.0, float64(len(npcs))))
+
+		futureNpcs := npcs[progress:len(npcs)]
+		npcs = npcs[0:progress]
+
+		fmt.Println(len(futureNpcs))
+		for _, fn := range futureNpcs {
+			// fn.RSpace = nil
+			fn.Destroy()
+		}
+		for _, np := range npcs {
+			np.Activate()
+		}
 
 		ptycon := players.PartyConstructor{
 			Players: players.ClassConstructor(

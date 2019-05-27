@@ -124,6 +124,17 @@ func (n *NPC) Init() event.CID {
 	return event.NextID(n)
 }
 
+// FaceLeft take wether the npc should face left
+// Set the facing renderable appropriately
+func (n NPC) FaceLeft(shouldFaceLeft bool) NPC {
+	if shouldFaceLeft {
+		n.R.(*render.Switch).Set("standLT")
+	} else {
+		n.R.(*render.Switch).Set("standRT")
+	}
+	return n
+}
+
 // NewInnNPC creates a npc to interact with for setting up party
 func NewInnNPC(class int, scale, x, y float64) NPC {
 	pcon := players.ClassConstructor([]int{class})[0]
@@ -141,7 +152,17 @@ func NewInnNPC(class int, scale, x, y float64) NPC {
 		n.Init(),
 		0,
 	)
+
+	return n
+}
+
+// Activate draws the npc and makes it collidable
+func (n NPC) Activate() {
 	n.RSpace.UpdateLabel(labels.NPC)
 	render.Draw(n.R, 2, 1)
-	return n
+}
+
+func (n NPC) Destroy() {
+	n.Tree.Remove(n.RSpace.Space)
+
 }
