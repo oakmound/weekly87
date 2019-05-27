@@ -68,6 +68,8 @@ var Scene = scene.Scene{
 			render.NewHeap(false),
 			// effects effectLayer
 			render.NewHeap(false),
+			// overlay Level
+			render.NewHeap(false),
 			// ui uiLayer
 			render.NewHeap(true),
 		}
@@ -89,7 +91,7 @@ var Scene = scene.Scene{
 			labels.PC:           color.RGBA{125, 0, 255, 255},
 			labels.PlayerAttack: color.RGBA{255, 0, 125, 255},
 		}
-		render.Draw(debugTree, 2, 1000)
+		render.Draw(debugTree, overlayLevel, 1000)
 
 		debugInvuln := false
 
@@ -122,7 +124,7 @@ var Scene = scene.Scene{
 		tracker := section.NewTracker(BaseSeed)
 
 		for i, p := range pty.Players {
-			render.Draw(p.R, 2, 2)
+			render.Draw(p.R, playLayer, 2)
 			rs := p.GetReactiveSpace()
 
 			// Interaction with Enemies
@@ -159,7 +161,7 @@ var Scene = scene.Scene{
 					// Show pop up to go to endgame scene
 					menuX := (float64(oak.ScreenWidth) - 180) / 2
 					menuY := float64(oak.ScreenHeight) / 4
-					btn.New(menus.BtnCfgB, btn.Layers(3, 0),
+					btn.New(menus.BtnCfgB, btn.Layers(uiLayer, 0),
 						btn.Pos(menuX, menuY), btn.Text("Defeated! See Your Stats?"),
 						btn.Width(180),
 						btn.Binding(mouse.ClickOn, func(int, interface{}) int {
@@ -195,7 +197,7 @@ var Scene = scene.Scene{
 				p.Chests = append(p.Chests, r)
 
 				ch.Destroy()
-				render.Draw(r, 2, 2)
+				render.Draw(r, playLayer, 2)
 				runbackOnce.Do(func() {
 					facing = -1
 					event.Trigger("RunBack", nil)
@@ -221,7 +223,7 @@ var Scene = scene.Scene{
 			}
 			abilityX := float64(cornerPad + i*aPad)
 
-			btnOpts := btn.And(menus.BtnCfgB, btn.Layers(4, 0),
+			btnOpts := btn.And(menus.BtnCfgB, btn.Layers(uiLayer, 0),
 				btn.Pos(abilityX, cornerPad),
 				btn.Height(aRendDims),
 				btn.Width(aRendDims),

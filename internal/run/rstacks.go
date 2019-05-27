@@ -5,6 +5,7 @@ const (
 	backgroundLayer
 	playLayer
 	effectLayer
+	overlayLevel
 	uiLayer
 	fpsLayer
 )
