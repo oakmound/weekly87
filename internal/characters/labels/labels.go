@@ -7,9 +7,8 @@ const (
 	PC
 	Enemy
 	NPC
-	Pickup
-	PlayerAttack
-	EnemyAttack
 	Blocking
 	Ornament
+	EffectsPlayer
+	EffectsEnemy
 )

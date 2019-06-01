@@ -4,6 +4,9 @@ import (
 	"errors"
 	"math"
 	"strconv"
+	"time"
+
+	"github.com/oakmound/weekly87/internal/abilities/buff"
 
 	"github.com/oakmound/oak/key"
 
@@ -113,6 +116,7 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			}
 		}
 		p := Player{}
+		p.Status = &buff.Status{}
 
 		if pcon.Special1 != nil {
 			p.Special1 = pcon.Special1.SetUser(&p)
@@ -152,6 +156,7 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 		for ev, b := range pcon.Bindings {
 			p.CheckedBind(b, ev)
 		}
+		p.Party = pty
 		pty.Players = append(pty.Players, &p)
 	}
 
@@ -166,13 +171,13 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 	}
 	pty.CheckedBind(func(pty *Party, _ interface{}) int {
 		for i, p := range pty.Players {
+			// Lean towards being generous
+			p.AddBuff(buff.Invulnerable(5 * time.Second))
 			i := i
 			p.RunSpeed *= -1
-			p.ForcedInvulnerable = true
 			p.CheckedBind(func(p *Player, _ interface{}) int {
 				// Shift the player back until against the right wall
 				if int(p.X())-oak.ViewPos.X >= oak.ScreenWidth-(WallOffset+(len(pty.Players)-1-i)*PlayerGap) {
-					p.ForcedInvulnerable = false
 					return event.UnbindSingle
 				}
 				p.ShiftX(float64(-pty.RunSpeed()) * 2)
@@ -234,6 +239,14 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 					} else {
 						p.Swtch.Set("stand" + p.facing)
 					}
+				}
+			}
+			for len(p.Buffs) > 0 {
+				if p.Buffs[0].ExpireAt.Before(time.Now()) {
+					p.Buffs[0].Disable(p.Status)
+					p.Buffs = p.Buffs[1:]
+				} else {
+					break
 				}
 			}
 		}

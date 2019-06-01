@@ -1,8 +1,13 @@
 package players
 
 import (
+	"sort"
+	"sync"
+	"time"
+
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/weekly87/internal/abilities"
+	"github.com/oakmound/weekly87/internal/abilities/buff"
 
 	"github.com/oakmound/oak/dlog"
 
@@ -57,15 +62,29 @@ func (pc *Constructor) Copy() *Constructor {
 
 type Player struct {
 	*entities.Interactive
-	facing             string
-	Swtch              *render.Switch
-	Special1           abilities.Ability
-	Special2           abilities.Ability
-	Alive              bool
-	ForcedInvulnerable bool
-	RunSpeed           float64
-	ChestValues        []int64
-	Chests             []render.Renderable
+	facing      string
+	Swtch       *render.Switch
+	Special1    abilities.Ability
+	Special2    abilities.Ability
+	Alive       bool
+	RunSpeed    float64
+	ChestValues []int64
+	Chests      []render.Renderable
+	BuffLock    sync.Mutex
+	Buffs       []buff.Buff
+	*buff.Status
+	Party *Party
+}
+
+func (p *Player) AddBuff(b buff.Buff) {
+	p.BuffLock.Lock()
+	b.ExpireAt = time.Now().Add(b.Duration)
+	p.Buffs = append(p.Buffs, b)
+	sort.Slice(p.Buffs, func(i, j int) bool {
+		return p.Buffs[i].ExpireAt.Before(p.Buffs[j].ExpireAt)
+	})
+	p.BuffLock.Unlock()
+	b.Enable(p.Status)
 }
 
 func (p *Player) Init() event.CID {

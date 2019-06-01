@@ -1,7 +1,6 @@
 package abilities
 
 import (
-	"fmt"
 	"math"
 	"time"
 
@@ -16,6 +15,7 @@ import (
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/particle"
+	"github.com/oakmound/weekly87/internal/abilities/buff"
 	"github.com/oakmound/weekly87/internal/characters"
 )
 
@@ -37,6 +37,8 @@ type Producer struct {
 	Interval time.Duration
 
 	Arc bool
+
+	Buffs []buff.Buff
 }
 
 type Option func(Producer) Producer
@@ -87,7 +89,6 @@ func WithLabel(l collision.Label) Option {
 
 func WithRenderable(r render.Renderable) Option {
 	return func(p Producer) Producer {
-		fmt.Println("Setting me a render")
 		p.R = r
 		return p
 	}
@@ -121,6 +122,25 @@ func While(do DoOption, interval time.Duration) Option {
 	return func(p Producer) Producer {
 		p.WhileFn = do
 		p.Interval = interval
+		return p
+	}
+}
+
+func WithBuff(b buff.Buff) Option {
+	return func(p Producer) Producer {
+		old := p.Buffs
+		p.Buffs = make([]buff.Buff, len(old))
+		copy(p.Buffs, old)
+		p.Buffs = append(p.Buffs, b)
+		return p
+	}
+}
+
+func And(opts ...Option) Option {
+	return func(p Producer) Producer {
+		for _, o := range opts {
+			p = o(p)
+		}
 		return p
 	}
 }
@@ -166,6 +186,15 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 	)
 	prd.RSpace.Space.Label = p.Label
 
+	if prd.R != nil {
+		prd.R.SetPos(p.Start.X(), p.Start.Y())
+		render.Draw(prd.R, 3)
+	}
+
+	if prd.source != nil {
+		prd.source.SetPos(p.Start.X(), p.Start.Y())
+	}
+
 	// If there's no end point, we shouldn't try to move the product
 	if p.End != (floatgeom.Point2{}) {
 
@@ -180,7 +209,6 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 				return nil, err
 			}
 		} else {
-			fmt.Println("Y values", p.Start.Y(), p.End.Y())
 			curve, err = shape.BezierCurve(p.Start.X(), p.Start.Y(), p.End.X(), p.End.Y())
 			if err != nil {
 				dlog.Error("error making bezier curve", err)
@@ -201,15 +229,6 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 			deltas[i] = positions[i+1].Sub(positions[i])
 		}
 
-		if prd.source != nil {
-			prd.source.SetPos(positions[0].X(), positions[0].Y())
-		}
-
-		if prd.R != nil {
-			prd.R.SetPos(positions[0].X(), positions[0].Y())
-			render.Draw(prd.R, 3)
-		}
-
 		prd.Bind(func(id int, _ interface{}) int {
 			prd, ok := event.GetEntity(id).(*Product)
 			if !ok {
@@ -219,36 +238,27 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 			prd.position++
 			if prd.position >= len(deltas) {
 				endx, endy := prd.Point.Vector.GetPos()
-				fmt.Println("----------\nability end\n--------------")
 				prd.next(floatgeom.Point2{endx, endy})
 				prd.Destroy()
 				return event.UnbindSingle
 			}
 			nextDelta := deltas[prd.position]
+			prd.Interactive.ShiftPos(nextDelta.X(), nextDelta.Y())
 			if prd.source != nil {
 				prd.source.ShiftX(nextDelta.X())
 				prd.source.ShiftY(nextDelta.Y())
-				x, y := prd.source.Generator.GetPos()
-				fmt.Println("Source pos", x, y)
-			}
-			if prd.R != nil {
-				prd.R.ShiftX(nextDelta.X())
-				prd.R.ShiftY(nextDelta.Y())
 			}
 			return 0
 		}, "EnterFrame")
-
-	} else {
-		if prd.R != nil {
-			prd.R.SetPos(p.Start.X(), p.Start.Y())
-			render.Draw(prd.R, 3)
-		}
 	}
 
 	// This might expand later on if things have time limits
-	if p.ThenFn != nil {
+	if p.ThenFn == nil {
 		prd.shouldPersist = true
 	}
+
+	prd.buffs = make([]buff.Buff, len(p.Buffs))
+	copy(prd.buffs, p.Buffs)
 
 	chrs := make([]characters.Character, 1)
 	chrs[0] = prd
@@ -267,6 +277,7 @@ type Product struct {
 	position      int
 	source        *particle.Source
 	next          func(floatgeom.Point2)
+	buffs         []buff.Buff
 }
 
 func (p *Product) Destroy() {
@@ -283,4 +294,8 @@ func (p *Product) Activate() {}
 
 func (p *Product) ShouldPersist() bool {
 	return p.shouldPersist
+}
+
+func (p *Product) Buffs() []buff.Buff {
+	return p.buffs
 }

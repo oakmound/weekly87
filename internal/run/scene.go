@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/oakmound/weekly87/internal/abilities/buff"
+
 	"github.com/oakmound/oak/key"
 
 	"github.com/oakmound/oak/mouse"
@@ -84,12 +86,10 @@ var Scene = scene.Scene{
 
 		debugTree := dtools.NewRTree(collision.DefTree)
 		debugTree.ColorMap = map[collision.Label]color.RGBA{
-			labels.Chest:        color.RGBA{255, 255, 0, 255},
-			labels.Door:         color.RGBA{125, 125, 125, 255},
-			labels.Enemy:        color.RGBA{0, 0, 255, 255},
-			labels.EnemyAttack:  color.RGBA{255, 0, 0, 255},
-			labels.PC:           color.RGBA{125, 0, 255, 255},
-			labels.PlayerAttack: color.RGBA{255, 0, 125, 255},
+			labels.Chest: color.RGBA{255, 255, 0, 255},
+			labels.Door:  color.RGBA{125, 125, 125, 255},
+			labels.Enemy: color.RGBA{0, 0, 255, 255},
+			labels.PC:    color.RGBA{125, 0, 255, 255},
 		}
 		render.Draw(debugTree, overlayLevel, 1000)
 
@@ -140,7 +140,7 @@ var Scene = scene.Scene{
 					fmt.Printf("%T\n", s.CID.E())
 					return
 				}
-				if debugInvuln || ply.ForcedInvulnerable || !en.Active {
+				if debugInvuln || ply.Invulnerable > 0 || !en.Active {
 					return
 				}
 				ply.Alive = false
@@ -203,6 +203,43 @@ var Scene = scene.Scene{
 					event.Trigger("RunBack", nil)
 					tracker.Prev()
 				})
+			})
+
+			type Buffer interface {
+				Buffs() []buff.Buff
+			}
+
+			type Destroyable interface {
+				Destroy()
+			}
+
+			rs.Add(labels.EffectsPlayer, func(s, bf *collision.Space) {
+				p, ok := s.CID.E().(*players.Player)
+				if !ok {
+					dlog.Error("Non-player sent to player binding")
+					return
+				}
+				bfr, ok := bf.CID.E().(Buffer)
+				if !ok {
+					dlog.Error("EffectsPlayer label on non-Effecter")
+					return
+				}
+				// Todo: How do we know if the buff is a party wide buff or not
+				pty := p.Party
+				if pty == nil {
+					dlog.Error("Player had no party")
+					return
+				}
+				bfs := bfr.Buffs()
+				for _, b := range bfs {
+					for _, ply := range pty.Players {
+						ply.AddBuff(b)
+					}
+				}
+				if dstr, ok := bfr.(Destroyable); ok {
+					dstr.Destroy()
+				}
+				//bf.CID.Trigger("Hit", nil)
 			})
 
 			// Player got back to the Inn!

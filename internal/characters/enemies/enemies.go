@@ -10,7 +10,6 @@ import (
 	"github.com/oakmound/oak/physics"
 
 	"github.com/oakmound/oak/alg/floatgeom"
-	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
@@ -133,16 +132,16 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		<-be.RSpace.CallOnHits()
 		return 0
 	}, "EnterFrame")
-	be.RSpace.Add(labels.PlayerAttack, func(s, _ *collision.Space) {
-		be, ok := s.CID.E().(*BasicEnemy)
-		if !ok {
-			dlog.Error("On hit for basic enemy called on non-basic enemy")
-			return
-		}
-		// TODO: track changes?
-		event.Trigger("EnemyDeath", []int64{secid, idx})
-		be.Destroy()
-	})
+	// be.RSpace.Add(labels.PlayerAttack, func(s, _ *collision.Space) {
+	// 	be, ok := s.CID.E().(*BasicEnemy)
+	// 	if !ok {
+	// 		dlog.Error("On hit for basic enemy called on non-basic enemy")
+	// 		return
+	// 	}
+	// 	// TODO: track changes?
+	// 	event.Trigger("EnemyDeath", []int64{secid, idx})
+	// 	be.Destroy()
+	// })
 	for ev, b := range ec.Bindings {
 		be.CheckedBind(b, ev)
 	}

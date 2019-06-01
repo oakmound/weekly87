@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/oakmound/weekly87/internal/abilities/buff"
+
 	"github.com/200sc/go-dist/floatrange"
 	"github.com/200sc/go-dist/intrange"
 	"github.com/oakmound/oak/dlog"
@@ -15,6 +17,7 @@ import (
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/weekly87/internal/characters"
+	"github.com/oakmound/weekly87/internal/characters/labels"
 )
 
 var (
@@ -42,7 +45,9 @@ var (
 				return nil
 			}
 
-			banner := WithRenderable(seq)(Producer{})
+			banner := And(WithRenderable(seq),
+				WithLabel(labels.EffectsPlayer),
+				WithBuff(buff.Invulnerable(6*time.Second)))(Producer{})
 
 			pg := particle.NewColorGenerator(
 				particle.Color(color.RGBA{255, 255, 0, 255}, color.RGBA{0, 0, 0, 0},
