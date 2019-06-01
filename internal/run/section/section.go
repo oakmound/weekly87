@@ -52,7 +52,9 @@ func (s *Section) Destroy() {
 	s.ground.Undraw()
 	s.wall.Undraw()
 	for _, e := range s.entities {
-		e.Destroy()
+		if e != nil {
+			e.Destroy()
+		}
 	}
 }
 
