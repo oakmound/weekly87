@@ -28,18 +28,21 @@ var (
 		},
 	)
 	Invulnerability = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{255, 255, 125, 255}),
+		render.NewColorBox(64, 64, color.RGBA{200, 200, 125, 255}),
 		time.Second*10,
 		func(u User) []characters.Character {
 			pos := u.Vec()
 
-			sp, err := render.LoadSprite("images", filepath.Join("16x32", "banner.png"))
+			animFilePath := (filepath.Join("16x32", "banner.png"))
+			seq, err := render.LoadSheetSequence(animFilePath, 16, 32, 0, 5, []int{0, 0, 1, 0, 2, 0, 3, 0, 0, 1, 1, 1, 2, 1}...)
+			dlog.ErrorCheck(err)
+
 			if err != nil {
 				dlog.Error(err)
 				return nil
 			}
 
-			banner := WithRenderable(sp)(Producer{})
+			banner := WithRenderable(seq)(Producer{})
 
 			pg := particle.NewColorGenerator(
 				particle.Color(color.RGBA{255, 255, 0, 255}, color.RGBA{0, 0, 0, 0},

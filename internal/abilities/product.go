@@ -87,6 +87,7 @@ func WithLabel(l collision.Label) Option {
 
 func WithRenderable(r render.Renderable) Option {
 	return func(p Producer) Producer {
+		fmt.Println("Setting me a render")
 		p.R = r
 		return p
 	}
@@ -96,12 +97,14 @@ type DoOption func(floatgeom.Point2)
 
 func Drop(p Producer) DoOption {
 	return func(pt floatgeom.Point2) {
+
 		p.Start = pt
 		chrs, err := p.Produce()
 		if err != nil {
 			dlog.Error(err)
 			return
 		}
+
 		event.Trigger("AbilityFired", chrs)
 	}
 }
@@ -215,6 +218,9 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 			}
 			prd.position++
 			if prd.position >= len(deltas) {
+				endx, endy := prd.Point.Vector.GetPos()
+				fmt.Println("----------\nability end\n--------------")
+				prd.next(floatgeom.Point2{endx, endy})
 				prd.Destroy()
 				return event.UnbindSingle
 			}
@@ -232,6 +238,11 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 			return 0
 		}, "EnterFrame")
 
+	} else {
+		if prd.R != nil {
+			prd.R.SetPos(p.Start.X(), p.Start.Y())
+			render.Draw(prd.R, 3)
+		}
 	}
 
 	// This might expand later on if things have time limits
