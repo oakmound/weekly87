@@ -70,29 +70,34 @@ var Scene = scene.Scene{
 
 		innSpace := floatgeom.NewRect2(0, 0, float64(oak.ScreenWidth), float64(oak.ScreenHeight)-32) //Adjusted for the current size of the spearman
 
+		uglymugger, _ := render.LoadSprites("", filepath.Join("16x16", "ugly_mugger.png"), 16, 16, 0)
+		prettyMugs := []*render.Sprite{uglymugger[0][0], uglymugger[0][1], uglymugger[1][0]}
+
 		doodads.NewFurniture(0, 0, float64(oak.ScreenWidth), 140) // top of inn
 
 		// Additional inn aspects
 		doodads.NewFurniture(130, 130, 100, float64(oak.ScreenHeight)-130) // Left Table
+		for i := 0; i < 2+rand.Intn(7); i++ {
+			doodads.NewOrnament(130, 130, 100, float64(oak.ScreenHeight)-130, prettyMugs[rand.Intn(3)])
+		}
 
-		doodads.NewFurniture(470, 225, 205, 60) // top Table
-		doodads.NewFurniture(480, 430, 185, 55) // bottom Table
+		topLocations := []float64{480, 225, 205, 60}
+		botLocations := []float64{480, 430, 185, 55}
 
-		// c := render.NewColorBox(85, 65, color.RGBA{200, 200, 200, 255})
-		// c.SetPos(240, 60)
-		// render.Draw(c, 2, 2)
+		doodads.NewFurniture(topLocations[0], topLocations[1], topLocations[2], topLocations[3]) // top Table
+		for i := 0; i < rand.Intn(6); i++ {
+			doodads.NewOrnament(topLocations[0], topLocations[1], topLocations[2], topLocations[3], prettyMugs[rand.Intn(3)])
+		}
+		doodads.NewFurniture(botLocations[0], botLocations[1], botLocations[2], botLocations[3]) // bottom Table
+		for i := 0; i < rand.Intn(6); i++ {
+			doodads.NewOrnament(botLocations[0], botLocations[1], botLocations[2], botLocations[3], prettyMugs[rand.Intn(3)])
+		}
 
 		noteSpace := floatgeom.NewRect2WH(240, 60, 85, 65)
 
 		noteHeight := 3
 		for i := 0; i < 5+rand.Intn(5)*3; i++ {
 			noteHeight = doodads.NewNote(noteSpace, noteHeight)
-		}
-
-		uglymugger, _ := render.LoadSprites("", filepath.Join("16x16", "ugly_mugger.png"), 16, 16, 0)
-		prettyMugs := []*render.Sprite{uglymugger[0][0], uglymugger[0][1], uglymugger[1][0]}
-		for i := 0; i < 10; i++ {
-			doodads.NewOrnament(130, 130, 100, float64(oak.ScreenHeight)-130, prettyMugs[rand.Intn(3)])
 		}
 
 		npcs := []NPC{}
