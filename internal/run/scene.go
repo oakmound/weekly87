@@ -12,6 +12,7 @@ import (
 	"github.com/oakmound/weekly87/internal/abilities/buff"
 
 	"github.com/oakmound/oak/key"
+	"github.com/oakmound/oak/physics"
 
 	"github.com/oakmound/oak/mouse"
 
@@ -146,10 +147,14 @@ var Scene = scene.Scene{
 
 				if ply.Shield > 0 {
 					dlog.Info("Enemy hit us be we were shielded")
+
+					// Affect the enemy
+					en.PushBack.Add(physics.NewVector(100, 0))
+
+					// Remove the charge from our buffs
 					for buffIdx, b := range ply.Buffs {
 						if b.Name == buff.NameShield {
 							b.Charges--
-
 							if b.Charges <= 0 {
 								b.ExpireAt = time.Now()
 							}

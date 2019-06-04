@@ -45,6 +45,7 @@ type BasicEnemy struct {
 	swtch         *render.Switch
 	Active        bool
 	beenDisplayed bool
+	PushBack      physics.Vector
 }
 
 func (be *BasicEnemy) Init() event.CID {
@@ -85,6 +86,7 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		}
 	}
 	be := &BasicEnemy{}
+	be.PushBack = physics.NewVector(0, 0)
 	newMp := map[string]render.Modifiable{}
 	for animKey, anim := range ec.AnimationMap {
 		newMp[animKey] = anim.Copy()
@@ -111,7 +113,14 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 	be.CheckedBind(func(be *BasicEnemy, _ interface{}) int {
 		// Enemies should only do anything if they are on screen
 		// Todo: other things could effect delta temporarily
-		be.Delta = be.Speed
+
+		push := be.PushBack
+
+		if be.facing == "RT" {
+			push.Scale(-1)
+		}
+		be.Delta = be.Speed.Copy().Add(push)
+		be.PushBack.Scale(0.8)
 		if be.X() <= float64(oak.ScreenWidth+oak.ViewPos.X) &&
 			be.X()+be.W >= float64(oak.ViewPos.X) {
 			//be.RSpace.Label = labels.Enemy
