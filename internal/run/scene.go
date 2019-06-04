@@ -143,6 +143,25 @@ var Scene = scene.Scene{
 				if debugInvuln || ply.Invulnerable > 0 || !en.Active {
 					return
 				}
+
+				if ply.Shield > 0 {
+					dlog.Info("Enemy hit us be we were shielded")
+					for buffIdx, b := range ply.Buffs {
+						if b.Name == buff.NameShield {
+							b.Charges--
+
+							if b.Charges <= 0 {
+								b.ExpireAt = time.Now()
+							}
+							ply.Buffs[buffIdx] = b
+
+							return
+						}
+					}
+					dlog.Warn("We thought we had shield but we could not find a buff with such a name")
+					return
+				}
+
 				ply.Alive = false
 				for _, r := range ply.Chests {
 					r.Undraw()

@@ -1,10 +1,12 @@
 package players
 
 import (
+	"fmt"
 	"sort"
 	"sync"
 	"time"
 
+	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/weekly87/internal/abilities"
 	"github.com/oakmound/weekly87/internal/abilities/buff"
@@ -68,8 +70,10 @@ type Player struct {
 	Special2    abilities.Ability
 	Alive       bool
 	RunSpeed    float64
+	PartyIndex  int
 	ChestValues []int64
 	Chests      []render.Renderable
+	buffR       []render.Renderable
 	BuffLock    sync.Mutex
 	Buffs       []buff.Buff
 	*buff.Status
@@ -79,12 +83,27 @@ type Player struct {
 func (p *Player) AddBuff(b buff.Buff) {
 	p.BuffLock.Lock()
 	b.ExpireAt = time.Now().Add(b.Duration)
+	b.R = b.RGen()
 	p.Buffs = append(p.Buffs, b)
+	render.Draw(b.R, 5, 10)
 	sort.Slice(p.Buffs, func(i, j int) bool {
 		return p.Buffs[i].ExpireAt.Before(p.Buffs[j].ExpireAt)
 	})
 	p.BuffLock.Unlock()
 	b.Enable(p.Status)
+	p.ReorderBuffs()
+
+}
+
+func (p *Player) ReorderBuffs() {
+	xOffset := abilities.BuffIconSize + 4
+	yOffset := abilities.BuffIconSize + 4
+	x := float64(p.PartyIndex*xOffset + oak.ScreenWidth/4*3)
+
+	for i, b := range p.Buffs {
+		b.R.SetPos(x, float64(yOffset*i+16))
+		fmt.Println("Drawing at ", x, float64(yOffset*i+16), p.PartyIndex)
+	}
 }
 
 func (p *Player) Init() event.CID {

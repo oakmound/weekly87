@@ -3,12 +3,15 @@ package abilities
 import (
 	"time"
 
+	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/weekly87/internal/characters"
 
 	"github.com/oakmound/oak/render"
 )
+
+var BuffIconSize = 16
 
 // User is something that can use abilities
 type User interface {
@@ -42,6 +45,7 @@ func (a *ability) Trigger() {
 
 	if a.user.Ready() && a.renderable.Get(1).(*cooldown).Trigger() {
 		artifacts := a.trigger(a.user)
+		dlog.Verb("Trigger ability firing")
 		event.Trigger("AbilityFired", artifacts)
 	}
 }

@@ -47,7 +47,7 @@ var (
 
 			banner := And(WithRenderable(seq),
 				WithLabel(labels.EffectsPlayer),
-				WithBuff(buff.Invulnerable(6*time.Second)))(Producer{})
+				WithBuff(buff.Invulnerable(render.NewColorBox(BuffIconSize, BuffIconSize, color.RGBA{250, 250, 0, 255}), 6*time.Second)))(Producer{})
 
 			pg := particle.NewColorGenerator(
 				particle.Color(color.RGBA{255, 255, 0, 255}, color.RGBA{0, 0, 0, 0},

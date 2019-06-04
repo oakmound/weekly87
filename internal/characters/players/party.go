@@ -2,6 +2,7 @@ package players
 
 import (
 	"errors"
+	"image/color"
 	"math"
 	"strconv"
 	"time"
@@ -116,6 +117,7 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			}
 		}
 		p := Player{}
+		p.PartyIndex = i
 		p.Status = &buff.Status{}
 
 		if pcon.Special1 != nil {
@@ -172,7 +174,7 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 	pty.CheckedBind(func(pty *Party, _ interface{}) int {
 		for i, p := range pty.Players {
 			// Lean towards being generous
-			p.AddBuff(buff.Invulnerable(5 * time.Second))
+			p.AddBuff(buff.Invulnerable(render.NewColorBox(8, 8, color.RGBA{255, 255, 0, 255}), 5*time.Second))
 			i := i
 			p.RunSpeed *= -1
 			p.CheckedBind(func(p *Player, _ interface{}) int {
@@ -243,8 +245,12 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			}
 			for len(p.Buffs) > 0 {
 				if p.Buffs[0].ExpireAt.Before(time.Now()) {
+					p.BuffLock.Lock()
 					p.Buffs[0].Disable(p.Status)
+					p.Buffs[0].R.Undraw()
 					p.Buffs = p.Buffs[1:]
+					p.BuffLock.Unlock()
+					p.ReorderBuffs()
 				} else {
 					break
 				}
