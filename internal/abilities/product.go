@@ -98,7 +98,7 @@ type DoOption func(floatgeom.Point2)
 
 func Drop(p Producer) DoOption {
 	return func(pt floatgeom.Point2) {
-
+		dlog.Info("An ability dropped something")
 		p.Start = pt
 		chrs, err := p.Produce()
 		if err != nil {
@@ -237,8 +237,6 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 			}
 			prd.position++
 			if prd.position >= len(deltas) {
-				endx, endy := prd.Point.Vector.GetPos()
-				prd.next(floatgeom.Point2{endx, endy})
 				prd.Destroy()
 				return event.UnbindSingle
 			}
