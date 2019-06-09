@@ -13,6 +13,8 @@ import (
 
 	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/physics"
+	"github.com/oakmound/oak/render/particle"
+	"github.com/oakmound/oak/shape"
 
 	"github.com/oakmound/oak/mouse"
 
@@ -22,6 +24,8 @@ import (
 
 	"github.com/oakmound/weekly87/internal/settings"
 
+	"github.com/200sc/go-dist/floatrange"
+	"github.com/200sc/go-dist/intrange"
 	klg "github.com/200sc/klangsynthese/audio"
 	"github.com/200sc/klangsynthese/audio/filter"
 
@@ -150,6 +154,34 @@ var Scene = scene.Scene{
 
 					// Affect the enemy
 					en.PushBack.Add(physics.NewVector(100, 0))
+					pg := particle.NewColorGenerator(
+						particle.Color(color.RGBA{255, 158, 0, 255}, color.RGBA{0, 0, 0, 0},
+							color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
+						particle.Shape(shape.Diamond),
+						particle.Size(intrange.NewConstant(10)),
+						particle.EndSize(intrange.NewConstant(5)),
+						particle.Speed(floatrange.NewConstant(2)),
+						particle.LifeSpan(floatrange.NewConstant(2)),
+						particle.Spread(5, 5),
+						particle.NewPerFrame(floatrange.NewConstant(40)),
+					)
+
+					source := pg.Generate(2)
+					source.SetPos(en.X(), en.Y())
+					endSource := time.Now().Add(time.Millisecond * 700)
+					source.CID.Bind(func(id int, data interface{}) int {
+						eff, ok := event.GetEntity(id).(*particle.Source)
+						if ok {
+							eff.ShiftX(ply.Delta.X() + 1)
+
+							if endSource.Before(time.Now()) {
+								eff.Stop()
+								return 1
+							}
+						}
+
+						return 0
+					}, "EnterFrame")
 
 					// Remove the charge from our buffs
 					for buffIdx, b := range ply.Buffs {
@@ -159,6 +191,8 @@ var Scene = scene.Scene{
 								b.ExpireAt = time.Now()
 							}
 							ply.Buffs[buffIdx] = b
+
+							//TODO: Consider have shields create different pushbacks
 
 							return
 						}
