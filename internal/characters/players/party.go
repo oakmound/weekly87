@@ -255,6 +255,27 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 					break
 				}
 			}
+			flashStartTime := time.Now().Add(time.Second * 5)
+			flashCounter := 5
+			for bIndex := 0; bIndex < len(p.Buffs); bIndex++ {
+				if p.Buffs[bIndex].PreExpireCounter == 0 && p.Buffs[bIndex].ExpireAt.Before(flashStartTime) {
+					p.Buffs[bIndex].PreExpireCounter++
+					switchBuffR(&p.Buffs[bIndex])
+					//p.Buffs[bIndex].R.SetRGBA(p.Buffs[bIndex].AltRenders.GetRGBA())
+
+				} else if p.Buffs[bIndex].PreExpireCounter > 0 {
+					p.Buffs[bIndex].PreExpireCounter++
+					if p.Buffs[bIndex].PreExpireCounter > flashCounter {
+						p.Buffs[bIndex].PreExpireCounter = 1
+						switchBuffR(&p.Buffs[bIndex])
+						//fmt.Println(p.Buffs[bIndex].R.(*render.Switch).Get())
+					}
+
+				} else {
+					break
+				}
+			}
+
 		}
 
 		oak.SetScreen(oak.ViewPos.X+int(pty.RunSpeed()), oak.ViewPos.Y)
@@ -267,4 +288,21 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 	}
 
 	return pty, nil
+}
+
+// switchBuffR is a utility fxn for buff update
+func switchBuffR(b *buff.Buff) *buff.Buff {
+	keyProgression := b.AltRenders.Get()
+	if keyProgression == "base" {
+		b.AltRenders.Set("flicker")
+	} else {
+		b.AltRenders.Set("base")
+	}
+
+	posX := b.R.X()
+	posY := b.R.Y()
+
+	// b.R = b.AltRenders.GetSub(b.AltRenders.Get())
+	b.R.SetPos(posX, posY)
+	return b
 }

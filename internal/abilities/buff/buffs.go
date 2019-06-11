@@ -4,17 +4,20 @@ import (
 	"time"
 
 	"github.com/oakmound/oak/render"
+	"github.com/oakmound/oak/render/mod"
 )
 
 type Buff struct {
-	Duration time.Duration
-	ExpireAt time.Time
-	Charges  int
-	Name     Name
-	Enable   func(*Status)
-	Disable  func(*Status)
-	R        render.Modifiable
-	RGen     func() render.Modifiable
+	Duration         time.Duration
+	ExpireAt         time.Time
+	Charges          int
+	PreExpireCounter int
+	Name             Name
+	Enable           func(*Status)
+	Disable          func(*Status)
+	R                render.Modifiable
+	AltRenders       render.Switch
+	RGen             func() render.Modifiable
 }
 
 type Name int
@@ -29,6 +32,13 @@ type Status struct {
 	Shield       int
 }
 
+// BasicBuffSwitch is a utlity that creates our standard flicker setup
+func BasicBuffSwitch(base render.Modifiable) render.Switch {
+	flick := base.Copy()
+	flick.Filter(mod.Fade(120))
+	return *render.NewSwitch("base", map[string]render.Modifiable{"base": base.Copy(), "flicker": flick})
+}
+
 func Invulnerable(r render.Modifiable, dur time.Duration) Buff {
 	return Buff{
 		Duration: dur,
@@ -38,6 +48,7 @@ func Invulnerable(r render.Modifiable, dur time.Duration) Buff {
 		Disable: func(s *Status) {
 			s.Invulnerable--
 		},
+
 		RGen: func() render.Modifiable {
 			return r.Copy()
 		},
