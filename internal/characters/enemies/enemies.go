@@ -2,11 +2,13 @@ package enemies
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/restrictor"
 
 	"github.com/oakmound/oak"
+	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/physics"
 
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -141,6 +143,19 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		<-be.RSpace.CallOnHits()
 		return 0
 	}, "EnterFrame")
+
+	be.GetReactiveSpace().Add(labels.EffectsEnemy, func(s, bf *collision.Space) {
+		be, ok := s.CID.E().(*BasicEnemy)
+		if !ok {
+			dlog.Error("Non-enemy affected??")
+			fmt.Printf("%T\n", s.CID.E())
+			return
+		}
+
+		fmt.Println("Trying to effect an enemy but for now we will be lazy and murder the enemy ", be)
+		event.Trigger("EnemyDeath", []int64{secid, idx})
+		be.Destroy()
+	})
 	// be.RSpace.Add(labels.PlayerAttack, func(s, _ *collision.Space) {
 	// 	be, ok := s.CID.E().(*BasicEnemy)
 	// 	if !ok {

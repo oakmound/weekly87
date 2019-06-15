@@ -1,7 +1,6 @@
 package abilities
 
 import (
-	"fmt"
 	"image/color"
 	"path/filepath"
 	"time"
@@ -26,10 +25,64 @@ var (
 		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 255}),
 		time.Second*10,
 		func(u User) []characters.Character {
-			fmt.Println("Just tried to burn a guy ", u)
-			return nil
+			dlog.Info("Firing a fireball")
+			pos := u.Vec()
+
+			// Spell Display
+			pg := particle.NewColorGenerator(
+				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
+					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
+				particle.Shape(shape.Diamond),
+				particle.Size(intrange.NewConstant(10)),
+				particle.EndSize(intrange.NewConstant(3)),
+				particle.Speed(floatrange.NewConstant(1)),
+				particle.LifeSpan(floatrange.NewConstant(20)),
+			)
+			end := floatgeom.Point2{pos.X() + 600, pos.Y()}
+			chrs, err := Produce(
+				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
+				//ArcTo(end),
+				LineTo(end),
+				WithParticles(pg),
+				WithLabel(labels.EffectsEnemy),
+			)
+			dlog.ErrorCheck(err)
+			return chrs
 		},
 	)
+
+	// GameBreakerFireBall is debug murder ability
+	GameBreakerFireBall = NewAbility(
+		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 255}),
+		time.Millisecond*1,
+		func(u User) []characters.Character {
+			dlog.Info("Firing a fireball")
+			pos := u.Vec()
+
+			// Spell Display
+			pg := particle.NewColorGenerator(
+				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
+					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
+				particle.Shape(shape.Diamond),
+				particle.Size(intrange.NewConstant(50)),
+				particle.EndSize(intrange.NewConstant(50)),
+				particle.Speed(floatrange.NewConstant(3)),
+				particle.LifeSpan(floatrange.NewConstant(1)),
+			)
+			end := floatgeom.Point2{pos.X() + 1200, pos.Y()}
+			chrs, err := Produce(
+				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
+				//ArcTo(end),
+				LineTo(end),
+				WithParticles(pg),
+				WithLabel(labels.EffectsEnemy),
+			)
+			dlog.ErrorCheck(err)
+			return chrs
+		},
+	)
+
+	// Invulnerability
 	Invulnerability = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{200, 200, 125, 255}),
 		time.Second*10,
