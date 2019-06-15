@@ -38,7 +38,11 @@ var (
 				particle.Speed(floatrange.NewConstant(1)),
 				particle.LifeSpan(floatrange.NewConstant(20)),
 			)
-			end := floatgeom.Point2{pos.X() + 600, pos.Y()}
+			endDelta := 600.0
+			if u.Direction() == "LT" {
+				endDelta *= -1
+			}
+			end := floatgeom.Point2{pos.X() + endDelta, pos.Y()}
 			chrs, err := Produce(
 				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
 				//ArcTo(end),
@@ -69,7 +73,11 @@ var (
 				particle.Speed(floatrange.NewConstant(3)),
 				particle.LifeSpan(floatrange.NewConstant(1)),
 			)
-			end := floatgeom.Point2{pos.X() + 1200, pos.Y()}
+			endDelta := 1200.0
+			if u.Direction() == "LT" {
+				endDelta *= -1
+			}
+			end := floatgeom.Point2{pos.X() + endDelta, pos.Y()}
 			chrs, err := Produce(
 				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
 				//ArcTo(end),
@@ -111,8 +119,12 @@ var (
 				particle.Speed(floatrange.NewConstant(1)),
 				particle.LifeSpan(floatrange.NewConstant(15)),
 			)
+			endDelta := 600.0
+			if u.Direction() == "LT" {
+				endDelta *= -1
+			}
 
-			end := floatgeom.Point2{pos.X() + 600, pos.Y()}
+			end := floatgeom.Point2{pos.X() + endDelta, pos.Y()}
 			chrs, err := Produce(
 				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
 				//ArcTo(end),
