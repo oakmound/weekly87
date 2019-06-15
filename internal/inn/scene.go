@@ -107,6 +107,7 @@ var Scene = scene.Scene{
 		npcs = append(npcs, NewInnNPC(players.WhiteMage, npcScale, 680, 430).FaceLeft(true))
 		npcs = append(npcs, NewInnNPC(players.Spearman, npcScale, 450, 240))
 		npcs = append(npcs, NewInnNPC(players.Swordsman, npcScale, 680, 230).FaceLeft(true))
+		npcs = append(npcs, NewInnNPC(players.BlueMage, npcScale, 380, 210).FaceLeft(true))
 
 		// For now lets use a combined metric for progress of npc unlocks
 		progress := int(math.Min(float64(r.SectionsCleared)/10.0, float64(len(npcs))))
@@ -114,7 +115,7 @@ var Scene = scene.Scene{
 		futureNpcs := npcs[progress:len(npcs)]
 		npcs = npcs[0:progress]
 
-		fmt.Println(len(futureNpcs))
+		dlog.Verb("Future NPCS", len(futureNpcs))
 		for _, fn := range futureNpcs {
 			// fn.RSpace = nil
 			fn.Destroy()
