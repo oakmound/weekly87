@@ -13,8 +13,10 @@ func Init() {
 	classmapping = map[int]*Constructor{
 		Spearman:  SpearmanConstructor,
 		Swordsman: SwordsmanConstructor,
-		Mage:      MageConstructor,
-		WhiteMage: WhiteMageConstructor,
+		Mage:      MageConstructors["Red"],
+		WhiteMage: MageConstructors["White"],
+		BlueMage:  MageConstructors["Blue"],
+		TimeMage:  MageConstructors["Time"],
 	}
 }
 func filterCharMap(baseCharMap map[string]render.Modifiable, filter mod.Filter) map[string]render.Modifiable {
@@ -33,8 +35,12 @@ func filterCharMap(baseCharMap map[string]render.Modifiable, filter mod.Filter) 
 const (
 	Spearman = iota
 	Swordsman
+	Berserker
+	Paladin
 	Mage
 	WhiteMage
+	BlueMage
+	TimeMage
 )
 
 var classmapping map[int]*Constructor
