@@ -83,8 +83,7 @@ type Player struct {
 func (p *Player) AddBuff(b buff.Buff) {
 	p.BuffLock.Lock()
 	b.ExpireAt = time.Now().Add(b.Duration)
-	b.R = b.RGen()
-	b.AltRenders = buff.BasicBuffSwitch(b.R)
+	b.R = buff.BasicBuffSwitch(b.RGen())
 	p.Buffs = append(p.Buffs, b)
 	render.Draw(b.R, 5, 10)
 	sort.Slice(p.Buffs, func(i, j int) bool {

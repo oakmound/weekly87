@@ -15,8 +15,7 @@ type Buff struct {
 	Name             Name
 	Enable           func(*Status)
 	Disable          func(*Status)
-	R                render.Modifiable
-	AltRenders       render.Switch
+	R                render.Switch
 	RGen             func() render.Modifiable
 }
 
