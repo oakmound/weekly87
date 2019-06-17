@@ -61,7 +61,11 @@ var (
 				particle.LifeSpan(floatrange.NewConstant(15)),
 			)
 
-			end := floatgeom.Point2{pos.X() + 600, pos.Y()}
+			endDelta := 600.0
+			if u.Direction() == "LT" {
+				endDelta *= -1
+			}
+			end := floatgeom.Point2{pos.X() + endDelta, pos.Y()}
 			chrs, err := Produce(
 				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
 				//ArcTo(end),
