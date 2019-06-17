@@ -15,8 +15,7 @@ type Buff struct {
 	Name             Name
 	Enable           func(*Status)
 	Disable          func(*Status)
-	R                render.Modifiable
-	AltRenders       render.Switch
+	R                *render.Switch
 	RGen             func() render.Modifiable
 }
 
@@ -33,10 +32,10 @@ type Status struct {
 }
 
 // BasicBuffSwitch is a utlity that creates our standard flicker setup
-func BasicBuffSwitch(base render.Modifiable) render.Switch {
+func BasicBuffSwitch(base render.Modifiable) *render.Switch {
 	flick := base.Copy()
 	flick.Filter(mod.Fade(120))
-	return *render.NewSwitch("base", map[string]render.Modifiable{"base": base.Copy(), "flicker": flick})
+	return render.NewSwitch("base", map[string]render.Modifiable{"base": base.Copy(), "flicker": flick})
 }
 
 func Invulnerable(r render.Modifiable, dur time.Duration) Buff {
