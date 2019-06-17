@@ -292,11 +292,11 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 
 // switchBuffR is a utility fxn for buff update
 func switchBuffR(b *buff.Buff) *buff.Buff {
-	keyProgression := b.Get()
+	keyProgression := b.R.Get()
 	if keyProgression == "base" {
-		b.Set("flicker")
+		b.R.Set("flicker")
 	} else {
-		b.Set("base")
+		b.R.Set("base")
 	}
 	return b
 }
