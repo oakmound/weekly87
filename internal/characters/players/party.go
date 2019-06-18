@@ -144,6 +144,9 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 		p.Speed = physics.NewVector(pcon.Speed.X(), pcon.Speed.Y())
 		p.RunSpeed = pcon.RunSpeed
 		p.RSpace.UpdateLabel(labels.PC)
+		if i != 0 {
+			p.Delta = pty.Players[0].Delta
+		}
 
 		p.CheckedBind(func(p *Player, _ interface{}) int {
 			p.facing = "LT"
