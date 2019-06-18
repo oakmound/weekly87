@@ -10,6 +10,7 @@ import (
 	"github.com/200sc/go-dist/intrange"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
+	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/particle"
 	"github.com/oakmound/oak/shape"
@@ -73,6 +74,51 @@ var (
 				WithParticles(pg),
 				Then(Drop(banner)),
 			)
+			dlog.ErrorCheck(err)
+			return chrs
+		},
+	)
+
+	SwordSwipe = NewAbility(
+		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 255}),
+		time.Second*4,
+		func(u User) []characters.Character {
+			dlog.Info("Trying to swipe at enemies")
+
+			yDelta := 40.0
+			xOffset := 150.0
+			xDelta := 150.0
+			if u.Direction() == "LT" {
+				xOffset *= -1
+				xDelta *= -1
+			}
+
+			pos := u.Vec().Copy()
+			pos.Add(physics.NewVector(xOffset, 16.0))
+			start := floatgeom.Point2{pos.X(), pos.Y() - yDelta}
+			mid := floatgeom.Point2{pos.X() + xDelta, pos.Y()}
+			end := floatgeom.Point2{pos.X(), pos.Y() + yDelta}
+
+			// Spell Display
+			pg := particle.NewColorGenerator(
+				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
+					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
+				particle.Shape(shape.Diamond),
+				particle.Size(intrange.NewConstant(10)),
+				particle.EndSize(intrange.NewConstant(5)),
+				particle.Speed(floatrange.NewConstant(2)),
+				particle.LifeSpan(floatrange.NewConstant(10)),
+			)
+
+			chrs, err := Produce(
+				StartAt(start),
+
+				FrameLength(20),
+				ArcTo(mid, end),
+				WithLabel(labels.EffectsEnemy),
+				WithParticles(pg),
+			)
+
 			dlog.ErrorCheck(err)
 			return chrs
 		},
