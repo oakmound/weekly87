@@ -86,7 +86,7 @@ var (
 			dlog.Info("Trying to swipe at enemies")
 
 			yDelta := 40.0
-			xOffset := 150.0
+			xOffset := 100.0
 			xDelta := 150.0
 			if u.Direction() == "LT" {
 				xOffset *= -1
@@ -112,9 +112,9 @@ var (
 
 			chrs, err := Produce(
 				StartAt(start),
-
 				FrameLength(20),
 				ArcTo(mid, end),
+				FollowSpeed(u.GetDelta().Xp(), u.GetDelta().Yp()),
 				WithLabel(labels.EffectsEnemy),
 				WithParticles(pg),
 			)

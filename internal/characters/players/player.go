@@ -8,6 +8,7 @@ import (
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
+	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/weekly87/internal/abilities"
 	"github.com/oakmound/weekly87/internal/abilities/buff"
 
@@ -78,6 +79,10 @@ type Player struct {
 	Buffs       []buff.Buff
 	*buff.Status
 	Party *Party
+}
+
+func (p *Player) GetDelta() physics.Vector {
+	return p.Delta
 }
 
 func (p *Player) AddBuff(b buff.Buff) {

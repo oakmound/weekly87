@@ -27,6 +27,8 @@ type Producer struct {
 	W float64
 	H float64
 
+	FollowX   *float64
+	FollowY   *float64
 	Generator particle.Generator
 
 	Label collision.Label
@@ -46,6 +48,15 @@ type Option func(Producer) Producer
 func FrameLength(frames int) Option {
 	return func(p Producer) Producer {
 		p.Frames = frames
+		return p
+	}
+}
+
+func FollowSpeed(xFollow, yFollow *float64) Option {
+
+	return func(p Producer) Producer {
+		p.FollowX = xFollow
+		p.FollowY = yFollow
 		return p
 	}
 }
@@ -200,6 +211,14 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 	if prd.source != nil {
 		prd.source.SetPos(p.Start.X(), p.Start.Y())
 	}
+	prd.FollowX = p.FollowX
+	prd.FollowY = p.FollowY
+	if prd.FollowX == nil {
+		prd.FollowX = new(float64)
+	}
+	if prd.FollowY == nil {
+		prd.FollowY = new(float64)
+	}
 
 	// If there's no end point, we shouldn't try to move the product
 	if p.End != (floatgeom.Point2{}) || len(p.ArcPoints) > 0 {
@@ -247,10 +266,10 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 				return event.UnbindSingle
 			}
 			nextDelta := deltas[prd.position]
-			prd.Interactive.ShiftPos(nextDelta.X(), nextDelta.Y())
+			prd.Interactive.ShiftPos(nextDelta.X()+*prd.FollowX, nextDelta.Y()+*prd.FollowY)
 			if prd.source != nil {
-				prd.source.ShiftX(nextDelta.X())
-				prd.source.ShiftY(nextDelta.Y())
+				prd.source.ShiftX(nextDelta.X() + *prd.FollowX)
+				prd.source.ShiftY(nextDelta.Y() + *prd.FollowY)
 			}
 			return 0
 		}, "EnterFrame")
@@ -279,6 +298,8 @@ type Product struct {
 	*entities.Interactive
 	shouldPersist bool
 	position      int
+	FollowX       *float64
+	FollowY       *float64
 	source        *particle.Source
 	next          func(floatgeom.Point2)
 	buffs         []buff.Buff

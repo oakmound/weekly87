@@ -15,9 +15,10 @@ var BuffIconSize = 16
 
 // User is something that can use abilities
 type User interface {
-	Vec() physics.Vector //Position
-	Direction() string   //Facing
-	Ready() bool         // Currently are you alive
+	Vec() physics.Vector      //Position
+	GetDelta() physics.Vector // Speed
+	Direction() string        //Facing
+	Ready() bool              // Currently are you alive
 }
 
 // Ability is an action with an associated UI element that can be invoked
