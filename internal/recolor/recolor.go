@@ -176,3 +176,53 @@ func ColorShift(inColor color.RGBA) func([]color.RGBA) []color.RGBA {
 		return outColors
 	}
 }
+
+// ColorMix moves all colors towards the given inColor's R G and B
+//
+func ColorMix(inColor color.RGBA) func([]color.RGBA) []color.RGBA {
+	return func(colors []color.RGBA) []color.RGBA {
+
+		inColorFactor := float64(inColor.A) / 255
+
+		// inBrightness := float64(inColor.R) + float64(inColor.G) + float64(inColor.B)
+		// inRBightness := float64(inColor.R) / inBrightness
+		// inGBrightness := float64(inColor.G) / inBrightness
+		// inBBrightness := float64(inColor.B) / inBrightness
+
+		inColorComponent := [3]float64{
+			float64(inColor.R) * inColorFactor,
+			float64(inColor.G) * inColorFactor,
+			float64(inColor.B) * inColorFactor,
+		}
+
+		outColors := make([]color.RGBA, len(colors))
+
+		for i, v := range colors {
+			if v.A == 0 {
+				continue
+			}
+			brightness := float64(v.R) + float64(v.G) + float64(v.B)
+			// Trying not to recolor pure black (outlines)
+			if brightness == 0 {
+				continue
+			}
+
+			// Goals
+			// take into account what we are shifting towards
+			// take into account alpha of origin but also shift (example white mage?)
+			// take into account somewhat the basic colors of the source
+
+			rBrightness := (float64(v.R) * (1 - inColorFactor)) + inColorComponent[0]
+			gBrightness := (float64(v.G) * (1 - inColorFactor)) + inColorComponent[1]
+			bBrightness := (float64(v.B) * (1 - inColorFactor)) + inColorComponent[2]
+
+			// rBrightness := ((float64(v.R)/brightness + inRBightness*2) / 3 * (1 - inColorFactor)) + inColorComponent[0]
+			// gBrightness := ((float64(v.G)/brightness + inGBrightness*2) / 3 * (1 - inColorFactor)) + inColorComponent[1]
+			// bBrightness := ((float64(v.B)/brightness + inBBrightness*2) / 3 * (1 - inColorFactor)) + inColorComponent[2]
+
+			outColors[i] = color.RGBA{uint8(rBrightness), uint8(gBrightness), uint8(bBrightness), v.A}
+		}
+
+		return outColors
+	}
+}
