@@ -284,6 +284,13 @@ type Product struct {
 	buffs         []buff.Buff
 }
 
+func (p *Product) MoveParticles(nextDelta floatgeom.Point2) {
+	if p.source != nil {
+		p.source.ShiftX(nextDelta.X())
+		p.source.ShiftY(nextDelta.Y())
+	}
+}
+
 func (p *Product) Destroy() {
 	if p.next != nil {
 		p.next(floatgeom.Point2{p.X(), p.Y()})

@@ -3,6 +3,7 @@ package section
 import (
 	"sync"
 
+	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/entities/x/move"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/weekly87/internal/characters"
@@ -19,6 +20,9 @@ type Section struct {
 	wall        *render.Sprite
 	entities    []characters.Character
 	entityMutex sync.Mutex
+}
+type MoverWithParticles interface {
+	MoveParticles(floatgeom.Point2)
 }
 
 func (s *Section) Copy() *Section {
@@ -84,6 +88,9 @@ func (s *Section) ShiftEntities(shift float64) {
 	for _, e := range s.entities {
 		if e != nil {
 			move.ShiftX(e, shift)
+			if pm, ok := e.(MoverWithParticles); ok {
+				pm.MoveParticles(floatgeom.Point2{shift, 0})
+			}
 		}
 	}
 	s.entityMutex.Unlock()
