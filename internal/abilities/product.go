@@ -1,7 +1,6 @@
 package abilities
 
 import (
-	"math"
 	"time"
 
 	"github.com/oakmound/oak/shape"
@@ -20,9 +19,10 @@ import (
 )
 
 type Producer struct {
-	Start  floatgeom.Point2
-	End    floatgeom.Point2
-	Frames int
+	Start     floatgeom.Point2
+	End       floatgeom.Point2
+	ArcPoints []float64
+	Frames    int
 
 	W float64
 	H float64
@@ -57,10 +57,14 @@ func StartAt(pt floatgeom.Point2) Option {
 	}
 }
 
-func ArcTo(pt floatgeom.Point2) Option {
+func ArcTo(pts ...floatgeom.Point2) Option {
 	return func(p Producer) Producer {
-		p.End = pt
-		p.Arc = true
+		p.ArcPoints = make([]float64, len(pts)*2)
+		for i, pt := range pts {
+			p.ArcPoints[i*2] = pt.X()
+			p.ArcPoints[i*2+1] = pt.Y()
+		}
+
 		return p
 	}
 }
@@ -68,7 +72,7 @@ func ArcTo(pt floatgeom.Point2) Option {
 func LineTo(pt floatgeom.Point2) Option {
 	return func(p Producer) Producer {
 		p.End = pt
-		p.Arc = false
+
 		return p
 	}
 }
@@ -196,14 +200,14 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 	}
 
 	// If there's no end point, we shouldn't try to move the product
-	if p.End != (floatgeom.Point2{}) {
+	if p.End != (floatgeom.Point2{}) || len(p.ArcPoints) > 0 {
 
 		var curve shape.Bezier
 		var err error
-		if p.Arc {
-			midX := (p.End.X() - p.Start.X()) / 2
-			midY := math.Min(p.End.Y(), p.Start.Y()) / 2
-			curve, err = shape.BezierCurve(p.Start.X(), p.Start.Y(), midX, midY, p.End.X(), p.End.Y())
+		if len(p.ArcPoints) > 0 {
+			tempPoints := []float64{p.Start.X(), p.Start.Y()}
+			tempPoints = append(tempPoints, p.ArcPoints...)
+			curve, err = shape.BezierCurve(tempPoints...)
 			if err != nil {
 				dlog.Error("error making bezier curve", err)
 				return nil, err
