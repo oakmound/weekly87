@@ -81,8 +81,8 @@ var Scene = scene.Scene{
 			doodads.NewOrnament(130, 130, 100, float64(oak.ScreenHeight)-130, prettyMugs[rand.Intn(3)])
 		}
 
-		topLocations := []float64{480, 225, 205, 60}
-		botLocations := []float64{480, 430, 185, 55}
+		topLocations := []float64{480, 230, 190, 60}
+		botLocations := []float64{480, 430, 180, 55}
 
 		doodads.NewFurniture(topLocations[0], topLocations[1], topLocations[2], topLocations[3]) // top Table
 		for i := 0; i < rand.Intn(6); i++ {
