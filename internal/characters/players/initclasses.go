@@ -1,18 +1,22 @@
 package players
 
 import (
+	"image/color"
 	"strings"
 
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/mod"
+	"github.com/oakmound/weekly87/internal/abilities"
 )
 
 func Init() {
 	WarriorsInit()
 	MageInit()
 	classmapping = map[int]*Constructor{
-		Spearman:  SpearmanConstructor,
-		Swordsman: SwordsmanConstructor,
+		Spearman:  WarriorConstructors["Spearman"],
+		Swordsman: WarriorConstructors["Swordsman"],
+		Berserker: WarriorConstructors["Berserker"],
+		Paladin:   WarriorConstructors["Paladin"],
 		Mage:      MageConstructors["Red"],
 		WhiteMage: MageConstructors["White"],
 		BlueMage:  MageConstructors["Blue"],
@@ -52,4 +56,11 @@ func ClassConstructor(partyComp []int) []Constructor {
 		classes[i] = *classmapping[c].Copy()
 	}
 	return classes
+}
+
+type ClassDefinition struct {
+	Name        string
+	LayerColors map[string]color.RGBA
+	Special1    abilities.Ability
+	Special2    abilities.Ability
 }

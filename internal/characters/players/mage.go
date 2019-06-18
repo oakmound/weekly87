@@ -17,17 +17,10 @@ import (
 	"github.com/oakmound/weekly87/internal/recolor"
 )
 
-type MageDefinition struct {
-	Name        string
-	LayerColors map[string]color.RGBA
-	Special1    abilities.Ability
-	Special2    abilities.Ability
-}
-
 var MageConstructors = map[string]*Constructor{}
 
 func MageInit() {
-	var definitions = []MageDefinition{
+	var mageDefinitions = []ClassDefinition{
 		{
 			Name: "White",
 			LayerColors: map[string]color.RGBA{
@@ -62,7 +55,7 @@ func MageInit() {
 		},
 	}
 
-	for _, def := range definitions {
+	for _, def := range mageDefinitions {
 
 		psdFilePath := filepath.Join("assets", "images", "16x32", "mage.psd")
 		psd, err := gopsd.ParseFromPath(psdFilePath)

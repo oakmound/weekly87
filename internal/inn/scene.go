@@ -103,11 +103,18 @@ var Scene = scene.Scene{
 		npcs := []NPC{}
 
 		npcScale := 1.6
-		npcs = append(npcs, NewInnNPC(players.Mage, npcScale, 440, 420))
-		npcs = append(npcs, NewInnNPC(players.WhiteMage, npcScale, 680, 430).FaceLeft(true))
-		npcs = append(npcs, NewInnNPC(players.Spearman, npcScale, 450, 240))
+
 		npcs = append(npcs, NewInnNPC(players.Swordsman, npcScale, 680, 230).FaceLeft(true))
-		npcs = append(npcs, NewInnNPC(players.BlueMage, npcScale, 380, 210).FaceLeft(true))
+		npcs = append(npcs, NewInnNPC(players.Mage, npcScale, 440, 210))
+
+		npcs = append(npcs, NewInnNPC(players.WhiteMage, npcScale, 670, 423).FaceLeft(true))
+		npcs = append(npcs, NewInnNPC(players.Berserker, npcScale, 445, 460))
+
+		npcs = append(npcs, NewInnNPC(players.BlueMage, npcScale, 241, 210).FaceLeft(true))
+		npcs = append(npcs, NewInnNPC(players.Paladin, npcScale, 240, 280).FaceLeft(true))
+
+		npcs = append(npcs, NewInnNPC(players.Spearman, npcScale, 243, 400).FaceLeft(true))
+		npcs = append(npcs, NewInnNPC(players.TimeMage, npcScale, 675, 477).FaceLeft(true))
 
 		// For now lets use a combined metric for progress of npc unlocks
 		progress := int(math.Min(float64(r.SectionsCleared)/10.0, float64(len(npcs))))
