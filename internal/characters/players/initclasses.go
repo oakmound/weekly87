@@ -37,10 +37,10 @@ func filterCharMap(baseCharMap map[string]render.Modifiable, filter mod.Filter) 
 }
 
 const (
-	Spearman = iota
-	Swordsman
+	Swordsman = iota
 	Berserker
 	Paladin
+	Spearman
 	Mage
 	WhiteMage
 	BlueMage

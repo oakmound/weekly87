@@ -19,6 +19,10 @@ func main() {
 		},
 		Title:     "Chest Stacker",
 		BatchLoad: true,
+		Debug: oak.Debug{
+
+			Level: "INFO",
+		},
 	}
 	//oak.SetBinaryPayload(assets.Asset, assets.AssetDir)
 

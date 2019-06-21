@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/oakmound/oak"
 	"github.com/oakmound/weekly87/internal/abilities/buff"
 
 	"github.com/200sc/go-dist/floatrange"
@@ -73,7 +74,8 @@ var (
 				particle.Speed(floatrange.NewConstant(3)),
 				particle.LifeSpan(floatrange.NewConstant(1)),
 			)
-			endDelta := 1200.0
+			// endDelta := 1200.0
+			endDelta := float64(oak.ScreenWidth * 1)
 			if u.Direction() == "LT" {
 				endDelta *= -1
 			}
@@ -81,6 +83,7 @@ var (
 			chrs, err := Produce(
 				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
 				//ArcTo(end),
+				FrameLength(400),
 				LineTo(end),
 				WithParticles(pg),
 				WithLabel(labels.EffectsEnemy),
