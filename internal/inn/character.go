@@ -15,6 +15,7 @@ import (
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/joys"
+	"github.com/oakmound/weekly87/internal/layer"
 )
 
 // NewInnWalker creates a special character for the inn
@@ -108,7 +109,7 @@ func NewInnWalker(innSpace floatgeom.Rect2, scale float64, anim *render.Switch) 
 		stayInMenu = false
 	}))
 
-	render.Draw(s.R, 2, 1)
+	render.Draw(s.R, layer.Play, 1)
 	return s
 }
 
@@ -159,7 +160,7 @@ func NewInnNPC(class int, scale, x, y float64) NPC {
 // Activate draws the npc and makes it collidable
 func (n NPC) Activate() {
 	n.RSpace.UpdateLabel(labels.NPC)
-	render.Draw(n.R, 2, 1)
+	render.Draw(n.R, layer.Play, 1)
 }
 
 func (n NPC) Destroy() {
