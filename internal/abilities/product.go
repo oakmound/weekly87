@@ -16,6 +16,7 @@ import (
 	"github.com/oakmound/oak/render/particle"
 	"github.com/oakmound/weekly87/internal/abilities/buff"
 	"github.com/oakmound/weekly87/internal/characters"
+	"github.com/oakmound/weekly87/internal/layer"
 )
 
 type Producer struct {
@@ -203,7 +204,7 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 
 	if prd.R != nil {
 		prd.R.SetPos(p.Start.X(), p.Start.Y())
-		render.Draw(prd.R, 3)
+		render.Draw(prd.R, layer.Effect)
 	} else {
 		prd.R = render.NewEmptySprite(0, 0, 1, 1) //Safety for Mover functionality
 	}
