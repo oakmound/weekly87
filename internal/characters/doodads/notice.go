@@ -1,6 +1,7 @@
 package doodads
 
 import (
+	"image"
 	"image/color"
 	"math"
 	"math/rand"
@@ -14,7 +15,7 @@ import (
 // NewNote creates overlapping notes with random colors
 func NewNote(noticeSpace floatgeom.Rect2, layerHeight int) int {
 	layerHeight++ // Each note should be higher
-	noteBaseSize := 10 + rand.Intn(5)
+	noteBaseSize := 10 + rand.Intn(8)
 	noteHeight := noteBaseSize + rand.Intn(10)
 
 	//	noteContentColor := color.RGBA{uint8(rand.Intn(220)), uint8(rand.Intn(220)), uint8(rand.Intn(220)), 255}
@@ -29,9 +30,10 @@ func NewNote(noticeSpace floatgeom.Rect2, layerHeight int) int {
 	}
 	// noteContentColor := v
 
+	// Background for a note via Colorybox
 	c := render.NewColorBox(noteBaseSize, noteHeight, noteContentColor)
 
-	noteXOff := noticeSpace.W() - float64(noteBaseSize)
+	noteXOff := (noticeSpace.W() - float64(noteBaseSize)) / 2
 	noteYOff := noticeSpace.H() - float64(noteHeight)
 
 	noteLocX := noticeSpace.Min.X() + float64(rand.Intn(int(math.Max(1, noteXOff))))
@@ -45,23 +47,23 @@ func NewNote(noticeSpace floatgeom.Rect2, layerHeight int) int {
 	// Scrawls should have the following:
 	// 1) be inside the note
 	// 2) be close to the last scrawl if exists
-	// 3) follow a path that has gaps and heigh changes
+	// 3) follow a path that has gaps and height changes
 	scrawlDistance := float64(5)
 	scrawlOffset := floatgeom.Point2{
 		0,
 		2, //1 to in and 1 for the fact that we can offset up to 2 above
 	}
-	scrawlOffset[1] += float64(rand.Intn(noteHeight - int(scrawlOffset.Y()) - 2))
+	scrawlOffset[1] += float64(rand.Intn((noteHeight-4)/2 - int(scrawlOffset.Y())))
 	for i := 0; scrawlOffset.Y() < float64(noteHeight-4); i++ {
 		layerHeight++
 		scrawlOffset[0] = float64(2 + rand.Intn(noteBaseSize-9))
 
-		l := render.NewThickLine(noteLocX+scrawlOffset.X(), noteLocY+scrawlOffset.Y(),
+		l := NewPunctuatedDeviatedLine(noteLocX+scrawlOffset.X(), noteLocY+scrawlOffset.Y(),
 			noteLocX+scrawlOffset.X()+scrawlDistance, noteLocY+scrawlOffset.Y(),
-			color.RGBA{10, 10, 10, 255}, 1)
+			render.IdentityColorer(color.RGBA{10, 10, 10, 255}), 1)
 		render.Draw(l, 2, layerHeight)
-		scrawlOffset[1] += 2
-		if rand.Float64() < .5 {
+		scrawlOffset[1] += 4
+		if rand.Float64() < .2 {
 			break
 		}
 	}
@@ -69,19 +71,19 @@ func NewNote(noticeSpace floatgeom.Rect2, layerHeight int) int {
 	return layerHeight
 }
 
-/*
-func NewThickLine(x1, y1, x2, y2 float64, c color.Color, thickness int) *render.Sprite {
-	colorer := render.IdentityColorer(c)
+//TODO: consider pulling into oak
+
+// NewPunctuatedDeviatedLine returns a line with a custom function for how each pixel in that line should be colored.
+func NewPunctuatedDeviatedLine(x1, y1, x2, y2 float64, colorer render.Colorer, thickness int) *render.Sprite {
 	var rgba *image.RGBA
 	// We subtract the minimum from each side here
 	// to normalize the new line segment toward the origin
 	minX := math.Min(x1, x2)
 	minY := math.Min(y1, y2)
-	rgba = dlb(int(x1-minX), int(y1-minY), int(x2-minX), int(y2-minY), colorer, thickness)
+	rgba = drawDeviatedLineBetween(int(x1-minX), int(y1-minY), int(x2-minX), int(y2-minY), colorer, thickness)
 	return render.NewSprite(minX-float64(thickness), minY-float64(thickness), rgba)
 }
-
-func dlb(x1, y1, x2, y2 int, colorer render.Colorer, thickness int) *image.RGBA {
+func drawDeviatedLineBetween(x1, y1, x2, y2 int, colorer render.Colorer, thickness int) *image.RGBA {
 
 	// Bresenham's line-drawing algorithm from wikipedia
 	xDelta := math.Abs(float64(x2 - x1))
@@ -122,8 +124,71 @@ func dlb(x1, y1, x2, y2 int, colorer render.Colorer, thickness int) *image.RGBA 
 	x1 += thickness
 	y1 += thickness
 
-	DrawLineColored(rgba, x1, y1, x2, y2, thickness, colorer)
+	DrawPunctuatedDeviatedLineColored(rgba, x1, y1, x2, y2, thickness, 0, 1, 0.7, colorer)
 
 	return rgba
 }
-*/
+
+func DrawPunctuatedDeviatedLineColored(rgba *image.RGBA, x1, y1, x2, y2, thickness, xPixelDeviance, yPixelDeviance int, gapPercent float64, colorer render.Colorer) {
+
+	if gapPercent >= 1 {
+		gapPercent = 0.0
+	}
+
+	xDelta := math.Abs(float64(x2 - x1))
+	yDelta := math.Abs(float64(y2 - y1))
+
+	xSlope := -1
+	x3 := x1
+	if x2 < x1 {
+		xSlope = 1
+		x3 = x2
+	}
+	ySlope := -1
+	y3 := y1
+	if y2 < y1 {
+		ySlope = 1
+		y3 = y2
+	}
+
+	w := int(xDelta)
+	h := int(yDelta)
+
+	progress := func(x, y, w, h int) float64 {
+		hprg := render.HorizontalProgress(x, y, w, h)
+		vprg := render.VerticalProgress(x, y, w, h)
+		if ySlope == -1 {
+			vprg = 1 - vprg
+		}
+		if xSlope == -1 {
+			hprg = 1 - hprg
+		}
+		return (hprg + vprg) / 2
+	}
+
+	err := xDelta - yDelta
+	var err2 float64
+	for i := 0; true; i++ {
+
+		for xm := x2 - thickness - yPixelDeviance; xm <= (x2 + thickness + xPixelDeviance); xm++ {
+			for ym := y2 - thickness - yPixelDeviance; ym <= (y2 + thickness + yPixelDeviance); ym++ {
+				if rand.Float64() > gapPercent {
+					p := progress(xm-x3, ym-y3, w, h)
+					rgba.Set(xm, ym, colorer(p))
+				}
+			}
+		}
+		if x2 == x1 && y2 == y1 {
+			break
+		}
+		err2 = 2 * err
+		if err2 > -1*yDelta {
+			err -= yDelta
+			x2 += xSlope
+		}
+		if err2 < xDelta {
+			err += xDelta
+			y2 += ySlope
+		}
+	}
+}

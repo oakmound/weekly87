@@ -96,7 +96,7 @@ var Scene = scene.Scene{
 		noteSpace := floatgeom.NewRect2WH(240, 60, 85, 65)
 
 		noteHeight := 3
-		for i := 0; i < 5+rand.Intn(5)*3; i++ {
+		for i := 0; i < 8+rand.Intn(5)*3; i++ {
 			noteHeight = doodads.NewNote(noteSpace, noteHeight)
 		}
 
