@@ -537,29 +537,6 @@ var Scene = scene.Scene{
 			music.Play()
 		}()
 
-		// Maybe there's a countdown timer
-
-		// The state of the game is generated based on combining a base seed
-		// and the current section the player is in. When the game is first started
-		// base seed is populated randomly and stored in a settings file, then
-		// incremented as sections are cleared
-
-		// We also need to keep track of changes to each section like enemies destroyed
-		// This means map[int64][]int, where the slice is list of enemies destroyed
-		// with enemies identified by order they are made in
-
-		// Background should probably be very basic hallway with tile types
-		// and different themes populate the tile types
-
-		// Character types: 10 Sec cooldown ability, 30 sec
-		// Spearman - Shove up - Attack in front
-		// Warrior - Shove back - Shove all enemies back
-		// Cleric - Slow down run speed for short period - Revive
-		// Ranger - Y Speed boost for short period - Shoot arrow in front
-		// Rogue - Invisible for short period - Blink / jump forward
-		// Paladin - Invincible for short period -
-		// Mage - Spawns Fire - Freeze all enemies in place
-
 		// Enemy types:
 		// 1. Stands Still or walks in a basic path
 		// 2. Charges right to left and hurts if you touch it
@@ -570,9 +547,6 @@ var Scene = scene.Scene{
 		// maybe 3 sizes
 		// Color order: brown, then dim gray, then black,
 		// white, yellow, green, blue, purple, orange, red, silver
-
-		// for right now the one character can chain boxes behind them
-		// infinitely, eventually there should be an upgrade thing
 
 		oak.ResetCommands()
 		oak.AddCommand("invuln", func(args []string) {
