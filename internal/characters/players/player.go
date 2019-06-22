@@ -11,6 +11,7 @@ import (
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/weekly87/internal/abilities"
 	"github.com/oakmound/weekly87/internal/abilities/buff"
+	"github.com/oakmound/weekly87/internal/layer"
 
 	"github.com/oakmound/oak/dlog"
 
@@ -90,7 +91,7 @@ func (p *Player) AddBuff(b buff.Buff) {
 	b.ExpireAt = time.Now().Add(b.Duration)
 	b.R = buff.BasicBuffSwitch(b.RGen())
 	p.Buffs = append(p.Buffs, b)
-	render.Draw(b.R, 5, 10)
+	render.Draw(b.R, layer.UI, 10)
 	sort.Slice(p.Buffs, func(i, j int) bool {
 		return p.Buffs[i].ExpireAt.Before(p.Buffs[j].ExpireAt)
 	})

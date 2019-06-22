@@ -10,6 +10,7 @@ import (
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/shiny/materialdesign/colornames"
+	"github.com/oakmound/weekly87/internal/layer"
 )
 
 // NewNote creates overlapping notes with random colors
@@ -42,7 +43,7 @@ func NewNote(noticeSpace floatgeom.Rect2, layerHeight int) int {
 	c.SetPos(noteLocX, noteLocY)
 	// c.SetPos(noticeSpace.Min.X(), noticeSpace.Min.Y())
 
-	render.Draw(c, 2, layerHeight)
+	render.Draw(c, layer.Play, layerHeight)
 
 	// Scrawls should have the following:
 	// 1) be inside the note
@@ -61,7 +62,7 @@ func NewNote(noticeSpace floatgeom.Rect2, layerHeight int) int {
 		l := NewPunctuatedDeviatedLine(noteLocX+scrawlOffset.X(), noteLocY+scrawlOffset.Y(),
 			noteLocX+scrawlOffset.X()+scrawlDistance, noteLocY+scrawlOffset.Y(),
 			render.IdentityColorer(color.RGBA{10, 10, 10, 255}), 1)
-		render.Draw(l, 2, layerHeight)
+		render.Draw(l, layer.Play, layerHeight)
 		scrawlOffset[1] += 4
 		if rand.Float64() < .2 {
 			break

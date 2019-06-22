@@ -9,6 +9,7 @@ import (
 	"github.com/oakmound/oak/render"
 
 	"github.com/oakmound/weekly87/internal/characters/labels"
+	"github.com/oakmound/weekly87/internal/layer"
 )
 
 // Ornament creates an ornament randomly within the given space trying not to overlap
@@ -59,6 +60,6 @@ func NewOrnament(x, y, w, h float64, img *render.Sprite) *Ornament {
 	}
 
 	o.R.SetPos(x+wOffset, y+hOffset)
-	render.Draw(o.R, 2, 2)
+	render.Draw(o.R, layer.Play, 2)
 	return o
 }
