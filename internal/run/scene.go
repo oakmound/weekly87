@@ -63,6 +63,7 @@ var facing = 1
 // Scene  to display the run
 var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
+		// Reset to start of run if not first run
 		stayInGame = true
 		nextscene = "endGame"
 		facing = 1
@@ -78,32 +79,22 @@ var Scene = scene.Scene{
 		}
 		render.Draw(debugTree, layer.Overlay, 1000)
 
-		debugInvuln := false
-
 		restrictor.ResetDefault()
 		restrictor.Start(1)
-		r := records.Load()
 
 		ptycon := players.PartyConstructor{
-			Players: players.ClassConstructor(
-				r.PartyComp),
-			// []int{players.Spearman, players.Mage, players.Mage, players.Swordsman}),
-
-			// []int{players.Spearman, players.Spearman, players.Spearman, players.Spearman}),
+			Players: players.ClassConstructor(records.Load().PartyComp),
 		}
 		ptycon.Players[0].Position = floatgeom.Point2{players.WallOffset, float64(oak.ScreenHeight / 2)}
 		pty, err := ptycon.NewRunningParty()
-		if err != nil {
-			dlog.Error(err)
-			return
-		}
+		dlog.ErrorCheck(err)
+
 		runInfo = records.RunInfo{
 			Party:           pty,
 			SectionsCleared: 0,
 			EnemiesDefeated: 0,
 		}
-		endLock := sync.Mutex{}
-		defeatedShowing := false
+
 		runbackOnce := sync.Once{}
 
 		tracker := section.NewTracker(BaseSeed)
@@ -125,7 +116,7 @@ var Scene = scene.Scene{
 					fmt.Printf("%T\n", s.CID.E())
 					return
 				}
-				if debugInvuln || ply.Invulnerable > 0 || !en.Active {
+				if ply.Invulnerable > 0 || !en.Active {
 					return
 				}
 
@@ -187,28 +178,7 @@ var Scene = scene.Scene{
 				}
 				ply.ChestValues = []int64{}
 				ply.Trigger("Kill", nil)
-
-				endLock.Lock()
-				defer endLock.Unlock()
-				if pty.Defeated() && !defeatedShowing {
-					for _, ply := range pty.Players {
-						ply.RunSpeed = 0
-					}
-					pty.Acceleration = 0
-					defeatedShowing = true
-					// Show pop up to go to endgame scene
-					menuX := (float64(oak.ScreenWidth) - 180) / 2
-					menuY := float64(oak.ScreenHeight) / 4
-					btn.New(menus.BtnCfgB, btn.Layers(layer.UI, 0),
-						btn.Pos(menuX, menuY), btn.Text("Defeated! See Your Stats?"),
-						btn.Width(180),
-						btn.Binding(mouse.ClickOn, func(int, interface{}) int {
-							nextscene = "endGame"
-							stayInGame = false
-
-							return 0
-						}))
-				}
+				event.Trigger("PlayerDeath", nil)
 			})
 
 			rs.Add(labels.Chest, func(s, s2 *collision.Space) {
@@ -462,6 +432,34 @@ var Scene = scene.Scene{
 			return 0
 		}, "EnterFrame")
 
+		endLock := sync.Mutex{}
+		defeatedShowing := false
+
+		event.GlobalBind(func(int, interface{}) int {
+			endLock.Lock()
+			defer endLock.Unlock()
+			if pty.Defeated() && !defeatedShowing {
+				for _, ply := range pty.Players {
+					ply.RunSpeed = 0
+				}
+				pty.Acceleration = 0
+				defeatedShowing = true
+				// Show pop up to go to endgame scene
+				menuX := (float64(oak.ScreenWidth) - 180) / 2
+				menuY := float64(oak.ScreenHeight) / 4
+				btn.New(menus.BtnCfgB, btn.Layers(layer.UI, 0),
+					btn.Pos(menuX, menuY), btn.Text("Defeated! See Your Stats?"),
+					btn.Width(180),
+					btn.Binding(mouse.ClickOn, func(int, interface{}) int {
+						nextscene = "endGame"
+						stayInGame = false
+
+						return 0
+					}))
+			}
+			return 0
+		}, "PlayerDeath")
+
 		event.GlobalBind(func(cid int, data interface{}) int {
 			dlog.Info("An Enemy Died")
 
@@ -531,9 +529,13 @@ var Scene = scene.Scene{
 		oak.ResetCommands()
 		oak.AddCommand("invuln", func(args []string) {
 			dlog.Error("Cheating to set the invulnerability toggle")
-			debugInvuln = true
+			for _, ply := range pty.Players {
+				ply.Invulnerable += 100
+			}
 			if len(args) > 0 && (args[0][0:0] == "f" || args[0][0:0] == "F") {
-				debugInvuln = false
+				for _, ply := range pty.Players {
+					ply.Invulnerable -= 100
+				}
 			}
 		})
 		oak.AddCommand("debug", func(args []string) {
