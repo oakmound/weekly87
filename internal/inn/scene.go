@@ -26,6 +26,7 @@ import (
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/dtools"
+	"github.com/oakmound/weekly87/internal/layer"
 	"github.com/oakmound/weekly87/internal/records"
 	"github.com/oakmound/weekly87/internal/settings"
 )
@@ -40,14 +41,7 @@ var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
 		stayInMenu = true
 		nextscene = "inn"
-		render.SetDrawStack(
-			// ground
-			render.NewCompositeR(),
-			// entities
-			render.NewHeap(false),
-			// ui
-			render.NewHeap(true),
-		)
+		render.SetDrawStack(layer.Get()...)
 		debugTree := dtools.NewThickRTree(collision.DefTree, 4)
 		debugTree.ColorMap = map[collision.Label]color.RGBA{
 			labels.Door:     color.RGBA{200, 0, 100, 255},

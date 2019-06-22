@@ -44,6 +44,7 @@ import (
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/dtools"
+	"github.com/oakmound/weekly87/internal/layer"
 	"github.com/oakmound/weekly87/internal/menus"
 	"github.com/oakmound/weekly87/internal/run/section"
 )
@@ -66,28 +67,7 @@ var Scene = scene.Scene{
 		nextscene = "endGame"
 		facing = 1
 
-		runLayers := []render.Stackable{
-			// ground groundLayer
-			render.NewCompositeR(),
-			// wall backgroundLayer
-			render.NewCompositeR(),
-			// entities 	playLayer
-			render.NewHeap(false),
-			// effects effectLayer
-			render.NewHeap(false),
-			// overlay Level
-			render.NewHeap(false),
-			// ui uiLayer
-			render.NewHeap(true),
-		}
-
-		// There should be some way to draw to a stack based
-		// on layer name
-		if settings.Active.ShowFpsToggle {
-			runLayers = append(runLayers, render.NewDrawFPS(), render.NewLogicFPS())
-		}
-
-		render.SetDrawStack(runLayers...)
+		render.SetDrawStack(layer.Get()...)
 
 		debugTree := dtools.NewRTree(collision.DefTree)
 		debugTree.ColorMap = map[collision.Label]color.RGBA{
@@ -96,7 +76,7 @@ var Scene = scene.Scene{
 			labels.Enemy: color.RGBA{0, 0, 255, 255},
 			labels.PC:    color.RGBA{125, 0, 255, 255},
 		}
-		render.Draw(debugTree, overlayLevel, 1000)
+		render.Draw(debugTree, layer.Overlay, 1000)
 
 		debugInvuln := false
 
