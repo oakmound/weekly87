@@ -33,6 +33,11 @@ func Start(loop bool, names ...string) (*klg.Audio, error) {
 	music = music.MustFilter(
 		filter.Volume(0.5 * settings.Active.MusicVolume * settings.Active.MasterVolume),
 	)
+	if loop && len(names) == 1 {
+		music = music.MustFilter(
+			filter.LoopOn(),
+		)
+	}
 
 	music.Play()
 
