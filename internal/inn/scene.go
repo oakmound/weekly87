@@ -56,16 +56,19 @@ var Scene = scene.Scene{
 
 		// A way to enter the run
 		doodads.NewInnDoor("run")
+		// A way to go back to menu screen
 		doodads.NewCustomInnDoor("startup", 490, 40, 100, 102)
 
 		innSpace := floatgeom.NewRect2(0, 0, float64(oak.ScreenWidth), float64(oak.ScreenHeight)-32) //Adjusted for the current size of the spearman
 
+		// Create doodads for tables
 		uglymugger, _ := render.LoadSprites("", filepath.Join("16x16", "ugly_mugger.png"), 16, 16, 0)
 		prettyMugs := []*render.Sprite{uglymugger[0][0], uglymugger[0][1], uglymugger[1][0]}
 
+		// Block off the top of the inn from being walkable
 		doodads.NewFurniture(0, 0, float64(oak.ScreenWidth), 140) // top of inn
 
-		// Additional inn aspects
+		// Additional inn such as tables
 		doodads.NewFurniture(130, 130, 100, float64(oak.ScreenHeight)-130) // Left Table
 		for i := 0; i < 2+rand.Intn(7); i++ {
 			doodads.NewOrnament(130, 130, 100, float64(oak.ScreenHeight)-130, prettyMugs[rand.Intn(3)])
@@ -83,17 +86,16 @@ var Scene = scene.Scene{
 			doodads.NewOrnament(botLocations[0], botLocations[1], botLocations[2], botLocations[3], prettyMugs[rand.Intn(3)])
 		}
 
+		// Create the notes on the notice board
 		noteSpace := floatgeom.NewRect2WH(240, 60, 85, 65)
-
 		noteHeight := 3
 		for i := 0; i < 8+rand.Intn(5)*3; i++ {
 			noteHeight = doodads.NewNote(noteSpace, noteHeight)
 		}
 
+		// Create all possible NPCs
 		npcs := []NPC{}
-
 		npcScale := 1.6
-
 		npcs = append(npcs, NewInnNPC(players.Swordsman, npcScale, 680, 230).FaceLeft(true))
 		npcs = append(npcs, NewInnNPC(players.Mage, npcScale, 440, 210))
 
@@ -106,12 +108,10 @@ var Scene = scene.Scene{
 		npcs = append(npcs, NewInnNPC(players.Spearman, npcScale, 243, 400).FaceLeft(true))
 		npcs = append(npcs, NewInnNPC(players.TimeMage, npcScale, 675, 477).FaceLeft(true))
 
-		// For now lets use a combined metric for progress of npc unlocks
+		// Simple metric for determining number of NPCs in room
 		progress := int(math.Min(float64(r.SectionsCleared)/10.0, float64(len(npcs))))
-
 		futureNpcs := npcs[progress:len(npcs)]
 		npcs = npcs[0:progress]
-
 		dlog.Verb("Future NPCS", len(futureNpcs))
 		for _, fn := range futureNpcs {
 			// fn.RSpace = nil
@@ -121,12 +121,11 @@ var Scene = scene.Scene{
 			np.Activate()
 		}
 
+		// Create the player and the display of the party at the top of the screen
 		ptycon := players.PartyConstructor{
-			Players: players.ClassConstructor(
-				r.PartyComp),
-			// []int{players.Spearman, players.Mage, players.Mage, players.Swordsman}),
-			// []int{players.Spearman, players.Spearman, players.Spearman, players.Spearman}),
+			Players: players.ClassConstructor(r.PartyComp),
 		}
+		// Draw the party in top left
 		partyBackground := render.NewColorBox(206, 52, color.RGBA{90, 90, 200, 255})
 		partyBackground.SetPos(30, 20)
 		render.Draw(partyBackground, layer.Play, 3)
