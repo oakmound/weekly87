@@ -109,7 +109,7 @@ var Scene = scene.Scene{
 		tracker := section.NewTracker(BaseSeed)
 
 		for i, p := range pty.Players {
-			render.Draw(p.R, playLayer, 2)
+			render.Draw(p.R, layer.Play, 2)
 			rs := p.GetReactiveSpace()
 
 			// Interaction with Enemies
@@ -199,7 +199,7 @@ var Scene = scene.Scene{
 					// Show pop up to go to endgame scene
 					menuX := (float64(oak.ScreenWidth) - 180) / 2
 					menuY := float64(oak.ScreenHeight) / 4
-					btn.New(menus.BtnCfgB, btn.Layers(uiLayer, 0),
+					btn.New(menus.BtnCfgB, btn.Layers(layer.UI, 0),
 						btn.Pos(menuX, menuY), btn.Text("Defeated! See Your Stats?"),
 						btn.Width(180),
 						btn.Binding(mouse.ClickOn, func(int, interface{}) int {
@@ -235,7 +235,7 @@ var Scene = scene.Scene{
 				p.Chests = append(p.Chests, r)
 
 				ch.Destroy()
-				render.Draw(r, playLayer, 2)
+				render.Draw(r, layer.Play, 2)
 				runbackOnce.Do(func() {
 					facing = -1
 					event.Trigger("RunBack", nil)
@@ -298,7 +298,7 @@ var Scene = scene.Scene{
 			}
 			abilityX := float64(cornerPad + i*aPad)
 
-			btnOpts := btn.And(menus.BtnCfgB, btn.Layers(uiLayer, 0),
+			btnOpts := btn.And(menus.BtnCfgB, btn.Layers(layer.UI, 0),
 				btn.Pos(abilityX, cornerPad),
 				btn.Height(aRendDims),
 				btn.Width(aRendDims),

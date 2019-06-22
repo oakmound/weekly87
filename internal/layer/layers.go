@@ -23,14 +23,14 @@ func Get() []render.Stackable {
 		// wall backgroundLayer
 		render.NewCompositeR(),
 		// entities 	playLayer
-		render.NewHeap(false),
+		render.NewDynamicHeap(),
 		// effects effectLayer
-		render.NewHeap(false),
+		render.NewDynamicHeap(),
 		// overlay Level
-		render.NewHeap(false),
+		render.NewDynamicHeap(),
 		// ui uiLayer
-		render.NewHeap(true),
-	} 
+		render.NewStaticHeap(),
+	}
 
 	if settings.Active.ShowFpsToggle {
 		layers = append(layers, render.NewDrawFPS(), render.NewLogicFPS())

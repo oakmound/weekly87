@@ -30,8 +30,8 @@ var EndScene = scene.Scene{
 		render.SetDrawStack(
 			render.NewCompositeR(),
 			render.NewCompositeR(),
-			render.NewHeap(false),
-			render.NewHeap(true),
+			render.NewDynamicHeap(),
+			render.NewStaticHeap(),
 		)
 
 		// TODO: This should be in a more central place.

@@ -7,6 +7,7 @@ import (
 	"github.com/oakmound/oak/entities/x/move"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/weekly87/internal/characters"
+	"github.com/oakmound/weekly87/internal/layer"
 )
 
 var (
@@ -35,8 +36,8 @@ func (s *Section) Copy() *Section {
 }
 
 func (s *Section) Draw() {
-	render.Draw(s.ground, 0)
-	render.Draw(s.wall, 1)
+	render.Draw(s.ground, layer.Ground)
+	render.Draw(s.wall, layer.Background)
 }
 
 func (s *Section) Shift(shift float64) {
@@ -78,7 +79,7 @@ func (s *Section) ActivateEntities() {
 	for _, e := range s.entities {
 		if e != nil {
 			e.Activate()
-			render.Draw(e.GetRenderable(), 2, 1)
+			render.Draw(e.GetRenderable(), layer.Play, 1)
 		}
 	}
 }
