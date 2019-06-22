@@ -1,11 +1,15 @@
 package players
 
 import (
+	"fmt"
+	"image"
 	"image/color"
 	"path/filepath"
+	"strings"
 
 	"github.com/oakmound/weekly87/internal/abilities"
 	"github.com/oakmound/weekly87/internal/recolor"
+	"github.com/solovev/gopsd"
 
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
@@ -53,11 +57,35 @@ func WarriorsInit() {
 	}
 
 	for _, def := range warriorDefinitions {
+		psdFilePath := filepath.Join("assets", "images", "16x32", "warrior.psd")
+		psd, err := gopsd.ParseFromPath(psdFilePath)
 
-		animFilePath := (filepath.Join("16x32", "warrior.png"))
-		sheet, err := render.LoadSprites(filepath.Join("assets", "images"),
-			animFilePath, 16, 32, 0)
+		combined := render.NewCompositeM()
+
+		for _, layer := range psd.Layers {
+			//TODO: combine strat with that of mage
+			img, err := layer.GetImage()
+			dlog.ErrorCheck(err)
+			rgba, ok := img.(*image.RGBA)
+			if !ok {
+				dlog.Error("Image was not RGBA in underlying type")
+			}
+			sp := render.NewSprite(float64(layer.Rectangle.X), float64(layer.Rectangle.Y), rgba)
+			if c, ok := def.LayerColors[strings.ToLower(layer.Name)]; ok {
+				fmt.Println("We found the right layer", layer.Name)
+				// Recolor this layer
+				sp.Filter(recolor.WithStrategy(recolor.ColorShift(c)))
+			}
+			// Add this layer to the combined image
+			// Todo: bug with shoulder having some pixel flashing
+			combined.Append(sp)
+		}
+
+		// flatten composite
+		combinedSp := combined.ToSprite()
+		sh, err := render.MakeSheet(combinedSp.GetRGBA(), 16, 32, 0)
 		dlog.ErrorCheck(err)
+		sheet := sh.ToSprites()
 
 		ghostFilePath := filepath.Join("16x32", "warriorghost.png")
 		dlog.ErrorCheck(err)
@@ -71,12 +99,12 @@ func WarriorsInit() {
 		standLT := sheet[0][0].Copy().Modify(mod.FlipX)
 		standHold := sheet[0][1].Copy().Modify(mod.FlipX)
 
-		walkRT, err := render.LoadSheetSequence(animFilePath, 16, 32, 0, 8, []int{1, 0, 2, 0, 0, 0}...)
+		walkRT, err := render.NewSheetSequence(sh, 8, []int{1, 0, 2, 0, 0, 0}...)
 		dlog.ErrorCheck(err)
 
 		walkLT := walkRT.Copy().Modify(mod.FlipX)
 
-		walkHold, err := render.LoadSheetSequence(animFilePath, 16, 32, 0, 8, []int{1, 1, 2, 1, 0, 1}...)
+		walkHold, err := render.NewSheetSequence(sh, 8, []int{1, 1, 2, 1, 0, 1}...)
 		dlog.ErrorCheck(err)
 		walkHold = walkHold.Copy().Modify(mod.FlipX).(*render.Sequence)
 
