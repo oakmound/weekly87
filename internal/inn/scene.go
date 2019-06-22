@@ -43,13 +43,9 @@ var Scene = scene.Scene{
 		nextscene = "inn"
 		render.SetDrawStack(layer.Get()...)
 		debugTree := dtools.NewThickRTree(collision.DefTree, 4)
-		debugTree.ColorMap = map[collision.Label]color.RGBA{
-			labels.Door:     color.RGBA{200, 0, 100, 255},
-			labels.PC:       color.RGBA{125, 0, 255, 255},
-			labels.Blocking: color.RGBA{200, 200, 10, 255},
-			labels.Ornament: color.RGBA{250, 200, 40, 255},
-			labels.NPC:      color.RGBA{125, 200, 10, 255},
-		}
+
+		debugTree.ColorMap = labels.ColorMap
+
 		render.Draw(debugTree, layer.Play, 1000)
 
 		r = records.Load()

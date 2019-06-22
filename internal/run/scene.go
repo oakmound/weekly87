@@ -71,12 +71,7 @@ var Scene = scene.Scene{
 		render.SetDrawStack(layer.Get()...)
 
 		debugTree := dtools.NewRTree(collision.DefTree)
-		debugTree.ColorMap = map[collision.Label]color.RGBA{
-			labels.Chest: color.RGBA{255, 255, 0, 255},
-			labels.Door:  color.RGBA{125, 125, 125, 255},
-			labels.Enemy: color.RGBA{0, 0, 255, 255},
-			labels.PC:    color.RGBA{125, 0, 255, 255},
-		}
+		debugTree.ColorMap = labels.ColorMap
 		render.Draw(debugTree, layer.Overlay, 1000)
 
 		restrictor.ResetDefault()
