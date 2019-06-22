@@ -43,14 +43,16 @@ var Scene = scene.Scene{
 		nextscene = "inn"
 		render.SetDrawStack(layer.Get()...)
 		debugTree := dtools.NewThickRTree(collision.DefTree, 4)
+
 		debugTree.ColorMap = labels.ColorMap
-		render.Draw(debugTree, 2, 1000)
+
+		render.Draw(debugTree, layer.Play, 1000)
 
 		r = records.Load()
 
 		// Make the Inn backing
 		innBackground, _ := render.LoadSprite("", filepath.Join("raw", "placeholder_inn.png"))
-		render.Draw(innBackground, 0)
+		render.Draw(innBackground, layer.Ground)
 
 		// A way to enter the run
 		doodads.NewInnDoor("run")
@@ -127,7 +129,7 @@ var Scene = scene.Scene{
 		}
 		partyBackground := render.NewColorBox(206, 52, color.RGBA{90, 90, 200, 255})
 		partyBackground.SetPos(30, 20)
-		render.Draw(partyBackground, 2, 3)
+		render.Draw(partyBackground, layer.Play, 3)
 		ptyOffset := floatgeom.Point2{players.WallOffset, 30}
 		ptycon.Players[0].Position = ptyOffset
 		pty, err := ptycon.NewParty(true)
@@ -136,7 +138,7 @@ var Scene = scene.Scene{
 			return
 		}
 		for _, p := range pty.Players {
-			render.Draw(p.R, 2, 4)
+			render.Draw(p.R, layer.Play, 4)
 		}
 
 		interactDelay := time.Second
@@ -179,10 +181,10 @@ var Scene = scene.Scene{
 			}
 			pc.R.Undraw()
 			pc.R = pty.Players[0].Swtch.Copy().Modify(mod.Scale(npcScale, npcScale))
-			render.Draw(pc.R, 2, 2)
+			render.Draw(pc.R, layer.Play, 2)
 
 			for _, p := range pty.Players {
-				render.Draw(p.R, 2, 4)
+				render.Draw(p.R, layer.Play, 4)
 			}
 
 		})
@@ -218,7 +220,7 @@ var Scene = scene.Scene{
 			}
 
 			for _, p := range pty.Players {
-				render.Draw(p.R, 2, 4)
+				render.Draw(p.R, layer.Play, 4)
 			}
 		})
 		oak.AddCommand("debug", func(args []string) {
