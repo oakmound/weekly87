@@ -22,9 +22,11 @@ import (
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/particle"
 	"github.com/oakmound/weekly87/internal/abilities/vfx"
+	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/enemies"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/joys"
+	"github.com/oakmound/weekly87/internal/layer"
 )
 
 type Party struct {
@@ -218,6 +220,35 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			ply.ChestValues = []int64{}
 			ply.Trigger("Kill", nil)
 			event.Trigger("PlayerDeath", nil)
+		})
+
+		// Hitting Chests
+		p.RSpace.Add(labels.Chest, func(s, s2 *collision.Space) {
+			p, ok := s.CID.E().(*Player)
+			if !ok {
+				dlog.Error("Non-player sent to player binding")
+				return
+			}
+			ch, ok := s2.CID.E().(*doodads.Chest)
+			if !ok {
+				dlog.Error("Non-chest sent to chest binding")
+				return
+			}
+			if !ch.Active {
+				return
+			}
+			r := ch.R.(render.Modifiable).Copy()
+			_, h := r.GetDims()
+
+			chestHeight := (len(p.ChestValues) + 1) * (h + 1)
+
+			r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -float64(chestHeight))
+			p.ChestValues = append(p.ChestValues, ch.Value)
+			p.Chests = append(p.Chests, r)
+
+			ch.Destroy()
+			render.Draw(r, layer.Play, 2)
+			event.Trigger("RunBackOnce", nil)
 		})
 
 		// Hitting buffs

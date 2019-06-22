@@ -1,7 +1,6 @@
 package run
 
 import (
-	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -14,19 +13,14 @@ import (
 	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/restrictor"
 
-	"github.com/oakmound/weekly87/internal/settings"
-
 	klg "github.com/200sc/klangsynthese/audio"
-	"github.com/200sc/klangsynthese/audio/filter"
 
-	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/records"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
-	"github.com/oakmound/oak/audio"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities/x/btn"
@@ -36,13 +30,14 @@ import (
 	"github.com/oakmound/weekly87/internal/dtools"
 	"github.com/oakmound/weekly87/internal/layer"
 	"github.com/oakmound/weekly87/internal/menus"
+	"github.com/oakmound/weekly87/internal/music"
 	"github.com/oakmound/weekly87/internal/run/section"
 )
 
 var stayInGame bool
 var nextscene string
 var BaseSeed int64
-var music klg.Audio
+var bkgMusic *klg.Audio
 
 var runInfo records.RunInfo
 
@@ -80,45 +75,11 @@ var Scene = scene.Scene{
 			EnemiesDefeated: 0,
 		}
 
-		runbackOnce := sync.Once{}
-
 		tracker := section.NewTracker(BaseSeed)
 
 		for i, p := range pty.Players {
 			render.Draw(p.R, layer.Play, 2)
 			rs := p.GetReactiveSpace()
-
-			rs.Add(labels.Chest, func(s, s2 *collision.Space) {
-				p, ok := s.CID.E().(*players.Player)
-				if !ok {
-					dlog.Error("Non-player sent to player binding")
-					return
-				}
-				ch, ok := s2.CID.E().(*doodads.Chest)
-				if !ok {
-					dlog.Error("Non-chest sent to chest binding")
-					return
-				}
-				if !ch.Active {
-					return
-				}
-				r := ch.R.(render.Modifiable).Copy()
-				_, h := r.GetDims()
-
-				chestHeight := (len(p.ChestValues) + 1) * (h + 1)
-
-				r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -float64(chestHeight))
-				p.ChestValues = append(p.ChestValues, ch.Value)
-				p.Chests = append(p.Chests, r)
-
-				ch.Destroy()
-				render.Draw(r, layer.Play, 2)
-				runbackOnce.Do(func() {
-					facing = -1
-					event.Trigger("RunBack", nil)
-					tracker.Prev()
-				})
-			})
 
 			// Player got back to the Inn!
 			rs.Add(labels.Door, func(_, d *collision.Space) {
@@ -129,6 +90,8 @@ var Scene = scene.Scene{
 					stayInGame = false
 				}()
 			})
+
+			// Ability icon rendering / binding
 
 			const aRendDims = 64.0
 			const aPad = aRendDims + 12.0 //Size of ability image plus padding
@@ -186,11 +149,9 @@ var Scene = scene.Scene{
 			}
 		}
 
-		var sec1, sec2, sec3 *section.Section
-
-		sec1 = tracker.Next()
-		sec2 = tracker.Next()
-		sec3 = sec1.Copy()
+		sec1 := tracker.Next()
+		sec2 := tracker.Next()
+		sec3 := sec1.Copy()
 
 		sec2.SetBackgroundX(sec1.W())
 		sec3.SetBackgroundX(sec1.W() * 2)
@@ -302,6 +263,17 @@ var Scene = scene.Scene{
 			return 0
 		}, "EnterFrame")
 
+		runbackOnce := sync.Once{}
+
+		event.GlobalBind(func(int, interface{}) int {
+			runbackOnce.Do(func() {
+				facing = -1
+				event.Trigger("RunBack", nil)
+				tracker.Prev()
+			})
+			return event.UnbindSingle
+		}, "RunBackOnce")
+
 		endLock := sync.Mutex{}
 		defeatedShowing := false
 
@@ -363,27 +335,7 @@ var Scene = scene.Scene{
 			return 0
 		}, "AbilityFired")
 
-		music, err = audio.Load(filepath.Join("assets", "audio"), "runIntro.wav")
-		dlog.ErrorCheck(err)
-		music, err = music.Copy()
-		dlog.ErrorCheck(err)
-		music = music.MustFilter(
-			filter.Volume(0.5 * settings.Active.MusicVolume * settings.Active.MasterVolume),
-		)
-
-		music.Play()
-		go func() {
-			time.Sleep(music.PlayLength())
-			music, err = audio.Load(filepath.Join("assets", "audio"), "runLoop.wav")
-			dlog.ErrorCheck(err)
-			music, err = music.Copy()
-			dlog.ErrorCheck(err)
-			music = music.MustFilter(
-				filter.Volume(0.5*settings.Active.MusicVolume*settings.Active.MasterVolume),
-				filter.LoopOn(),
-			)
-			music.Play()
-		}()
+		bkgMusic, err = music.Start(true, "runIntro.wav", "runLoop.wav")
 
 		// Enemy types:
 		// 1. Stands Still or walks in a basic path
@@ -430,7 +382,7 @@ var Scene = scene.Scene{
 	},
 	Loop: scene.BooleanLoop(&stayInGame),
 	End: func() (string, *scene.Result) {
-		music.Stop()
+		(*bkgMusic).Stop()
 		restrictor.Stop()
 		restrictor.Clear()
 		return nextscene, nil
