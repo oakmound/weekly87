@@ -2,6 +2,7 @@ package players
 
 import (
 	"errors"
+	"fmt"
 	"image/color"
 	"math"
 	"strconv"
@@ -13,11 +14,15 @@ import (
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
+	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
+	"github.com/oakmound/oak/render/particle"
+	"github.com/oakmound/weekly87/internal/abilities/vfx"
+	"github.com/oakmound/weekly87/internal/characters/enemies"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/joys"
 )
@@ -147,6 +152,103 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 		if i != 0 {
 			p.Delta = pty.Players[0].Delta
 		}
+
+		// Interaction with Enemies
+		p.RSpace.Add(labels.Enemy, func(s, e *collision.Space) {
+			ply, ok := s.CID.E().(*Player)
+			if !ok {
+				dlog.Error("Non-player sent to player binding")
+				return
+			}
+			en, ok := e.CID.E().(*enemies.BasicEnemy)
+			if !ok {
+				dlog.Error("Non-enemy sent to enemy binding")
+				fmt.Printf("%T\n", s.CID.E())
+				return
+			}
+			if ply.Invulnerable > 0 || !en.Active {
+				return
+			}
+
+			if ply.Shield > 0 {
+				dlog.Info("Enemy hit us be we were shielded")
+
+				// Affect the enemy
+				en.PushBack.Add(physics.NewVector(100, 0))
+
+				source := vfx.PushBack1().Generate(2)
+				source.SetPos(en.X(), en.Y())
+				endSource := time.Now().Add(time.Millisecond * 700)
+				source.CID.Bind(func(id int, data interface{}) int {
+					eff, ok := event.GetEntity(id).(*particle.Source)
+					if ok {
+						eff.ShiftX(ply.Delta.X() + 1)
+
+						if endSource.Before(time.Now()) {
+							eff.Stop()
+							return 1
+						}
+					}
+
+					return 0
+				}, "EnterFrame")
+
+				// Remove the charge from our buffs
+				for buffIdx, b := range ply.Buffs {
+					if b.Name == buff.NameShield {
+						b.Charges--
+						if b.Charges <= 0 {
+							b.ExpireAt = time.Now()
+						}
+						ply.Buffs[buffIdx] = b
+
+						//TODO: Consider have shields create different pushbacks
+
+						return
+					}
+				}
+				dlog.Warn("We thought we had shield but we could not find a buff with such a name")
+				return
+			}
+
+			ply.Alive = false
+			for _, r := range ply.Chests {
+				r.Undraw()
+			}
+			ply.ChestValues = []int64{}
+			ply.Trigger("Kill", nil)
+			event.Trigger("PlayerDeath", nil)
+		})
+
+		// Hitting buffs
+		p.RSpace.Add(labels.EffectsPlayer, func(s, bf *collision.Space) {
+			p, ok := s.CID.E().(*Player)
+			if !ok {
+				dlog.Error("Non-player sent to player binding")
+				return
+			}
+			bfr, ok := bf.CID.E().(Buffer)
+			if !ok {
+				dlog.Error("EffectsPlayer label on non-Effecter")
+				return
+			}
+			// Todo: How do we know if the buff is a party wide buff or not
+			pty := p.Party
+			if pty == nil {
+				dlog.Error("Player had no party")
+				return
+			}
+			bfs := bfr.Buffs()
+			for _, b := range bfs {
+				for _, ply := range pty.Players {
+					ply.AddBuff(b)
+				}
+			}
+			if dstr, ok := bfr.(Destroyable); ok {
+				dstr.Destroy()
+			}
+			//bf.CID.Trigger("Hit", nil)
+		})
 
 		p.CheckedBind(func(p *Player, _ interface{}) int {
 			p.facing = "LT"

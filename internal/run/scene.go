@@ -1,31 +1,21 @@
 package run
 
 import (
-	"fmt"
-	"image/color"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/oakmound/weekly87/internal/abilities/buff"
-
 	"github.com/oakmound/oak/key"
-	"github.com/oakmound/oak/physics"
-	"github.com/oakmound/oak/render/particle"
-	"github.com/oakmound/oak/shape"
 
 	"github.com/oakmound/oak/mouse"
 
 	"github.com/oakmound/weekly87/internal/characters"
-	"github.com/oakmound/weekly87/internal/characters/enemies"
 	"github.com/oakmound/weekly87/internal/restrictor"
 
 	"github.com/oakmound/weekly87/internal/settings"
 
-	"github.com/200sc/go-dist/floatrange"
-	"github.com/200sc/go-dist/intrange"
 	klg "github.com/200sc/klangsynthese/audio"
 	"github.com/200sc/klangsynthese/audio/filter"
 
@@ -98,84 +88,6 @@ var Scene = scene.Scene{
 			render.Draw(p.R, layer.Play, 2)
 			rs := p.GetReactiveSpace()
 
-			// Interaction with Enemies
-			rs.Add(labels.Enemy, func(s, e *collision.Space) {
-				ply, ok := s.CID.E().(*players.Player)
-				if !ok {
-					dlog.Error("Non-player sent to player binding")
-					return
-				}
-				en, ok := e.CID.E().(*enemies.BasicEnemy)
-				if !ok {
-					dlog.Error("Non-enemy sent to enemy binding")
-					fmt.Printf("%T\n", s.CID.E())
-					return
-				}
-				if ply.Invulnerable > 0 || !en.Active {
-					return
-				}
-
-				if ply.Shield > 0 {
-					dlog.Info("Enemy hit us be we were shielded")
-
-					// Affect the enemy
-					en.PushBack.Add(physics.NewVector(100, 0))
-					pg := particle.NewColorGenerator(
-						particle.Color(color.RGBA{255, 158, 0, 255}, color.RGBA{0, 0, 0, 0},
-							color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
-						particle.Shape(shape.Diamond),
-						particle.Size(intrange.NewConstant(10)),
-						particle.EndSize(intrange.NewConstant(5)),
-						particle.Speed(floatrange.NewConstant(2)),
-						particle.LifeSpan(floatrange.NewConstant(2)),
-						particle.Spread(5, 5),
-						particle.NewPerFrame(floatrange.NewConstant(40)),
-					)
-
-					source := pg.Generate(2)
-					source.SetPos(en.X(), en.Y())
-					endSource := time.Now().Add(time.Millisecond * 700)
-					source.CID.Bind(func(id int, data interface{}) int {
-						eff, ok := event.GetEntity(id).(*particle.Source)
-						if ok {
-							eff.ShiftX(ply.Delta.X() + 1)
-
-							if endSource.Before(time.Now()) {
-								eff.Stop()
-								return 1
-							}
-						}
-
-						return 0
-					}, "EnterFrame")
-
-					// Remove the charge from our buffs
-					for buffIdx, b := range ply.Buffs {
-						if b.Name == buff.NameShield {
-							b.Charges--
-							if b.Charges <= 0 {
-								b.ExpireAt = time.Now()
-							}
-							ply.Buffs[buffIdx] = b
-
-							//TODO: Consider have shields create different pushbacks
-
-							return
-						}
-					}
-					dlog.Warn("We thought we had shield but we could not find a buff with such a name")
-					return
-				}
-
-				ply.Alive = false
-				for _, r := range ply.Chests {
-					r.Undraw()
-				}
-				ply.ChestValues = []int64{}
-				ply.Trigger("Kill", nil)
-				event.Trigger("PlayerDeath", nil)
-			})
-
 			rs.Add(labels.Chest, func(s, s2 *collision.Space) {
 				p, ok := s.CID.E().(*players.Player)
 				if !ok {
@@ -206,43 +118,6 @@ var Scene = scene.Scene{
 					event.Trigger("RunBack", nil)
 					tracker.Prev()
 				})
-			})
-
-			type Buffer interface {
-				Buffs() []buff.Buff
-			}
-
-			type Destroyable interface {
-				Destroy()
-			}
-
-			rs.Add(labels.EffectsPlayer, func(s, bf *collision.Space) {
-				p, ok := s.CID.E().(*players.Player)
-				if !ok {
-					dlog.Error("Non-player sent to player binding")
-					return
-				}
-				bfr, ok := bf.CID.E().(Buffer)
-				if !ok {
-					dlog.Error("EffectsPlayer label on non-Effecter")
-					return
-				}
-				// Todo: How do we know if the buff is a party wide buff or not
-				pty := p.Party
-				if pty == nil {
-					dlog.Error("Player had no party")
-					return
-				}
-				bfs := bfr.Buffs()
-				for _, b := range bfs {
-					for _, ply := range pty.Players {
-						ply.AddBuff(b)
-					}
-				}
-				if dstr, ok := bfr.(Destroyable); ok {
-					dstr.Destroy()
-				}
-				//bf.CID.Trigger("Hit", nil)
 			})
 
 			// Player got back to the Inn!
