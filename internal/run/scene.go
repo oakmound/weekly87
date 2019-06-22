@@ -70,12 +70,7 @@ var Scene = scene.Scene{
 		render.SetDrawStack(layer.Get()...)
 
 		debugTree := dtools.NewRTree(collision.DefTree)
-		debugTree.ColorMap = map[collision.Label]color.RGBA{
-			labels.Chest: color.RGBA{255, 255, 0, 255},
-			labels.Door:  color.RGBA{125, 125, 125, 255},
-			labels.Enemy: color.RGBA{0, 0, 255, 255},
-			labels.PC:    color.RGBA{125, 0, 255, 255},
-		}
+		debugTree.ColorMap = labels.ColorMap
 		render.Draw(debugTree, layer.Overlay, 1000)
 
 		debugInvuln := false
@@ -87,9 +82,6 @@ var Scene = scene.Scene{
 		ptycon := players.PartyConstructor{
 			Players: players.ClassConstructor(
 				r.PartyComp),
-			// []int{players.Spearman, players.Mage, players.Mage, players.Swordsman}),
-
-			// []int{players.Spearman, players.Spearman, players.Spearman, players.Spearman}),
 		}
 		ptycon.Players[0].Position = floatgeom.Point2{players.WallOffset, float64(oak.ScreenHeight / 2)}
 		pty, err := ptycon.NewRunningParty()
