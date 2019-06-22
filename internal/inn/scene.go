@@ -11,9 +11,7 @@ import (
 	"time"
 
 	klg "github.com/200sc/klangsynthese/audio"
-	"github.com/200sc/klangsynthese/audio/filter"
 
-	"github.com/oakmound/oak/audio"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/render/mod"
@@ -28,13 +26,13 @@ import (
 	"github.com/oakmound/weekly87/internal/dtools"
 	"github.com/oakmound/weekly87/internal/layer"
 	"github.com/oakmound/weekly87/internal/records"
-	"github.com/oakmound/weekly87/internal/settings"
+	"github.com/oakmound/weekly87/internal/music"
 )
 
 var stayInMenu bool
 var nextscene string
-var music klg.Audio
-var r *records.Records
+var bkgMusic *klg.Audio 
+var curRecord *records.Records
 
 // Scene  to display the inn
 var Scene = scene.Scene{
@@ -48,7 +46,7 @@ var Scene = scene.Scene{
 
 		render.Draw(debugTree, layer.Play, 1000)
 
-		r = records.Load()
+		curRecord = records.Load()
 
 		// Make the Inn backing
 		innBackground, _ := render.LoadSprite("", filepath.Join("raw", "placeholder_inn.png"))
@@ -109,7 +107,7 @@ var Scene = scene.Scene{
 		npcs = append(npcs, NewInnNPC(players.TimeMage, npcScale, 675, 477).FaceLeft(true))
 
 		// Simple metric for determining number of NPCs in room
-		progress := int(math.Min(float64(r.SectionsCleared)/10.0, float64(len(npcs))))
+		progress := int(math.Min(float64(curRecord.SectionsCleared)/10.0, float64(len(npcs))))
 		futureNpcs := npcs[progress:len(npcs)]
 		npcs = npcs[0:progress]
 		dlog.Verb("Future NPCS", len(futureNpcs))
@@ -123,7 +121,7 @@ var Scene = scene.Scene{
 
 		// Create the player and the display of the party at the top of the screen
 		ptycon := players.PartyConstructor{
-			Players: players.ClassConstructor(r.PartyComp),
+			Players: players.ClassConstructor(curRecord.PartyComp),
 		}
 		// Draw the party in top left
 		partyBackground := render.NewColorBox(206, 52, color.RGBA{90, 90, 200, 255})
@@ -162,15 +160,15 @@ var Scene = scene.Scene{
 			interactLock.Unlock()
 
 			dlog.Info("Adding a class to the party")
-			r.PartyComp = append(r.PartyComp, npc.Class)
+			curRecord.PartyComp = append(curRecord.PartyComp, npc.Class)
 			for _, p := range pty.Players {
 				p.Destroy()
 				p.R.Undraw()
 			}
-			if len(r.PartyComp) > 4 {
-				r.PartyComp = r.PartyComp[1:]
+			if len(curRecord.PartyComp) > 4 {
+				curRecord.PartyComp = curRecord.PartyComp[1:]
 			}
-			ptycon.Players = players.ClassConstructor(r.PartyComp)
+			ptycon.Players = players.ClassConstructor(curRecord.PartyComp) 
 			ptycon.Players[0].Position = ptyOffset
 
 			pty, err = ptycon.NewParty(true)
@@ -191,23 +189,13 @@ var Scene = scene.Scene{
 		// err = mouse.PhaseCollision()
 		dlog.ErrorCheck(err)
 
-		// Set up the audio
-		music, err = audio.Load(filepath.Join("assets", "audio"), "inn1.wav")
-		dlog.ErrorCheck(err)
-		music, err = music.Copy()
-		dlog.ErrorCheck(err)
-		music = music.MustFilter(
-			filter.Volume(0.5*settings.Active.MusicVolume*settings.Active.MasterVolume),
-			filter.LoopOn(),
-		)
-
-		music.Play()
+		bkgMusic, err = music.Start(true, "inn1.wav")
 
 		oak.ResetCommands()
 		oak.AddCommand("resetParty", func(args []string) {
-			r.PartyComp = []int{players.Spearman}
-			ptycon.Players = players.ClassConstructor(r.PartyComp)
-			ptycon.Players[0].Position = ptyOffset
+			curRecord.PartyComp = []int{players.Spearman}
+			ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
+			ptycon.Players[0].Position = ptyOffset 
 			for _, p := range pty.Players {
 				p.R.Undraw()
 				debugTree.Remove(p.RSpace.Space)
@@ -244,8 +232,8 @@ var Scene = scene.Scene{
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
 	End: func() (string, *scene.Result) {
-		r.Store()
-		music.Stop()
+		curRecord.Store()
+		(*bkgMusic).Stop()
 		return nextscene, nil
 	},
 }
