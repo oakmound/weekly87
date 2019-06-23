@@ -62,22 +62,14 @@ var Scene = scene.Scene{
 		doodads.NewFurniture(0, 0, float64(oak.ScreenWidth), 140) // top of inn
 
 		// Additional inn such as tables
-		doodads.NewFurniture(130, 130, 100, float64(oak.ScreenHeight)-130) // Left Table
-		for i := 0; i < 2+rand.Intn(7); i++ {
-			doodads.NewOrnament(130, 130, 100, float64(oak.ScreenHeight)-130, prettyMugs[rand.Intn(3)])
-		}
+		leftT := doodads.NewFurniture(130, 130, 100, float64(oak.ScreenHeight)-130)
+		leftT.SetOrnaments(prettyMugs, 3+rand.Intn(7))
 
-		topLocations := []float64{480, 230, 190, 60}
-		botLocations := []float64{480, 430, 180, 55}
+		topT := doodads.NewFurniture(480, 230, 190, 60)
+		topT.SetOrnaments(prettyMugs, rand.Intn(6))
 
-		doodads.NewFurniture(topLocations[0], topLocations[1], topLocations[2], topLocations[3]) // top Table
-		for i := 0; i < rand.Intn(6); i++ {
-			doodads.NewOrnament(topLocations[0], topLocations[1], topLocations[2], topLocations[3], prettyMugs[rand.Intn(3)])
-		}
-		doodads.NewFurniture(botLocations[0], botLocations[1], botLocations[2], botLocations[3]) // bottom Table
-		for i := 0; i < rand.Intn(6); i++ {
-			doodads.NewOrnament(botLocations[0], botLocations[1], botLocations[2], botLocations[3], prettyMugs[rand.Intn(3)])
-		}
+		botT := doodads.NewFurniture(480, 430, 180, 55)
+		botT.SetOrnaments(prettyMugs, rand.Intn(6))
 
 		// Create the notes on the notice board
 		noteSpace := floatgeom.NewRect2WH(240, 60, 85, 65)
