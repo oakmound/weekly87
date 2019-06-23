@@ -25,13 +25,13 @@ import (
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/dtools"
 	"github.com/oakmound/weekly87/internal/layer"
-	"github.com/oakmound/weekly87/internal/records"
 	"github.com/oakmound/weekly87/internal/music"
+	"github.com/oakmound/weekly87/internal/records"
 )
 
 var stayInMenu bool
 var nextscene string
-var bkgMusic *klg.Audio 
+var bkgMusic *klg.Audio
 var curRecord *records.Records
 
 // Scene  to display the inn
@@ -40,13 +40,8 @@ var Scene = scene.Scene{
 		stayInMenu = true
 		nextscene = "inn"
 		render.SetDrawStack(layer.Get()...)
-		debugTree := dtools.NewThickRTree(collision.DefTree, 4)
-
-		debugTree.ColorMap = labels.ColorMap
-
+		debugTree := dtools.NewThickColoredRTree(collision.DefTree, 4, labels.ColorMap)
 		render.Draw(debugTree, layer.Play, 1000)
-
-		curRecord = records.Load()
 
 		// Make the Inn backing
 		innBackground, _ := render.LoadSprite("", filepath.Join("raw", "placeholder_inn.png"))
@@ -92,28 +87,27 @@ var Scene = scene.Scene{
 		}
 
 		// Create all possible NPCs
-		npcs := []NPC{}
 		npcScale := 1.6
-		npcs = append(npcs, NewInnNPC(players.Swordsman, npcScale, 680, 230).FaceLeft(true))
-		npcs = append(npcs, NewInnNPC(players.Mage, npcScale, 440, 210))
+		npcs := []NPC{
+			NewInnNPC(players.Swordsman, npcScale, 680, 230).FaceLeft(true),
+			NewInnNPC(players.Mage, npcScale, 440, 210),
+			NewInnNPC(players.WhiteMage, npcScale, 670, 423).FaceLeft(true),
+			NewInnNPC(players.Berserker, npcScale, 445, 460),
+			NewInnNPC(players.BlueMage, npcScale, 241, 210).FaceLeft(true),
+			NewInnNPC(players.Paladin, npcScale, 240, 280).FaceLeft(true),
+			NewInnNPC(players.Spearman, npcScale, 243, 400).FaceLeft(true),
+			NewInnNPC(players.TimeMage, npcScale, 675, 477).FaceLeft(true),
+		}
 
-		npcs = append(npcs, NewInnNPC(players.WhiteMage, npcScale, 670, 423).FaceLeft(true))
-		npcs = append(npcs, NewInnNPC(players.Berserker, npcScale, 445, 460))
-
-		npcs = append(npcs, NewInnNPC(players.BlueMage, npcScale, 241, 210).FaceLeft(true))
-		npcs = append(npcs, NewInnNPC(players.Paladin, npcScale, 240, 280).FaceLeft(true))
-
-		npcs = append(npcs, NewInnNPC(players.Spearman, npcScale, 243, 400).FaceLeft(true))
-		npcs = append(npcs, NewInnNPC(players.TimeMage, npcScale, 675, 477).FaceLeft(true))
+		// Inn does quite a few operations on our record (mainly for party purposes)
+		curRecord = records.Load()
 
 		// Simple metric for determining number of NPCs in room
 		progress := int(math.Min(float64(curRecord.SectionsCleared)/10.0, float64(len(npcs))))
 		futureNpcs := npcs[progress:len(npcs)]
 		npcs = npcs[0:progress]
-		dlog.Verb("Future NPCS", len(futureNpcs))
 		for _, fn := range futureNpcs {
-			// fn.RSpace = nil
-			fn.Destroy()
+			fn.Destroy() // Being extra safe
 		}
 		for _, np := range npcs {
 			np.Activate()
@@ -127,6 +121,7 @@ var Scene = scene.Scene{
 		partyBackground := render.NewColorBox(206, 52, color.RGBA{90, 90, 200, 255})
 		partyBackground.SetPos(30, 20)
 		render.Draw(partyBackground, layer.Play, 3)
+
 		ptyOffset := floatgeom.Point2{players.WallOffset, 30}
 		ptycon.Players[0].Position = ptyOffset
 		pty, err := ptycon.NewParty(true)
@@ -143,6 +138,7 @@ var Scene = scene.Scene{
 		interactLock := &sync.Mutex{}
 		//Create an example person to navigate the space
 		pc := NewInnWalker(innSpace, npcScale, pty.Players[0].Swtch.Copy().(*render.Switch))
+		// Interact with NPCs
 		pc.RSpace.Add(labels.NPC, func(_, n *collision.Space) {
 			// Limit interaction rate of player
 			interactLock.Lock()
@@ -168,7 +164,7 @@ var Scene = scene.Scene{
 			if len(curRecord.PartyComp) > 4 {
 				curRecord.PartyComp = curRecord.PartyComp[1:]
 			}
-			ptycon.Players = players.ClassConstructor(curRecord.PartyComp) 
+			ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
 			ptycon.Players[0].Position = ptyOffset
 
 			pty, err = ptycon.NewParty(true)
@@ -186,16 +182,15 @@ var Scene = scene.Scene{
 
 		})
 
-		// err = mouse.PhaseCollision()
+		bkgMusic, err = music.Start(true, "inn1.wav")
 		dlog.ErrorCheck(err)
 
-		bkgMusic, err = music.Start(true, "inn1.wav")
-
+		// Clear, set and report on the debug commands available
 		oak.ResetCommands()
 		oak.AddCommand("resetParty", func(args []string) {
 			curRecord.PartyComp = []int{players.Spearman}
 			ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
-			ptycon.Players[0].Position = ptyOffset 
+			ptycon.Players[0].Position = ptyOffset
 			for _, p := range pty.Players {
 				p.R.Undraw()
 				debugTree.Remove(p.RSpace.Space)
