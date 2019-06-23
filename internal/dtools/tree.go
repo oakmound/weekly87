@@ -18,12 +18,17 @@ func NewRTree(t *collision.Tree) *Rtree {
 
 // NewThickRTree creates a wrapper around tree that colors spaces up to a thickness
 func NewThickRTree(t *collision.Tree, thickness int) *Rtree {
+	return NewThickColoredRTree(t, thickness, map[collision.Label]color.RGBA{})
+}
+
+// NewThickColoredRTree creates a wrapper around tree that colors spaces up to a thickness based on a coloring map
+func NewThickColoredRTree(t *collision.Tree, thickness int, colorMapping map[collision.Label]color.RGBA) *Rtree {
 	rt := new(Rtree)
 	rt.Tree = t
 	rt.Thickness = thickness
 	rt.LayeredPoint = render.NewLayeredPoint(0, 0, -1)
 	rt.OutlineColor = color.RGBA{0, 0, 255, 255}
-	rt.ColorMap = map[collision.Label]color.RGBA{}
+	rt.ColorMap = colorMapping
 	return rt
 }
 
