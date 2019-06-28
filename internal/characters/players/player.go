@@ -66,18 +66,19 @@ func (pc *Constructor) Copy() *Constructor {
 
 type Player struct {
 	*entities.Interactive
-	facing      string
-	Swtch       *render.Switch
-	Special1    abilities.Ability
-	Special2    abilities.Ability
-	Alive       bool
-	RunSpeed    float64
-	PartyIndex  int
-	ChestValues []int64
-	Chests      []render.Renderable
-	buffR       []render.Renderable
-	BuffLock    sync.Mutex
-	Buffs       []buff.Buff
+	facing       string
+	Swtch        *render.Switch
+	Special1     abilities.Ability
+	Special2     abilities.Ability
+	Alive        bool
+	RunSpeed     float64
+	PartyIndex   int
+	ChestValues  []int64
+	Chests       []render.Renderable
+	ChestsHeight float64
+	buffR        []render.Renderable
+	BuffLock     sync.Mutex
+	Buffs        []buff.Buff
 	*buff.Status
 	Party *Party
 }

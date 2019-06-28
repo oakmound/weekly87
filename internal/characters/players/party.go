@@ -218,6 +218,7 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 				r.Undraw()
 			}
 			ply.ChestValues = []int64{}
+			ply.ChestsHeight = 0
 			ply.Trigger("Kill", nil)
 			event.Trigger("PlayerDeath", nil)
 		})
@@ -240,9 +241,10 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			r := ch.R.(render.Modifiable).Copy()
 			_, h := r.GetDims()
 
-			chestHeight := (len(p.ChestValues) + 1) * (h + 1)
+			p.ChestsHeight += float64(h)
+			chestHeight := p.ChestsHeight
 
-			r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -float64(chestHeight))
+			r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -chestHeight)
 			p.ChestValues = append(p.ChestValues, ch.Value)
 			p.Chests = append(p.Chests, r)
 
