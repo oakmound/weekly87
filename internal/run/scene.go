@@ -58,7 +58,7 @@ var Scene = scene.Scene{
 
 		debugTree := dtools.NewRTree(collision.DefTree)
 		debugTree.ColorMap = labels.ColorMap
-		render.Draw(debugTree, layer.Overlay, 1000)
+		render.Draw(debugTree, layer.Debug, 20)
 
 		restrictor.ResetDefault()
 		restrictor.Start(1)

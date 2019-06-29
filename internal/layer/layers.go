@@ -13,6 +13,7 @@ const (
 	Effect
 	Overlay
 	UI
+	Debug
 )
 
 // Get returns a slice of all common layers, including fps if active
@@ -29,6 +30,8 @@ func Get() []render.Stackable {
 		// overlay Level
 		render.NewDynamicHeap(),
 		// ui uiLayer
+		render.NewStaticHeap(),
+		// debug
 		render.NewStaticHeap(),
 	}
 
