@@ -41,9 +41,10 @@ type Rtree struct {
 	DrawDisabled bool
 }
 
-// GetDims retunrs the screen dimensions
+// GetDims returns the total possible area to draw this on.
+// TODO: Update
 func (r *Rtree) GetDims() (int, int) {
-	return oak.ScreenWidth, oak.ScreenHeight
+	return oak.ScreenWidth * 20, oak.ScreenHeight
 }
 
 // Draw will draw the collision outlines
