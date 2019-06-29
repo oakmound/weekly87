@@ -21,22 +21,23 @@ import (
 )
 
 var (
+	// FrostBolt is a simple projectile with slowing
 	FrostBolt = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 255}),
-		time.Second*10,
+		time.Second*20,
 		func(u User) []characters.Character {
-			dlog.Info("Firing a fireball")
+			dlog.Info("Firing a frostbolt")
 			pos := u.Vec()
 
 			// Spell Display
 			pg := particle.NewColorGenerator(
-				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
+				particle.Color(color.RGBA{10, 10, 255, 255}, color.RGBA{0, 0, 0, 0},
 					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
 				particle.Shape(shape.Diamond),
-				particle.Size(intrange.NewConstant(10)),
+				particle.Size(intrange.NewConstant(20)),
 				particle.EndSize(intrange.NewConstant(3)),
 				particle.Speed(floatrange.NewConstant(1)),
-				particle.LifeSpan(floatrange.NewConstant(20)),
+				particle.LifeSpan(floatrange.NewConstant(30)),
 			)
 			endDelta := 600.0
 			if u.Direction() == "LT" {
@@ -68,10 +69,10 @@ var (
 				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
 					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
 				particle.Shape(shape.Diamond),
-				particle.Size(intrange.NewConstant(10)),
+				particle.Size(intrange.NewConstant(5)),
 				particle.EndSize(intrange.NewConstant(3)),
 				particle.Speed(floatrange.NewConstant(1)),
-				particle.LifeSpan(floatrange.NewConstant(20)),
+				particle.LifeSpan(floatrange.NewConstant(10)),
 			)
 			endDelta := 600.0
 			if u.Direction() == "LT" {
@@ -94,12 +95,12 @@ var (
 		render.NewColorBox(64, 64, color.RGBA{10, 10, 250, 255}),
 		time.Second*10,
 		func(u User) []characters.Character {
-			dlog.Info("Firing a fireball")
+			dlog.Info("making a blizzard")
 			pos := u.Vec()
 
 			// Spell Display
 			pg := particle.NewColorGenerator(
-				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
+				particle.Color(color.RGBA{10, 10, 255, 255}, color.RGBA{0, 0, 0, 0},
 					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
 				particle.Shape(shape.Diamond),
 				particle.Size(intrange.NewConstant(10)),
