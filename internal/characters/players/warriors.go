@@ -23,12 +23,20 @@ func WarriorsInit() {
 
 	var warriorDefinitions = []ClassDefinition{
 		{
+			Name: "Swordsman",
+			//LayerColors: map[string]color.RGBA{
+			//	"clothes": color.RGBA{240, 100, 100, 125},
+			//},
+			Special1: abilities.SwordSwipe,
+			Special2: abilities.SelfShield,
+		},
+		{
 			Name: "Paladin",
 			LayerColors: map[string]color.RGBA{
 				"clothes": color.RGBA{240, 240, 240, 70},
 			},
-			Special1: abilities.SwordSwipe,
-			Special2: abilities.Shield,
+			Special1: abilities.HammerSmack,
+			Special2: abilities.PartyShield,
 		},
 		{
 			Name: "Berserker",
@@ -36,23 +44,15 @@ func WarriorsInit() {
 				"clothes": color.RGBA{100, 100, 240, 20},
 			},
 			Special1: abilities.SwordSwipe,
-			Special2: abilities.Shield,
+			Special2: abilities.Rage,
 		},
 		{
 			Name: "Spearman",
 			LayerColors: map[string]color.RGBA{
 				"clothes": color.RGBA{100, 240, 100, 150},
 			},
-			Special1: abilities.SwordSwipe,
-			Special2: abilities.Shield,
-		},
-		{
-			Name: "Swordsman",
-			//LayerColors: map[string]color.RGBA{
-			//	"clothes": color.RGBA{240, 100, 100, 125},
-			//},
-			Special1: abilities.SwordSwipe,
-			Special2: abilities.SwordSwipe,
+			Special1: abilities.SpearStab,
+			Special2: abilities.SpearThrow,
 		},
 	}
 

@@ -22,27 +22,19 @@ var MageConstructors = map[string]*Constructor{}
 func MageInit() {
 	var mageDefinitions = []ClassDefinition{
 		{
-			Name: "White",
-			LayerColors: map[string]color.RGBA{
-				"clothes": color.RGBA{240, 240, 240, 70},
-			},
-			Special1: abilities.Invulnerability,
-			Special2: abilities.Invulnerability,
-		},
-		{
 			Name: "Blue",
 			LayerColors: map[string]color.RGBA{
 				"clothes": color.RGBA{100, 100, 240, 20},
 			},
-			Special1: abilities.GameBreakerFireBall,
-			Special2: abilities.Invulnerability,
+			Special1: abilities.FrostBolt,
+			Special2: abilities.Blizzard,
 		},
 		{
-			Name: "Time",
+			Name: "White",
 			LayerColors: map[string]color.RGBA{
-				"clothes": color.RGBA{100, 240, 100, 150},
+				"clothes": color.RGBA{240, 240, 240, 70},
 			},
-			Special1: abilities.Invulnerability,
+			Special1: abilities.Rez,
 			Special2: abilities.Invulnerability,
 		},
 		{
@@ -51,7 +43,15 @@ func MageInit() {
 			//	"clothes": color.RGBA{240, 100, 100, 125},
 			//},
 			Special1: abilities.Fireball,
-			Special2: abilities.Fireball,
+			Special2: abilities.FireWall,
+		},
+		{
+			Name: "Time",
+			LayerColors: map[string]color.RGBA{
+				"clothes": color.RGBA{100, 240, 100, 150},
+			},
+			Special1: abilities.Slow,
+			Special2: abilities.CooldownRework,
 		},
 	}
 

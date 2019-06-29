@@ -30,8 +30,116 @@ var (
 		},
 	)
 
-	Shield = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{40, 200, 125, 255}),
+	SwordSwipe = NewAbility(
+		render.NewColorBox(64, 64, color.RGBA{200, 90, 0, 255}),
+		time.Second*4,
+		func(u User) []characters.Character {
+			dlog.Info("Trying to swipe at enemies")
+
+			yDelta := 40.0
+			xOffset := 100.0
+			xDelta := 150.0
+			if u.Direction() == "LT" {
+				xOffset *= -1
+				xDelta *= -1
+			}
+
+			pos := u.Vec().Copy()
+			pos.Add(physics.NewVector(xOffset, 16.0))
+			start := floatgeom.Point2{pos.X(), pos.Y() - yDelta}
+			mid := floatgeom.Point2{pos.X() + xDelta, pos.Y()}
+			end := floatgeom.Point2{pos.X(), pos.Y() + yDelta}
+
+			// Spell Display
+			pg := particle.NewColorGenerator(
+				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
+					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
+				particle.Shape(shape.Diamond),
+				particle.Size(intrange.NewConstant(10)),
+				particle.EndSize(intrange.NewConstant(5)),
+				particle.Speed(floatrange.NewConstant(2)),
+				particle.LifeSpan(floatrange.NewConstant(10)),
+			)
+
+			chrs, err := Produce(
+				StartAt(start),
+				FrameLength(20),
+				ArcTo(mid, end),
+				FollowSpeed(u.GetDelta().Xp(), u.GetDelta().Yp()),
+				WithLabel(labels.EffectsEnemy),
+				WithParticles(pg),
+			)
+
+			dlog.ErrorCheck(err)
+			return chrs
+		},
+	)
+
+	HammerSmack = NewAbility(
+		render.NewColorBox(64, 64, color.RGBA{200, 80, 80, 255}),
+		time.Second*4,
+		func(u User) []characters.Character {
+			dlog.Info("Trying to swipe at enemies")
+
+			yDelta := 40.0
+			xOffset := 100.0
+			xDelta := 150.0
+			if u.Direction() == "LT" {
+				xOffset *= -1
+				xDelta *= -1
+			}
+
+			pos := u.Vec().Copy()
+			pos.Add(physics.NewVector(xOffset, 16.0))
+			start := floatgeom.Point2{pos.X(), pos.Y() - yDelta}
+			mid := floatgeom.Point2{pos.X() + xDelta, pos.Y()}
+			end := floatgeom.Point2{pos.X(), pos.Y() + yDelta}
+
+			// Spell Display
+			pg := particle.NewColorGenerator(
+				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
+					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
+				particle.Shape(shape.Diamond),
+				particle.Size(intrange.NewConstant(10)),
+				particle.EndSize(intrange.NewConstant(5)),
+				particle.Speed(floatrange.NewConstant(2)),
+				particle.LifeSpan(floatrange.NewConstant(10)),
+			)
+
+			chrs, err := Produce(
+				StartAt(start),
+				FrameLength(20),
+				ArcTo(mid, end),
+				FollowSpeed(u.GetDelta().Xp(), u.GetDelta().Yp()),
+				WithLabel(labels.EffectsEnemy),
+				WithParticles(pg),
+			)
+
+			dlog.ErrorCheck(err)
+			return chrs
+		},
+	)
+
+	Rage = NewAbility(
+		render.NewColorBox(64, 64, color.RGBA{230, 5, 0, 255}),
+		time.Second*5,
+		func(u User) []characters.Character {
+			fmt.Println("Just tried to stab a guy ", u)
+			return nil
+		},
+	)
+
+	SpearThrow = NewAbility(
+		render.NewColorBox(64, 64, color.RGBA{200, 50, 150, 255}),
+		time.Second*5,
+		func(u User) []characters.Character {
+			fmt.Println("Just tried to stab a guy ", u)
+			return nil
+		},
+	)
+
+	PartyShield = NewAbility(
+		render.NewColorBox(64, 64, color.RGBA{40, 200, 90, 255}),
 		time.Second*10,
 		func(u User) []characters.Character {
 			pos := u.Vec()
@@ -79,48 +187,12 @@ var (
 		},
 	)
 
-	SwordSwipe = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 255}),
-		time.Second*4,
+	SelfShield = NewAbility(
+		render.NewColorBox(64, 64, color.RGBA{110, 200, 110, 255}),
+		time.Second*5,
 		func(u User) []characters.Character {
-			dlog.Info("Trying to swipe at enemies")
-
-			yDelta := 40.0
-			xOffset := 100.0
-			xDelta := 150.0
-			if u.Direction() == "LT" {
-				xOffset *= -1
-				xDelta *= -1
-			}
-
-			pos := u.Vec().Copy()
-			pos.Add(physics.NewVector(xOffset, 16.0))
-			start := floatgeom.Point2{pos.X(), pos.Y() - yDelta}
-			mid := floatgeom.Point2{pos.X() + xDelta, pos.Y()}
-			end := floatgeom.Point2{pos.X(), pos.Y() + yDelta}
-
-			// Spell Display
-			pg := particle.NewColorGenerator(
-				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
-					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
-				particle.Shape(shape.Diamond),
-				particle.Size(intrange.NewConstant(10)),
-				particle.EndSize(intrange.NewConstant(5)),
-				particle.Speed(floatrange.NewConstant(2)),
-				particle.LifeSpan(floatrange.NewConstant(10)),
-			)
-
-			chrs, err := Produce(
-				StartAt(start),
-				FrameLength(20),
-				ArcTo(mid, end),
-				FollowSpeed(u.GetDelta().Xp(), u.GetDelta().Yp()),
-				WithLabel(labels.EffectsEnemy),
-				WithParticles(pg),
-			)
-
-			dlog.ErrorCheck(err)
-			return chrs
+			fmt.Println("To Be Implemented ", u)
+			return nil
 		},
 	)
 )
