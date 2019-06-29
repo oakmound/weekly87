@@ -27,6 +27,7 @@ func initHare() {
 	baseConstructor := Constructor{
 		Dimensions:   floatgeom.Point2{32, 32},
 		AnimationMap: anims,
+		Speed:        floatgeom.Point2{3, 2},
 		Bindings: map[string]func(*BasicEnemy, interface{}) int{
 			"EnterFrame": func(b *BasicEnemy, frame interface{}) int {
 				f := frame.(int)
@@ -35,8 +36,8 @@ func initHare() {
 					b.Speed = physics.NewVector(0, 0)
 				} else if f%70 == 0 {
 					b.Speed = physics.NewVector(
-						-float64(rand.Intn(3)+1)*3,
-						float64(rand.Intn(4)-2),
+						-(rand.Float64()*b.baseSpeed.X()+1)*3,
+						rand.Float64()*b.baseSpeed.Y()*float64(rand.Intn(2)*2-1),
 					)
 					if b.facing == "RT" {
 						b.Speed.Scale(-1)

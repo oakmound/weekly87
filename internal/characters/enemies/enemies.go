@@ -73,6 +73,7 @@ type BasicEnemy struct {
 	Active        bool
 	beenDisplayed bool
 	PushBack      physics.Vector
+	baseSpeed     physics.Vector
 }
 
 func (be *BasicEnemy) Init() event.CID {
@@ -130,6 +131,7 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		0,
 	)
 	be.Speed = physics.NewVector(ec.Speed.X(), ec.Speed.Y())
+	be.baseSpeed = be.Speed.Copy()
 	be.facing = "LT"
 	be.RSpace.Label = labels.Enemy
 	be.CheckedBind(func(be *BasicEnemy, _ interface{}) int {
