@@ -1,6 +1,7 @@
 package run
 
 import (
+	"image/color"
 	"strconv"
 	"strings"
 	"sync"
@@ -80,7 +81,6 @@ var Scene = scene.Scene{
 		for i, p := range pty.Players {
 			render.Draw(p.R, layer.Play, 2)
 			rs := p.GetReactiveSpace()
-
 			// Player got back to the Inn!
 			rs.Add(labels.Door, func(_, d *collision.Space) {
 				d.CID.Trigger("RibbonCut", nil)
@@ -92,7 +92,6 @@ var Scene = scene.Scene{
 			})
 
 			// Ability icon rendering / binding
-
 			const aRendDims = 64.0
 			const aPad = aRendDims + 12.0 //Size of ability image plus padding
 			const cornerPad = 20
@@ -168,6 +167,24 @@ var Scene = scene.Scene{
 		)
 
 		var lastX float64
+
+		// Create a debug for Section drawing
+		secDebugHeight := 20
+		secDebug1 := render.NewColorBox(oak.ScreenWidth/3, secDebugHeight, color.RGBA{100, 2, 2, 100})
+		secDebug2 := render.NewColorBox(oak.ScreenWidth/3, secDebugHeight, color.RGBA{2, 100, 2, 100})
+		secDebug3 := render.NewColorBox(oak.ScreenWidth/3, secDebugHeight, color.RGBA{2, 2, 100, 100})
+
+		secDebug2.SetPos(float64(oak.ScreenWidth)/3, 0)
+		secDebug3.SetPos(2*float64(oak.ScreenWidth)/3, 0)
+
+		render.Draw(secDebug1, layer.UI, 3)
+		render.Draw(secDebug2, layer.UI, 3)
+		render.Draw(secDebug3, layer.UI, 3)
+
+		pSecDebug := render.NewColorBox(4, 4, color.RGBA{10, 10, 10, 255})
+		render.Draw(pSecDebug, layer.UI, 5)
+		pSecXNormalizer := sec1.W() * 3 / float64(oak.ScreenWidth)
+		pSecYNormalizer := float64(oak.ScreenHeight) / 3 * 2 / float64(secDebugHeight-4)
 
 		// Section creation bind to support infinite* hallway
 		event.GlobalBind(func(int, interface{}) int {
@@ -258,7 +275,7 @@ var Scene = scene.Scene{
 					}
 				}
 			}
-
+			pSecDebug.SetPos((x-2)/pSecXNormalizer, (pty.Players[0].Y()/pSecYNormalizer)-float64(secDebugHeight)/3-2)
 			lastX = x
 			return 0
 		}, "EnterFrame")
