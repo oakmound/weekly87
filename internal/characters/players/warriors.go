@@ -33,7 +33,8 @@ func WarriorsInit() {
 		{
 			Name: "Paladin",
 			LayerColors: map[string]color.RGBA{
-				"clothes": color.RGBA{240, 240, 240, 70},
+				//"clothes": color.RGBA{240, 240, 240, 70},
+				"clothes": color.RGBA{200, 200, 200, 200},
 			},
 			Special1: abilities.HammerSmack,
 			Special2: abilities.PartyShield,
@@ -41,7 +42,7 @@ func WarriorsInit() {
 		{
 			Name: "Berserker",
 			LayerColors: map[string]color.RGBA{
-				"clothes": color.RGBA{100, 100, 240, 20},
+				"clothes": color.RGBA{160, 70, 70, 160},
 			},
 			Special1: abilities.SwordSwipe,
 			Special2: abilities.Rage,
@@ -49,7 +50,7 @@ func WarriorsInit() {
 		{
 			Name: "Spearman",
 			LayerColors: map[string]color.RGBA{
-				"clothes": color.RGBA{100, 240, 100, 150},
+				"clothes": color.RGBA{70, 70, 150, 150},
 			},
 			Special1: abilities.SpearStab,
 			Special2: abilities.SpearThrow,
@@ -74,7 +75,7 @@ func WarriorsInit() {
 			if c, ok := def.LayerColors[strings.ToLower(layer.Name)]; ok {
 				fmt.Println("We found the right layer", layer.Name)
 				// Recolor this layer
-				sp.Filter(recolor.WithStrategy(recolor.ColorShift(c)))
+				sp.Filter(recolor.WithStrategy(recolor.ColorMix(c)))
 			}
 			// Add this layer to the combined image
 			// Todo: bug with shoulder having some pixel flashing
