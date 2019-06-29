@@ -136,7 +136,7 @@ func (st *Tracker) Produce(delta int64) *Section {
 	if !(st.sectionsDeep == 1 && delta > 0) {
 		for i := 0; i < plan.enemyCount.Poll(); i++ {
 			typ := alg.WeightedChooseOne(enemyDist)
-			cs := enemies.Constructors[typ]
+			cs := enemies.Constructors[typ*enemies.VariantCount+plan.enemyVariantRange.Poll()]
 			e, err := cs.NewEnemy(st.sectionsDeep, int64(len(st.entities)))
 			if delta < 0 {
 				e.RunBackwards()

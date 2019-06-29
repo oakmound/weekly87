@@ -24,7 +24,7 @@ func initHare() {
 	anims["walkRT"] = render.NewSequence(4, sheet[0][0].Copy(), sheet[1][0].Copy())
 	anims["walkLT"] = anims["walkRT"].Copy().Modify(mod.FlipX)
 
-	Constructors[Hare] = Constructor{
+	baseConstructor := Constructor{
 		Dimensions:   floatgeom.Point2{32, 32},
 		AnimationMap: anims,
 		Bindings: map[string]func(*BasicEnemy, interface{}) int{
@@ -45,5 +45,16 @@ func initHare() {
 				return 0
 			},
 		},
+	}
+
+	// Todo: if this gets more complicated, we can have initHare return the baseConstructor
+	// and do this in one place for all enemies
+	for size := 0; size < lastSize; size++ {
+		for color := 0; color < lastColor; color++ {
+			cons := baseConstructor.Copy()
+			sizeVariants[size](cons)
+			colorVariants[color](cons)
+			setConstructor(int(Hare), size, color, cons)
+		}
 	}
 }

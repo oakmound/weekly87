@@ -37,9 +37,34 @@ type Constructor struct {
 	// more may be added
 	AnimationMap map[string]render.Modifiable
 	Bindings     map[string]func(*BasicEnemy, interface{}) int
+	Health       int
 }
 
-var Constructors [TypeLimit]Constructor
+func (c *Constructor) Copy() *Constructor {
+	c2 := &Constructor{
+		Position:   c.Position,
+		Dimensions: c.Dimensions,
+		Speed:      c.Speed,
+		// Todo: Assuming right now that the bindings map never gets modified (by a variant)
+		Bindings:     c.Bindings,
+		Health:       c.Health,
+		AnimationMap: make(map[string]render.Modifiable, len(c.AnimationMap)),
+	}
+	for k, v := range c.AnimationMap {
+		c2.AnimationMap[k] = v.Copy()
+	}
+	return c2
+}
+
+var Constructors [TypeLimit * VariantCount]*Constructor
+
+func setConstructor(eType, size, color int, cons *Constructor) {
+	Constructors[(eType*VariantCount)+(size*lastColor)+color] = cons
+}
+
+func GetConstructor(eType, size, color int) *Constructor {
+	return Constructors[(eType*VariantCount)+(size*lastColor)+color]
+}
 
 type BasicEnemy struct {
 	*entities.Interactive

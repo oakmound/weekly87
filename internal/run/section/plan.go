@@ -17,6 +17,7 @@ type entityPlan struct {
 	chestRange        intrange.Range
 	enemyCount        intrange.Range
 	enemyDistribution [enemies.TypeLimit]float64
+	enemyVariantRange intrange.Range
 }
 
 type tilePlan struct {
@@ -52,11 +53,12 @@ func Init() {
 	entityPlanA := entityPlan{
 		chestCount: intrange.NewLinear(0, 5),
 		chestRange: intrange.NewLinear(1, 5),
-		enemyCount: intrange.NewLinear(3, 7),
+		enemyCount: intrange.NewLinear(4, 9),
 		enemyDistribution: [...]float64{
 			enemies.Hare:   .5,
 			enemies.Mantis: .5,
 		},
+		enemyVariantRange: intrange.NewLinear(0, enemies.VariantCount-1),
 	}
 
 	aPlanWeight := tileWeight{

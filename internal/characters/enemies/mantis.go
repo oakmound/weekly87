@@ -23,12 +23,21 @@ func initMantis() {
 	anims["walkRT"] = render.NewSequence(4, sheet[0][0].Copy(), sheet[1][0].Copy())
 	anims["walkLT"] = anims["walkRT"].Copy().Modify(mod.FlipX)
 
-	Constructors[Mantis] = Constructor{
+	baseConstructor := Constructor{
 		Dimensions:   floatgeom.Point2{32, 32},
 		AnimationMap: anims,
 		Speed: floatgeom.Point2{
 			-1 * ((rand.Float64() * 4) + 1),
 			-1 * ((rand.Float64() * 4) + 1),
 		},
+	}
+
+	for size := 0; size < lastSize; size++ {
+		for color := 0; color < lastColor; color++ {
+			cons := baseConstructor.Copy()
+			sizeVariants[size](cons)
+			colorVariants[color](cons)
+			setConstructor(int(Mantis), size, color, cons)
+		}
 	}
 }
