@@ -34,7 +34,7 @@ func WarriorsInit() {
 			Name: "Paladin",
 			LayerColors: map[string]color.RGBA{
 				//"clothes": color.RGBA{240, 240, 240, 70},
-				"clothes": color.RGBA{200, 200, 200, 200},
+				"clothes": color.RGBA{200, 200, 200, 120},
 			},
 			Special1: abilities.HammerSmack,
 			Special2: abilities.PartyShield,
@@ -42,7 +42,7 @@ func WarriorsInit() {
 		{
 			Name: "Berserker",
 			LayerColors: map[string]color.RGBA{
-				"clothes": color.RGBA{160, 70, 70, 160},
+				"clothes": color.RGBA{160, 70, 70, 90},
 			},
 			Special1: abilities.SwordSwipe,
 			Special2: abilities.Rage,
@@ -50,7 +50,7 @@ func WarriorsInit() {
 		{
 			Name: "Spearman",
 			LayerColors: map[string]color.RGBA{
-				"clothes": color.RGBA{70, 70, 150, 150},
+				"clothes": color.RGBA{70, 70, 150, 90},
 			},
 			Special1: abilities.SpearStab,
 			Special2: abilities.SpearThrow,

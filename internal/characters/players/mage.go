@@ -24,7 +24,7 @@ func MageInit() {
 		{
 			Name: "Blue",
 			LayerColors: map[string]color.RGBA{
-				"clothes 2": color.RGBA{47, 47, 200, 200},
+				"clothes": color.RGBA{47, 47, 200, 200},
 			},
 			Special1: abilities.FrostBolt,
 			Special2: abilities.Blizzard,
@@ -32,7 +32,7 @@ func MageInit() {
 		{
 			Name: "White",
 			LayerColors: map[string]color.RGBA{
-				"clothes 2": color.RGBA{190, 190, 190, 190},
+				"clothes": color.RGBA{190, 190, 190, 190},
 			},
 			Special1: abilities.Rez,
 			Special2: abilities.Invulnerability,
@@ -40,7 +40,7 @@ func MageInit() {
 		{
 			Name: "Red",
 			LayerColors: map[string]color.RGBA{
-				"clothes 2": color.RGBA{180, 70, 70, 180},
+				"clothes": color.RGBA{180, 70, 70, 180},
 			},
 			Special1: abilities.Fireball,
 			Special2: abilities.FireWall,
@@ -48,7 +48,7 @@ func MageInit() {
 		{
 			Name: "Time",
 			// LayerColors: map[string]color.RGBA{
-			// 	"clothes 2": color.RGBA{100, 240, 100, 150},
+			// 	"clothes": color.RGBA{100, 240, 100, 150},
 			// },
 			Special1: abilities.Slow,
 			Special2: abilities.CooldownRework,
