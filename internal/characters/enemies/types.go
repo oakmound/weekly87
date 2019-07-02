@@ -12,6 +12,7 @@ type enemyType int
 const (
 	Hare   enemyType = iota
 	Mantis enemyType = iota
+	Tree   enemyType = iota
 	TypeLimit
 )
 
@@ -90,9 +91,11 @@ const VariantCount = lastSize * lastColor
 var enemyTypeList = [TypeLimit]enemyType{
 	Hare,
 	Mantis,
+	Tree,
 }
 
 func Init() {
 	initHare()
 	initMantis()
+	initTree()
 }

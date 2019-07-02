@@ -57,6 +57,7 @@ func Init() {
 		enemyDistribution: [...]float64{
 			enemies.Hare:   .5,
 			enemies.Mantis: .5,
+			enemies.Tree:   1,
 		},
 		enemyVariantRange: intrange.NewLinear(0, enemies.VariantCount-1),
 	}
