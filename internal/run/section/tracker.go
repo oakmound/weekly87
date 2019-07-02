@@ -102,13 +102,14 @@ func (st *Tracker) Produce(delta int64) *Section {
 
 	// These initial rng calls should make these test sections more distinct
 	plan := sectionPlans[((st.sectionsDeep-1)/3)%int64(len(sectionPlans))]
+	plan.setRng(st.rng)
 	gWeights := alg.RemainingWeights(plan.groundTileWeights)
 	sfWeights := alg.RemainingWeights(plan.surfaceTileWeights)
 	skWeights := alg.RemainingWeights(plan.skyTileWeights)
 
 	for x := 0; x < len(st.ground); x++ {
 		for y := 0; y < len(st.ground[x]); y++ {
-			choice := alg.WeightedChooseOne(gWeights)
+			choice := alg.WeightedChooseOneSeeded(gWeights, st.rng)
 			t := plan.groundTiles[choice]
 			st.ground[x][y] = t.Copy()
 		}
@@ -117,11 +118,11 @@ func (st *Tracker) Produce(delta int64) *Section {
 		for y := 0; y < len(st.wall[x]); y++ {
 			var t render.Modifiable
 			if y == len(st.wall[x])-1 {
-				choice := alg.WeightedChooseOne(sfWeights)
+				choice := alg.WeightedChooseOneSeeded(sfWeights, st.rng)
 				t = plan.surfaceTiles[choice]
 
 			} else {
-				choice := alg.WeightedChooseOne(skWeights)
+				choice := alg.WeightedChooseOneSeeded(skWeights, st.rng)
 				t = plan.skyTiles[choice]
 			}
 			st.wall[x][y] = t.Copy()
@@ -135,7 +136,7 @@ func (st *Tracker) Produce(delta int64) *Section {
 
 	if !(st.sectionsDeep == 1 && delta > 0) {
 		for i := 0; i < plan.enemyCount.Poll(); i++ {
-			typ := alg.WeightedChooseOne(enemyDist)
+			typ := alg.WeightedChooseOneSeeded(enemyDist, st.rng)
 			cs := enemies.Constructors[typ*enemies.VariantCount+plan.enemyVariantRange.Poll()]
 			e, err := cs.NewEnemy(st.sectionsDeep, int64(len(st.entities)))
 			if delta < 0 {
@@ -168,6 +169,7 @@ func (st *Tracker) Produce(delta int64) *Section {
 		newSection.ApplyChange(c)
 	}
 
+	dlog.Info("Created a section: ", newSection.GetId(), " with seed of ", st.rng.Seed)
 	return newSection
 }
 
