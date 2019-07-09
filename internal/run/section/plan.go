@@ -1,6 +1,7 @@
 package section
 
 import (
+	"math/rand"
 	"path/filepath"
 
 	"github.com/200sc/go-dist/intrange"
@@ -37,6 +38,14 @@ type sectionPlan struct {
 	tileWeight
 	entityPlan
 	effects []render.Modifiable
+}
+
+func (sp *sectionPlan) setRng(rng *rand.Rand) {
+	sp.entityPlan.chestCount.SetRand(rng)
+	sp.entityPlan.chestRange.SetRand(rng)
+	sp.entityPlan.enemyCount.SetRand(rng)
+	sp.entityPlan.enemyVariantRange.SetRand(rng)
+
 }
 
 var tilePlans = map[string]tilePlan{}
