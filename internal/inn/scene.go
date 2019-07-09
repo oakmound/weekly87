@@ -7,13 +7,14 @@ import (
 	"math/rand"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	klg "github.com/200sc/klangsynthese/audio"
 
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
+	"github.com/oakmound/oak/event"
+	"github.com/oakmound/oak/key"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -111,7 +112,6 @@ var Scene = scene.Scene{
 		// Draw the party in top left
 		partyBackground := render.NewColorBox(206, 52, color.RGBA{90, 90, 200, 255})
 		partyBackground.SetPos(30, 20)
-		render.Draw(partyBackground, layer.Play, 3)
 
 		ptyOffset := floatgeom.Point2{players.WallOffset, 30}
 		ptycon.Players[0].Position = ptyOffset
@@ -120,56 +120,129 @@ var Scene = scene.Scene{
 			dlog.Error(err)
 			return
 		}
-		for _, p := range pty.Players {
-			render.Draw(p.R, layer.Play, 4)
-		}
 
-		interactDelay := time.Second
-		pcLastInteract := time.Now()
-		interactLock := &sync.Mutex{}
+		//interactDelay := time.Second
+		//pcLastInteract := time.Now()
+		//interactLock := &sync.Mutex{}
 		//Create an example person to navigate the space
 		pc := NewInnWalker(innSpace, npcScale, pty.Players)
+
+		var lastInteractedNPC *NPC
 		// Interact with NPCs
 		pc.front.RSpace.Add(labels.NPC, func(_, n *collision.Space) {
-			// Limit interaction rate of player
-			interactLock.Lock()
-			if pcLastInteract.Add(interactDelay).After(time.Now()) {
-				interactLock.Unlock()
-				return
-			}
+			// Todo: what if we're touching multiple NPCS?
+			// Keep track of most recently touched npc
 			npc, ok := n.CID.E().(*NPC)
 			if !ok {
-				interactLock.Unlock()
 				dlog.Error("Non-npc sent to npc binding")
 				return
 			}
-			pcLastInteract = time.Now()
-			interactLock.Unlock()
-
-			dlog.Info("Adding a class to the party")
-			curRecord.PartyComp = append(curRecord.PartyComp, npc.Class)
-			for _, p := range pty.Players {
-				p.Destroy()
-				p.R.Undraw()
-			}
-			if len(curRecord.PartyComp) > 4 {
-				curRecord.PartyComp = curRecord.PartyComp[1:]
-			}
-			ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
-			ptycon.Players[0].Position = ptyOffset
-
-			pty, err = ptycon.NewParty(true)
-			if err != nil {
-				dlog.Error(err)
+			if lastInteractedNPC == npc {
+				// reset undraw countdown
+				npc.UndrawButtonAt = time.Now().Add(1 * time.Second)
 				return
 			}
-			pc.SetParty(pty.Players)
+			lastInteractedNPC = npc
+			fmt.Println(lastInteractedNPC)
 
-			for _, p := range pty.Players {
-				render.Draw(p.R, layer.Play, 4)
-			}
+			// Make a pop up above the NPC being touched
+			// as a command prompt
+			interactBtn := getConfirmBtn()
+			w, h := interactBtn.GetDims()
+			npcW, _ := npc.R.GetDims()
 
+			interactBtn.SetPos(npc.X()+float64(npcW-w)/2, npc.Y()-10-float64(h))
+			render.Draw(interactBtn, layer.UI, 1)
+			npc.Button = interactBtn
+
+			npc.UndrawButtonAt = time.Now().Add(1 * time.Second)
+
+			npc.Bind(func(id int, f interface{}) int {
+				frame, ok := f.(int)
+				if !ok {
+					dlog.Error("Expected int in enterframe")
+					return 0
+				}
+				if frame%15 == 0 {
+					npc, ok := event.GetEntity(id).(*NPC)
+					if !ok {
+						dlog.Error("Non-npc sent to npc binding")
+						return 0
+					}
+					if time.Now().After(npc.UndrawButtonAt) {
+						npc.Button.Undraw()
+						if lastInteractedNPC == npc {
+							lastInteractedNPC = nil
+						}
+					}
+				}
+				return 0
+			}, "EnterFrame")
+
+			// Limit interaction rate of player
+			// interactLock.Lock()
+			// if pcLastInteract.Add(interactDelay).After(time.Now()) {
+			// 	interactLock.Unlock()
+			// 	return
+			// }
+			//
+			// pcLastInteract = time.Now()
+			// interactLock.Unlock()
+
+			// dlog.Info("Adding a class to the party")
+			// curRecord.PartyComp = append(curRecord.PartyComp, npc.Class)
+			// for _, p := range pty.Players {
+			// 	p.Destroy()
+			// 	p.R.Undraw()
+			// }
+			// if len(curRecord.PartyComp) > 4 {
+			// 	curRecord.PartyComp = curRecord.PartyComp[1:]
+			// }
+			// ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
+			// ptycon.Players[0].Position = ptyOffset
+
+			// pty, err = ptycon.NewParty(true)
+			// if err != nil {
+			// 	dlog.Error(err)
+			// 	return
+			// }
+			// pc.SetParty(pty.Players)
+
+			// for _, p := range pty.Players {
+			// 	render.Draw(p.R, layer.Play, 4)
+			// }
 		})
+
+		event.GlobalBind(func(int, interface{}) int {
+			if lastInteractedNPC != nil {
+				npc := lastInteractedNPC
+				npc.Button.Undraw()
+				npcW, _ := npc.R.GetDims()
+				bkgW, bkgH := partyBackground.GetDims()
+				// Disable all controls
+				pc.inMenu = true
+				// Spawn a box with the party above the npc being selected
+				partyBackground.SetPos(npc.X()+float64(npcW-bkgW)/2, npc.Y()-10-float64(bkgH))
+				ptycon.Players[0].Position = floatgeom.Point2{partyBackground.X() + 20, partyBackground.Y() + 10}
+				render.Draw(partyBackground, layer.UI, 1)
+
+				pty, err := ptycon.NewParty(true)
+				dlog.ErrorCheck(err)
+				for _, p := range pty.Players {
+					render.Draw(p.R, layer.UI, 2)
+				}
+				// Let arrow keys / joystick or mouse even control which party member is selected
+				// Show a confirm button (and a cancel button)
+				cnfrm := getConfirmBtn()
+				cnfrm.SetPos(partyBackground.X(), partyBackground.Y()+float64(bkgH)+2)
+				render.Draw(cnfrm, layer.UI, 1)
+				cancl := getCancelBtn()
+				canclW, _ := cancl.GetDims()
+				cancl.SetPos(partyBackground.X()+float64(bkgW-canclW), partyBackground.Y()+float64(bkgH)+2)
+				render.Draw(cancl, layer.UI, 1)
+			}
+			return 0
+		}, key.Down+key.ReturnEnter)
 
 		bkgMusic, err = music.Start(true, "inn1.wav")
 		dlog.ErrorCheck(err)
@@ -220,4 +293,14 @@ var Scene = scene.Scene{
 		(*bkgMusic).Stop()
 		return nextscene, nil
 	},
+}
+
+func getConfirmBtn() render.Renderable {
+	// todo: joystick
+	return render.NewColorBox(50, 20, color.RGBA{100, 100, 255, 255})
+}
+
+func getCancelBtn() render.Renderable {
+	// todo: joystick
+	return render.NewColorBox(50, 20, color.RGBA{255, 100, 100, 255})
 }

@@ -2,6 +2,7 @@ package inn
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -29,6 +30,7 @@ type InnWalker struct {
 	scale     float64
 	lagDeltas [frameLag * maxPartySize]floatgeom.Point2
 	lagIdx    int
+	inMenu    bool
 }
 
 func (iw *InnWalker) SetParty(plys []*players.Player) {
@@ -92,6 +94,10 @@ func NewInnWalker(innSpace floatgeom.Rect2, scale float64, plys []*players.Playe
 		}
 
 		p.Delta.Zero()
+
+		if iw.inMenu {
+			return 0
+		}
 
 		js := joys.StickState(lowestID)
 		// Todo: support full analog control
@@ -205,8 +211,10 @@ func NewInnWalker(innSpace floatgeom.Rect2, scale float64, plys []*players.Playe
 // NPC is a inn only construct
 type NPC struct {
 	*entities.Interactive
-	Swtch *render.Switch
-	Class int
+	Swtch          *render.Switch
+	Class          int
+	Button         render.Renderable
+	UndrawButtonAt time.Time
 }
 
 // Init the npc so it has a CID!
