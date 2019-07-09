@@ -14,7 +14,6 @@ import (
 
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
-	"github.com/oakmound/oak/render/mod"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -129,9 +128,9 @@ var Scene = scene.Scene{
 		pcLastInteract := time.Now()
 		interactLock := &sync.Mutex{}
 		//Create an example person to navigate the space
-		pc := NewInnWalker(innSpace, npcScale, pty.Players[0].Swtch.Copy().(*render.Switch))
+		pc := NewInnWalker(innSpace, npcScale, pty.Players)
 		// Interact with NPCs
-		pc.RSpace.Add(labels.NPC, func(_, n *collision.Space) {
+		pc.front.RSpace.Add(labels.NPC, func(_, n *collision.Space) {
 			// Limit interaction rate of player
 			interactLock.Lock()
 			if pcLastInteract.Add(interactDelay).After(time.Now()) {
@@ -164,9 +163,7 @@ var Scene = scene.Scene{
 				dlog.Error(err)
 				return
 			}
-			pc.R.Undraw()
-			pc.R = pty.Players[0].Swtch.Copy().Modify(mod.Scale(npcScale, npcScale))
-			render.Draw(pc.R, layer.Play, 2)
+			pc.SetParty(pty.Players)
 
 			for _, p := range pty.Players {
 				render.Draw(p.R, layer.Play, 4)
