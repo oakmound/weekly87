@@ -75,6 +75,7 @@ func (st *Tracker) Next() *Section {
 func (st *Tracker) Produce(delta int64) *Section {
 	st.sectionsDeep += delta
 	st.rng.Seed(st.start + st.sectionsDeep)
+	dlog.Info("Section generation, (depth, seed):", st.sectionsDeep, st.start+st.sectionsDeep)
 	// Section plan:
 	// Tiles:
 	// A | B
