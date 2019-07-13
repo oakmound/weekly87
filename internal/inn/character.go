@@ -49,9 +49,13 @@ func (iw *InnWalker) SetParty(plys []*players.Player) {
 			0,
 			0,
 		)
+		iw.bindFront()
 	} else {
-		iw.front.R.Undraw()
+		old := iw.front.R
+		old.Undraw()
 		iw.front.R = plys[0].Swtch.Copy().Modify(mod.Scale(iw.scale, iw.scale))
+		iw.front.R.SetPos(old.X(), old.Y())
+		iw.front.R.(*render.Switch).Set(old.(*render.Switch).Get())
 	}
 	render.Draw(iw.front.R, layer.Play, maxPartySize)
 
@@ -69,24 +73,32 @@ func (iw *InnWalker) SetParty(plys []*players.Player) {
 				0,
 				0,
 			))
+
 		} else {
-			iw.followers[i-1].R.Undraw()
+			old := iw.followers[i-1].R
+			old.Undraw()
 			iw.followers[i-1].R = plys[i].Swtch.Copy().Modify(mod.Scale(iw.scale, iw.scale))
+			iw.followers[i-1].SetPos(old.X(), old.Y())
+			iw.followers[i-1].R.(*render.Switch).Set(old.(*render.Switch).Get())
+
 		}
 		render.Draw(iw.followers[i-1].R, layer.Play, maxPartySize-1)
 	}
 }
 
 // NewInnWalker creates a special character for the inn
-func NewInnWalker(innSpace floatgeom.Rect2, scale float64, plys []*players.Player) *InnWalker {
+func NewInnWalker(scale float64, plys []*players.Player) *InnWalker {
 
 	iw := &InnWalker{
 		scale: scale,
 	}
 	iw.SetParty(plys)
 
-	lowestID := joys.LowestID()
+	return iw
+}
 
+func (iw *InnWalker) bindFront() {
+	lowestID := joys.LowestID()
 	iw.front.Bind(func(id int, _ interface{}) int {
 		p, ok := event.GetEntity(id).(*entities.Interactive)
 		if !ok {
@@ -205,7 +217,6 @@ func NewInnWalker(innSpace floatgeom.Rect2, scale float64, plys []*players.Playe
 		nextscene = d.NextScene
 		stayInMenu = false
 	}))
-	return iw
 }
 
 // NPC is a inn only construct

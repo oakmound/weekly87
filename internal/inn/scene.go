@@ -25,6 +25,7 @@ import (
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/dtools"
 	"github.com/oakmound/weekly87/internal/layer"
+	"github.com/oakmound/weekly87/internal/menus/selector"
 	"github.com/oakmound/weekly87/internal/music"
 	"github.com/oakmound/weekly87/internal/records"
 )
@@ -51,8 +52,6 @@ var Scene = scene.Scene{
 		doodads.NewInnDoor("run")
 		// A way to go back to menu screen
 		doodads.NewCustomInnDoor("startup", 490, 40, 100, 102)
-
-		innSpace := floatgeom.NewRect2(0, 0, float64(oak.ScreenWidth), float64(oak.ScreenHeight)-32) //Adjusted for the current size of the spearman
 
 		// Create doodads for tables
 		uglymugger, _ := render.LoadSprites("", filepath.Join("16x16", "ugly_mugger.png"), 16, 16, 0)
@@ -125,7 +124,7 @@ var Scene = scene.Scene{
 		//pcLastInteract := time.Now()
 		//interactLock := &sync.Mutex{}
 		//Create an example person to navigate the space
-		pc := NewInnWalker(innSpace, npcScale, pty.Players)
+		pc := NewInnWalker(npcScale, pty.Players)
 
 		var lastInteractedNPC *NPC
 		// Interact with NPCs
@@ -178,39 +177,6 @@ var Scene = scene.Scene{
 				}
 				return 0
 			}, "EnterFrame")
-
-			// Limit interaction rate of player
-			// interactLock.Lock()
-			// if pcLastInteract.Add(interactDelay).After(time.Now()) {
-			// 	interactLock.Unlock()
-			// 	return
-			// }
-			//
-			// pcLastInteract = time.Now()
-			// interactLock.Unlock()
-
-			// dlog.Info("Adding a class to the party")
-			// curRecord.PartyComp = append(curRecord.PartyComp, npc.Class)
-			// for _, p := range pty.Players {
-			// 	p.Destroy()
-			// 	p.R.Undraw()
-			// }
-			// if len(curRecord.PartyComp) > 4 {
-			// 	curRecord.PartyComp = curRecord.PartyComp[1:]
-			// }
-			// ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
-			// ptycon.Players[0].Position = ptyOffset
-
-			// pty, err = ptycon.NewParty(true)
-			// if err != nil {
-			// 	dlog.Error(err)
-			// 	return
-			// }
-			// pc.SetParty(pty.Players)
-
-			// for _, p := range pty.Players {
-			// 	render.Draw(p.R, layer.Play, 4)
-			// }
 		})
 
 		event.GlobalBind(func(int, interface{}) int {
@@ -228,10 +194,12 @@ var Scene = scene.Scene{
 
 				pty, err := ptycon.NewParty(true)
 				dlog.ErrorCheck(err)
-				for _, p := range pty.Players {
+				spcs := make([]*collision.Space, len(pty.Players))
+				for i, p := range pty.Players {
 					render.Draw(p.R, layer.UI, 2)
+					spcs[i] = p.GetSpace()
 				}
-				// Let arrow keys / joystick or mouse even control which party member is selected
+
 				// Show a confirm button (and a cancel button)
 				cnfrm := getConfirmBtn()
 				cnfrm.SetPos(partyBackground.X(), partyBackground.Y()+float64(bkgH)+2)
@@ -240,6 +208,41 @@ var Scene = scene.Scene{
 				canclW, _ := cancl.GetDims()
 				cancl.SetPos(partyBackground.X()+float64(bkgW-canclW), partyBackground.Y()+float64(bkgH)+2)
 				render.Draw(cancl, layer.UI, 1)
+
+				// Let arrow keys / joystick or mouse even control which party member is selected
+				selector.New(
+					selector.Layers(layer.UI, 3),
+					selector.HorzArrowControl(),
+					selector.Spaces(spcs...),
+					selector.Callback(func(i int) {
+						// undraw menu
+						for _, p := range pty.Players {
+							p.R.Undraw()
+							collision.Remove(p.GetSpace())
+						}
+						cnfrm.Undraw()
+						cancl.Undraw()
+						partyBackground.Undraw()
+
+						// modify party
+						curRecord.PartyComp[i] = npc.Class
+						ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
+
+						pty, err = ptycon.NewParty(true)
+						if err != nil {
+							dlog.Error(err)
+							return
+						}
+						pc.SetParty(pty.Players)
+
+						// end selection
+						pc.inMenu = false
+						event.Trigger("EndPartySelect", nil)
+					}),
+					selector.SelectTrigger(key.Down+key.Spacebar),
+					selector.DestroyTrigger("EndPartySelect"),
+					selector.DestroyTrigger(key.Down+key.Escape),
+				)
 			}
 			return 0
 		}, key.Down+key.ReturnEnter)
