@@ -4,11 +4,14 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/oakmound/oak/collision"
+	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/mouse"
 
 	"golang.org/x/image/colornames"
 
 	"github.com/oakmound/weekly87/internal/joys"
+	"github.com/oakmound/weekly87/internal/menus/selector"
 	"github.com/oakmound/weekly87/internal/run"
 
 	"github.com/oakmound/oak"
@@ -79,7 +82,7 @@ var Scene = scene.Scene{
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) / 4
 
-		grid.New(
+		selectors := grid.New(
 			grid.Defaults(btn.And(menus.BtnCfgB, btn.Pos(menuX, menuY))),
 			grid.YGap(menus.BtnHeightB*1.5),
 			grid.Content(
@@ -98,6 +101,23 @@ var Scene = scene.Scene{
 				},
 			),
 		)
+
+		spcs := []*collision.Space{}
+		for _, selectList := range selectors {
+			for _, button := range selectList {
+				spcs = append(spcs, button.GetSpace())
+			}
+		}
+
+		selector.New(
+			selector.Layers(2, 3),
+			selector.HorzArrowControl(),
+			selector.Spaces(spcs...),
+
+			selector.SelectTrigger(key.Down+key.Spacebar),
+			selector.DestroyTrigger(key.Down+key.Escape),
+		)
+
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
 	End:  scene.GoToPtr(&nextscene),
