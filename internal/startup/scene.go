@@ -4,8 +4,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/oakmound/oak/collision"
-	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/mouse"
 
 	"golang.org/x/image/colornames"
@@ -102,20 +100,8 @@ var Scene = scene.Scene{
 			),
 		)
 
-		spcs := []*collision.Space{}
-		for _, selectList := range selectors {
-			for _, button := range selectList {
-				spcs = append(spcs, button.GetSpace())
-			}
-		}
-
 		selector.New(
-			selector.Layers(2, 3),
-			selector.HorzArrowControl(),
-			selector.Spaces(spcs...),
-
-			selector.SelectTrigger(key.Down+key.Spacebar),
-			selector.DestroyTrigger(key.Down+key.Escape),
+			menus.ButtonSelectorA(selectors),
 		)
 
 	},

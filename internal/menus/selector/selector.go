@@ -25,6 +25,16 @@ func Spaces(sps ...*collision.Space) Option {
 
 // Todo: more spot constructors
 
+// And combines a variadic number of options
+func And(opts ...Option) Option {
+	return func(sc *Constructor) {
+		for _, opt := range opts {
+			opt(sc)
+		}
+	}
+}
+
+// Control sets the given strings to control movement in the selector
 func Control(prev, next string) Option {
 	return func(sc *Constructor) {
 		if sc.Bindings == nil {
@@ -39,40 +49,48 @@ func Control(prev, next string) Option {
 	}
 }
 
+// VertWASDControl sets W and S as selection controls
 func VertWASDControl() Option {
 	return Control(key.Down+key.W, key.Down+key.S)
 }
 
+// VertArrowControl sets uparrow and downarrow as selection controls
 func VertArrowControl() Option {
 	return Control(key.Down+key.UpArrow, key.Down+key.DownArrow)
 }
 
+// HorzWASDControl sets A and D as selection controls
 func HorzWASDControl() Option {
 	return Control(key.Down+key.A, key.Down+key.D)
 }
 
+// HorzArrowControl sets leftarrow and r as selection controls
 func HorzArrowControl() Option {
 	return Control(key.Down+key.LeftArrow, key.Down+key.RightArrow)
 }
 
+// Layers sets the layer for drawing the selector
 func Layers(lys ...int) Option {
 	return func(sc *Constructor) {
 		sc.Layers = lys
 	}
 }
 
+// Callback determines what shoud happen on a select event
 func Callback(cb func(i int)) Option {
 	return func(sc *Constructor) {
 		sc.Callback = cb
 	}
 }
 
+// Display sets how to display the selector
 func Display(display func(floatgeom.Point2) render.Renderable) Option {
 	return func(sc *Constructor) {
 		sc.Display = display
 	}
 }
 
+// SelectTrigger sets the input/event to trigger selection with
 func SelectTrigger(trigger string) Option {
 	return func(sc *Constructor) {
 		if sc.Bindings == nil {
@@ -84,6 +102,7 @@ func SelectTrigger(trigger string) Option {
 	}
 }
 
+// DestroyTrigger sets the input/event to destroy the selector
 func DestroyTrigger(trigger string) Option {
 	return func(sc *Constructor) {
 		if sc.Bindings == nil {
