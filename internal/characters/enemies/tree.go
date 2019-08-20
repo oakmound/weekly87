@@ -8,6 +8,7 @@ import (
 
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
+	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render/mod"
 
 	"github.com/oakmound/oak/render"
@@ -18,7 +19,7 @@ func initTree() {
 	psdFilePath := filepath.Join("assets", "images", "64x64", "tree2.psd")
 	psd, err := gopsd.ParseFromPath(psdFilePath)
 	combined := render.NewCompositeM()
-
+	combined.Append(render.NewEmptySprite(0, 0, int(psd.Width), int(psd.Height))) // Make sure this is here in case there is no layer that encompasses the whole thing
 	for _, layer := range psd.Layers {
 		//TODO: combine strat with that of mage
 		img, err := layer.GetImage()
@@ -38,7 +39,7 @@ func initTree() {
 		combined.Append(sp)
 	}
 	combinedSp := combined.ToSprite()
-	sh, err := render.MakeSheet(combinedSp.GetRGBA(), 62, 64, 0)
+	sh, err := render.MakeSheet(combinedSp.GetRGBA(), 64, 64, 0)
 	dlog.ErrorCheck(err)
 	sheet := sh.ToSprites()
 
@@ -49,9 +50,10 @@ func initTree() {
 	anims["walkLT"] = sheet[0][0].Copy().Modify(mod.FlipX)
 
 	baseConstructor := Constructor{
-		Dimensions:   floatgeom.Point2{32, 32},
+		Dimensions:   floatgeom.Point2{22, 50},
 		AnimationMap: anims,
-		Speed:        floatgeom.Point2{3, 2},
+		Speed:        floatgeom.Point2{0, 0},
+		SpaceOffset:  physics.NewVector(-6, 0),
 		Bindings: map[string]func(*BasicEnemy, interface{}) int{
 			"EnterFrame": func(b *BasicEnemy, frame interface{}) int {
 

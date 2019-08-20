@@ -28,7 +28,10 @@ var requiredAnimations = []string{
 type Constructor struct {
 	Position   floatgeom.Point2
 	Dimensions floatgeom.Point2
-	Speed      floatgeom.Point2
+
+	Speed       floatgeom.Point2
+	SpaceOffset physics.Vector
+
 	// The following strings are required in the animation map:
 	// "standRT"
 	// "standLT"
@@ -42,9 +45,10 @@ type Constructor struct {
 
 func (c *Constructor) Copy() *Constructor {
 	c2 := &Constructor{
-		Position:   c.Position,
-		Dimensions: c.Dimensions,
-		Speed:      c.Speed,
+		Position:    c.Position,
+		Dimensions:  c.Dimensions,
+		SpaceOffset: c.SpaceOffset,
+		Speed:       c.Speed,
 		// Todo: Assuming right now that the bindings map never gets modified (by a variant)
 		Bindings:     c.Bindings,
 		Health:       c.Health,
@@ -120,6 +124,12 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		newMp[animKey] = anim.Copy()
 	}
 	be.swtch = render.NewSwitch("standLT", newMp)
+	if ec.SpaceOffset != (physics.Vector{}) {
+
+		for animKey := range ec.AnimationMap {
+			be.swtch.SetOffsets(animKey, ec.SpaceOffset)
+		}
+	}
 	be.Interactive = entities.NewInteractive(
 		ec.Position.X(),
 		ec.Position.Y(),
@@ -130,6 +140,7 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		be.Init(),
 		0,
 	)
+	// be.swtch.SetOffsets("walkLT", )
 	be.Speed = physics.NewVector(ec.Speed.X(), ec.Speed.Y())
 	be.baseSpeed = be.Speed.Copy()
 	be.facing = "LT"

@@ -3,6 +3,7 @@ package enemies
 import (
 	"image/color"
 
+	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render/mod"
 	"github.com/oakmound/weekly87/internal/recolor"
 )
@@ -64,27 +65,25 @@ var (
 		},
 	}
 	sizeVariants = [lastSize]Variant{
-		baseSize: func(*Constructor) {},
-		largeSize: func(c *Constructor) {
-			c.Dimensions = c.Dimensions.MulConst(1.5)
-			for k, md := range c.AnimationMap {
-				c.AnimationMap[k] = md.Modify(mod.Scale(1.5, 1.5))
-			}
-		},
-		smallSize: func(c *Constructor) {
-			c.Dimensions = c.Dimensions.MulConst(.5)
-			for k, md := range c.AnimationMap {
-				c.AnimationMap[k] = md.Modify(mod.Scale(.5, .5))
-			}
-		},
-		giantSize: func(c *Constructor) {
-			c.Dimensions = c.Dimensions.MulConst(2)
-			for k, md := range c.AnimationMap {
-				c.AnimationMap[k] = md.Modify(mod.Scale(2, 2))
-			}
-		},
+		baseSize:  func(*Constructor) {},
+		largeSize: changeSize(1.5),
+		smallSize: changeSize(.5),
+		giantSize: changeSize(2),
 	}
 )
+
+func changeSize(mult float64) func(c *Constructor) {
+	return func(c *Constructor) {
+		c.Dimensions = c.Dimensions.MulConst(mult)
+		if c.SpaceOffset != (physics.Vector{}) {
+			c.SpaceOffset = c.SpaceOffset.Copy().Scale(mult)
+		}
+		for k, md := range c.AnimationMap {
+			c.AnimationMap[k] = md.Modify(mod.Scale(mult, mult))
+
+		}
+	}
+}
 
 const VariantCount = lastSize * lastColor
 
