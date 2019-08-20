@@ -394,14 +394,28 @@ var Scene = scene.Scene{
 			}
 			pty.SpeedUp(up)
 		})
+		oak.AddCommand("killme", func(args []string) {
+			for _, p := range pty.Players {
+				p.Alive = false
+			}
+			event.Trigger("PlayerDeath", nil)
+		})
 
 		dlog.Info("Current Debug Commands are: ", strings.Join(oak.GetDebugKeys(), " , "))
+		oak.AddCommand("help", func(args []string) {
+			dlog.Info("Current Debug Commands are: ", strings.Join(oak.GetDebugKeys(), " , "))
+		})
 	},
 	Loop: scene.BooleanLoop(&stayInGame),
 	End: func() (string, *scene.Result) {
 		(*bkgMusic).Stop()
 		restrictor.Stop()
 		restrictor.Clear()
-		return nextscene, nil
+		return nextscene, &scene.Result{NextSceneInput: Outcome{runInfo}}
 	},
+}
+
+// Outcome is returned by the run scene
+type Outcome struct {
+	R records.RunInfo
 }

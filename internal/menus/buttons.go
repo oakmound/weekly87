@@ -1,6 +1,7 @@
 package menus
 
 import (
+	"github.com/oakmound/oak/alg/intgeom"
 	"github.com/oakmound/oak/dlog"
 
 	"github.com/oakmound/oak/event"
@@ -15,6 +16,7 @@ import (
 	"image/color"
 )
 
+// Shared menu configuration parameters
 var (
 	BtnHeightA = 30.0
 	BtnWidthA  = 120.0
@@ -49,7 +51,7 @@ var (
 			mod.CutRound(.05, .25),
 			mods.Inset(func(c color.Color) color.Color {
 				return mods.Darker(c, .25)
-			}, mods.UpLeft),
+			}, intgeom.UpLeft),
 			mods.Highlight(color.RGBA{170, 170, 170, 200}, 1),
 			mods.HighlightOff(color.RGBA{0, 0, 0, 100}, 1, 2, 1),
 		)),

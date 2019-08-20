@@ -1,4 +1,4 @@
-package run
+package end
 
 import (
 	"fmt"
@@ -6,33 +6,46 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/oakmound/oak/collision"
+	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/mouse"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
-	"github.com/oakmound/oak/render/mod"
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/characters/doodads"
+	"github.com/oakmound/weekly87/internal/characters/labels"
+	"github.com/oakmound/weekly87/internal/characters/players"
+	"github.com/oakmound/weekly87/internal/dtools"
+	"github.com/oakmound/weekly87/internal/layer"
 	"github.com/oakmound/weekly87/internal/menus"
 	"github.com/oakmound/weekly87/internal/records"
+	"github.com/oakmound/weekly87/internal/run"
 )
 
 var stayInEndScene bool
 var endSceneNextScene string
 
-// EndScene is a scene in the same package as run to allow for easy variable access.
-//If there is time at the end we can look at what vbariables this touches and get them exported or passed onwards so this can have its own package
-var EndScene = scene.Scene{
+// Scene is a scene in the same package as run to allow for easy variable access.
+//If there is time at the e nd we can look at what vbariables this touches and get them exported or passed onwards so this can have its own package
+var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
+
+		outcome := data.(run.Outcome)
+		fmt.Println(outcome.R)
+		runInfo := outcome.R
 		stayInEndScene = true
 		endSceneNextScene = "inn"
-		render.SetDrawStack(
-			render.NewCompositeR(),
-			render.NewCompositeR(),
-			render.NewDynamicHeap(),
-			render.NewStaticHeap(),
-		)
+
+		render.SetDrawStack(layer.Get()...)
+
+		// render.SetDrawStack(
+		// 	render.NewCompositeR(),
+		// 	render.NewCompositeR(),
+		// 	render.NewDynamicHeap(),
+		// 	render.NewStaticHeap(),
+		// )
 
 		// TODO: This should be in a more central place.
 		// Allows us to have text that shows up on a white background
@@ -44,10 +57,16 @@ var EndScene = scene.Scene{
 		fnt.Size = 14
 		blueFnt := fnt.Generate()
 
-		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
-		menuBackground.Modify(mod.FlipX)
-		render.Draw(menuBackground, 0)
+		// nextscene = "inn"
+		render.SetDrawStack(layer.Get()...)
+		debugTree := dtools.NewThickColoredRTree(collision.DefTree, 4, labels.ColorMap)
+		render.Draw(debugTree, layer.Play, 1000)
 
+		// Make the Inn backing
+		innBackground, _ := render.LoadSprite("", filepath.Join("raw", "end_scene.png"))
+		render.Draw(innBackground, layer.Ground)
+
+		// Text overlay info
 		textBackingX := oak.ScreenWidth / 3
 
 		textBacking := render.NewColorBox(textBackingX, oak.ScreenHeight*2/3, color.RGBA{120, 120, 120, 190})
@@ -125,10 +144,38 @@ var EndScene = scene.Scene{
 			r.FarthestGoneInSections = sc
 		}
 		// For the next run
-		BaseSeed += int64(runInfo.SectionsCleared) + 1
+		// BaseSeed := int64(runInfo.SectionsCleared) + 1
 		r.Store()
+
+		// Extra running info
+		presentSpoils(runInfo.Party, 0)
+
 	},
 	Loop: scene.BooleanLoop(&stayInEndScene),
 	// scene.GoTo("inn"),
 	End: scene.GoToPtr(&endSceneNextScene),
+}
+
+func presentSpoils(party *players.Party, index int) {
+	if index > len(party.Players) {
+		return
+	}
+	p := party.Players[index]
+	p.CID = p.Init()
+	p.SetPos(float64(oak.ScreenWidth-64), float64(oak.ScreenHeight/2))
+	render.Draw(p.R, layer.Play, 20)
+	fmt.Printf("\nCharacter %d walking through as %s ", index, p.R)
+	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
+		fmt.Println("triggers")
+		ply.R.ShiftX(-2)
+
+		if ply.R.X() < float64(oak.ScreenWidth/2) {
+
+			ply.R.Undraw()
+			presentSpoils(party, index+1)
+			return event.UnbindSingle
+		}
+		return 0
+	}, "EnterFrame")
+
 }
