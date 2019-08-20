@@ -2,6 +2,7 @@ package end
 
 import (
 	"fmt"
+	"image/color"
 	"path/filepath"
 	"strconv"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
-	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/dtools"
@@ -54,15 +54,12 @@ var Scene = scene.Scene{
 		innBackground, _ := render.LoadSprite("", filepath.Join("raw", "end_scene.png"))
 		render.Draw(innBackground, layer.Ground)
 
-		// Text overlay info
-		textBackingX := oak.ScreenWidth / 3
-
 		// textBacking := render.NewColorBox(textBackingX, oak.ScreenHeight*2/3, color.RGBA{120, 120, 120, 190})
 		// textBacking.SetPos(float64(oak.ScreenWidth)*0.33, 40)
 		// render.Draw(textBacking, 1)
 
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
-		menuY := 32.0
+		menuY := 16.0
 
 		btn.New(menus.BtnCfgB,
 			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
@@ -72,56 +69,39 @@ var Scene = scene.Scene{
 				return 0
 			}))
 
-		textY := 60.0
-
-		//TODO: 2 layers: first current run
-		// Second layer totals
-		// Each layer has: sections_completed, enemies_defeated, chestvalue
-
-		sectionText := blueFnt.NewStrText("Sections Cleared: "+strconv.Itoa(runInfo.SectionsCleared), float64(oak.ScreenWidth)/2-80, textY)
-		textY += 40
-		render.Draw(sectionText, 2, 2)
-
-		enemy := blueFnt.NewStrText("Enemies Defeated: "+strconv.Itoa(runInfo.EnemiesDefeated), float64(oak.ScreenWidth)/2-80, textY)
-		textY += 40
-		render.Draw(enemy, 2, 2)
+		textY := 120.0
 
 		fmt.Println("Cleared out", runInfo.SectionsCleared)
 		chestTotal := 0
 		for _, pl := range runInfo.Party.Players {
-			// playerJson, _ := json.Marshal(runInfo.Party[i].ChestValues)
-
 			playerChestValue := 0
 			for _, j := range pl.ChestValues {
 				playerChestValue += int(j)
 			}
 			chestTotal += playerChestValue
-			fmt.Println("Chest Value :", playerChestValue)
-			_ = blueFnt.NewStrText("Chests Acquired by Player:"+strconv.Itoa(playerChestValue), float64(textBackingX), textY)
-			// render.Draw(charText, 2, 3)
-			textY += 16
-
-			chestMin := oak.ScreenWidth/2 - textBackingX/2
-			textX := chestMin
-			for _, j := range pl.ChestValues {
-				ch := doodads.NewChest(j)
-
-				xInc, _ := ch.R.GetDims()
-
-				textX += xInc + 10
-				if textX > chestMin+textBackingX {
-					textX = chestMin
-					textY += 15
-				}
-
-				ch.SetPos(float64(textX), float64(textY))
-				render.Draw(ch.GetRenderable(), 2, 1)
-			}
-			if len(pl.ChestValues) > 0 {
-				textY += 30
-			}
-
 		}
+
+		//TODO: 2 layers: first current run
+		// Second layer totals
+		// Each layer has: sections_completed, enemies_defeated, chestvalue
+
+		textX := float64(oak.ScreenWidth) / 8
+
+		titling := blueFnt.NewStrText("Last Run Info:", textX, textY)
+		textX += 120
+		render.Draw(titling, 2, 2)
+
+		sectionText := blueFnt.NewStrText("Sections Cleared: "+strconv.Itoa(runInfo.SectionsCleared), textX, textY)
+		textX += 200
+		render.Draw(sectionText, 2, 2)
+
+		enemy := blueFnt.NewStrText("Enemies Defeated: "+strconv.Itoa(runInfo.EnemiesDefeated), textX, textY)
+		textX += 200
+		render.Draw(enemy, 2, 2)
+
+		chestValues := blueFnt.NewStrText("Chest Value: "+strconv.Itoa(chestTotal), textX, textY)
+		textX += 200
+		render.Draw(chestValues, 2, 2)
 
 		// partyJson, _ := json.Marshal(runInfo.Party)
 
@@ -150,14 +130,39 @@ func presentSpoils(party *players.Party, index int) {
 	}
 	p := party.Players[index]
 	p.CID = p.Init()
+
+	// location to go to for players to perform their actions
+	presentationX := float64(oak.ScreenWidth / 2)
+	startY := float64(oak.ScreenHeight/2) + 20
+	graveX := 90.0
+	pitX := float64(oak.ScreenWidth) - 180.0
+	pitY := float64(oak.ScreenHeight) - 100.0
+
 	//Player enters stage right
-	p.SetPos(float64(oak.ScreenWidth-64), float64(oak.ScreenHeight/2))
+	p.SetPos(float64(oak.ScreenWidth-64), startY)
 	render.Draw(p.R, layer.Play, 20)
 	fmt.Printf("\nCharacter %d walking through as %s ", index, p.R)
+
+	// debug locations
+	dMid := render.NewColorBox(5, 5, color.RGBA{200, 200, 10, 255})
+	dMid.SetPos(presentationX, p.Y())
+	render.Draw(dMid, layer.Play, 18)
+
+	dGrave := render.NewColorBox(5, 5, color.RGBA{200, 200, 200, 255})
+	dGrave.SetPos(graveX, p.Y())
+	render.Draw(dGrave, layer.Play, 18)
+
+	dPit := render.NewColorBox(5, 5, color.RGBA{10, 200, 200, 255})
+	dPit.SetPos(pitX, pitY)
+	render.Draw(dPit, layer.Play, 18)
 
 	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
 
 		ply.R.ShiftX(-2)
+		ply.Swtch.Set("deadLT")
+		if ply.Alive {
+			ply.Swtch.Set("walkLT")
+		}
 		// TODO: the following
 		// Player comes to middle ish
 
@@ -172,11 +177,38 @@ func presentSpoils(party *players.Party, index int) {
 		// You walk to end point (graves or bottom)
 		// When reach your end point destroy self
 
-		if ply.R.X() < float64(oak.ScreenWidth/2) {
+		if ply.R.X() < presentationX {
 
-			ply.R.Undraw()
+			if p.Alive {
+				p.CheckedBind(func(ply *players.Player, _ interface{}) int {
+
+					//toss
+
+					ply.R.ShiftY(2)
+					if ply.R.Y() > float64(oak.ScreenHeight) {
+
+						return event.UnbindSingle
+					}
+					return 0
+				}, "EnterFrame")
+			} else {
+				p.CheckedBind(func(ply *players.Player, _ interface{}) int {
+
+					// ply.R.Undraw()
+
+					ply.R.ShiftX(-2)
+					if ply.R.X() < graveX {
+
+						return event.UnbindSingle
+					}
+
+					return 0
+				}, "EnterFrame")
+			}
+
 			presentSpoils(party, index+1)
 			return event.UnbindSingle
+
 		}
 		return 0
 	}, "EnterFrame")
