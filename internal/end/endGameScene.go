@@ -2,7 +2,6 @@ package end
 
 import (
 	"fmt"
-	"image/color"
 	"path/filepath"
 	"strconv"
 
@@ -40,19 +39,8 @@ var Scene = scene.Scene{
 
 		render.SetDrawStack(layer.Get()...)
 
-		// render.SetDrawStack(
-		// 	render.NewCompositeR(),
-		// 	render.NewCompositeR(),
-		// 	render.NewDynamicHeap(),
-		// 	render.NewStaticHeap(),
-		// )
-
-		// TODO: This should be in a more central place.
-		// Allows us to have text that shows up on a white background
 		fnt := render.DefFontGenerator.Copy()
-		fnt.Color = render.FontColor("Red")
-		fnt.Size = 16
-		redFnt := fnt.Generate()
+
 		fnt.Color = render.FontColor("Blue")
 		fnt.Size = 14
 		blueFnt := fnt.Generate()
@@ -69,16 +57,16 @@ var Scene = scene.Scene{
 		// Text overlay info
 		textBackingX := oak.ScreenWidth / 3
 
-		textBacking := render.NewColorBox(textBackingX, oak.ScreenHeight*2/3, color.RGBA{120, 120, 120, 190})
-		textBacking.SetPos(float64(oak.ScreenWidth)*0.33, 40)
-		render.Draw(textBacking, 1)
+		// textBacking := render.NewColorBox(textBackingX, oak.ScreenHeight*2/3, color.RGBA{120, 120, 120, 190})
+		// textBacking.SetPos(float64(oak.ScreenWidth)*0.33, 40)
+		// render.Draw(textBacking, 1)
 
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
-		menuY := float64(oak.ScreenHeight) * 3 / 4
+		menuY := 32.0
 
 		btn.New(menus.BtnCfgB,
 			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
-			btn.Pos(menuX, menuY), btn.Text("Return To Menu"),
+			btn.Pos(menuX, menuY), btn.Text("Return To Inn"),
 			btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 				stayInEndScene = false
 				return 0
@@ -86,9 +74,9 @@ var Scene = scene.Scene{
 
 		textY := 60.0
 
-		text := redFnt.NewStrText("Your Ending Statistics", float64(oak.ScreenWidth)/2-80, textY)
-		textY += 40
-		render.Draw(text, 2, 2)
+		//TODO: 2 layers: first current run
+		// Second layer totals
+		// Each layer has: sections_completed, enemies_defeated, chestvalue
 
 		sectionText := blueFnt.NewStrText("Sections Cleared: "+strconv.Itoa(runInfo.SectionsCleared), float64(oak.ScreenWidth)/2-80, textY)
 		textY += 40
@@ -109,8 +97,8 @@ var Scene = scene.Scene{
 			}
 			chestTotal += playerChestValue
 			fmt.Println("Chest Value :", playerChestValue)
-			charText := blueFnt.NewStrText("Chests Acquired by Player:"+strconv.Itoa(playerChestValue), float64(textBackingX), textY)
-			render.Draw(charText, 2, 3)
+			_ = blueFnt.NewStrText("Chests Acquired by Player:"+strconv.Itoa(playerChestValue), float64(textBackingX), textY)
+			// render.Draw(charText, 2, 3)
 			textY += 16
 
 			chestMin := oak.ScreenWidth/2 - textBackingX/2
@@ -157,17 +145,32 @@ var Scene = scene.Scene{
 }
 
 func presentSpoils(party *players.Party, index int) {
-	if index > len(party.Players) {
+	if index > len(party.Players)-1 {
 		return
 	}
 	p := party.Players[index]
 	p.CID = p.Init()
+	//Player enters stage right
 	p.SetPos(float64(oak.ScreenWidth-64), float64(oak.ScreenHeight/2))
 	render.Draw(p.R, layer.Play, 20)
 	fmt.Printf("\nCharacter %d walking through as %s ", index, p.R)
+
 	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
-		fmt.Println("triggers")
+
 		ply.R.ShiftX(-2)
+		// TODO: the following
+		// Player comes to middle ish
+
+		// Do something with spoils or look sad if dead
+		// If alive: throw chests with hop and cheer
+		//		Card explaining the amount in their chests?
+		//		Chest explodes into money and goes into pit
+		// If dead: whomp whomp
+		// 		eulogoy? name, class, run?
+
+		// Next person in party starts process
+		// You walk to end point (graves or bottom)
+		// When reach your end point destroy self
 
 		if ply.R.X() < float64(oak.ScreenWidth/2) {
 

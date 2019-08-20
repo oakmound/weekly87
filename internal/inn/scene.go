@@ -109,7 +109,8 @@ var Scene = scene.Scene{
 			Players: players.ClassConstructor(curRecord.PartyComp),
 		}
 		// Draw the party in top left
-		partyBackground := render.NewColorBox(206, 52, color.RGBA{90, 90, 200, 255})
+		partyBackground, _ := render.LoadSprite("", filepath.Join("raw", "selector_background.png"))
+
 		partyBackground.SetPos(30, 20)
 
 		ptyOffset := floatgeom.Point2{players.WallOffset, 30}
