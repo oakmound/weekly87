@@ -92,6 +92,13 @@ func Callback(cb func(i int)) Option {
 	}
 }
 
+// Cleanup determines what shoud happen on a select event
+func Cleanup(cb func(i int)) Option {
+	return func(sc *Constructor) {
+		sc.Cleanup = cb
+	}
+}
+
 // Display sets how to display the selector
 func Display(display func(floatgeom.Point2) render.Renderable) Option {
 	return func(sc *Constructor) {
@@ -130,6 +137,7 @@ type Constructor struct {
 	Spots    []floatgeom.Rect2
 	Layers   []int
 	Callback func(i int)
+	Cleanup  func(i int)
 	// Todo: mouse over
 	Bindings map[string]func(*Selector)
 }
@@ -206,9 +214,11 @@ func (s *Selector) MoveTo(i int) error {
 
 func (s *Selector) Select() {
 	s.Callback(s.Pos)
+	s.Cleanup(s.Pos)
 }
 
 func (s *Selector) Destroy() {
+	s.Cleanup(s.Pos)
 	event.DestroyEntity(int(s.CID))
 	s.R.Undraw()
 }

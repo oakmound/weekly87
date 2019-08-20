@@ -119,7 +119,7 @@ var Scene = scene.Scene{
 		}
 		// Draw the party in top left
 		partyBackground, _ := render.LoadSprite("", filepath.Join("raw", "selector_background.png"))
-		
+
 		partyBackground.SetPos(30, 20)
 
 		ptyOffset := floatgeom.Point2{players.WallOffset, 30}
@@ -226,6 +226,12 @@ var Scene = scene.Scene{
 					selector.JoystickHorzDpadControl(),
 					selector.Spaces(spcs...),
 					selector.Callback(func(i int) {
+						// modify party
+						curRecord.PartyComp[i] = npc.Class
+						ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
+
+					}),
+					selector.Cleanup(func(i int) {
 						// undraw menu
 						for _, p := range pty.Players {
 							p.R.Undraw()
@@ -234,10 +240,6 @@ var Scene = scene.Scene{
 						cnfrm.Undraw()
 						cancl.Undraw()
 						partyBackground.Undraw()
-
-						// modify party
-						curRecord.PartyComp[i] = npc.Class
-						ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
 
 						pty, err = ptycon.NewParty(true)
 						if err != nil {
