@@ -14,6 +14,7 @@ import (
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/event"
+	"github.com/oakmound/oak/joystick"
 	"github.com/oakmound/oak/key"
 
 	"github.com/oakmound/oak"
@@ -38,6 +39,14 @@ var curRecord *records.Records
 // Scene  to display the inn
 var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
+
+		// event.AddAliases(map[string][]string
+		// 	"EndPartySelect": []string{
+		// 		key.Down+key.Escape,
+		// 		"B"+joystick.ButtonUp,
+		// 	},
+		// )
+
 		stayInMenu = true
 		nextscene = "inn"
 		render.SetDrawStack(layer.Get()...)
@@ -110,7 +119,7 @@ var Scene = scene.Scene{
 		}
 		// Draw the party in top left
 		partyBackground, _ := render.LoadSprite("", filepath.Join("raw", "selector_background.png"))
-
+		
 		partyBackground.SetPos(30, 20)
 
 		ptyOffset := floatgeom.Point2{players.WallOffset, 30}
@@ -214,6 +223,7 @@ var Scene = scene.Scene{
 				selector.New(
 					selector.Layers(layer.UI, 3),
 					selector.HorzArrowControl(),
+					selector.JoystickHorzDpadControl(),
 					selector.Spaces(spcs...),
 					selector.Callback(func(i int) {
 						// undraw menu
@@ -241,8 +251,10 @@ var Scene = scene.Scene{
 						event.Trigger("EndPartySelect", nil)
 					}),
 					selector.SelectTrigger(key.Down+key.Spacebar),
+					selector.SelectTrigger("A"+joystick.ButtonUp),
 					selector.DestroyTrigger("EndPartySelect"),
 					selector.DestroyTrigger(key.Down+key.Escape),
+					selector.DestroyTrigger("B"+joystick.ButtonUp),
 				)
 			}
 			return 0

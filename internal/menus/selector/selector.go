@@ -8,6 +8,7 @@ import (
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/event"
+	"github.com/oakmound/oak/joystick"
 	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/render"
 )
@@ -67,6 +68,14 @@ func HorzWASDControl() Option {
 // HorzArrowControl sets leftarrow and r as selection controls
 func HorzArrowControl() Option {
 	return Control(key.Down+key.LeftArrow, key.Down+key.RightArrow)
+}
+
+func JoystickHorzDpadControl() Option {
+	return Control("Left"+joystick.ButtonUp, "Right"+joystick.ButtonUp)
+}
+
+func JoystickVertDpadControl() Option {
+	return Control("Up"+joystick.ButtonUp, "Down"+joystick.ButtonUp)
 }
 
 // Layers sets the layer for drawing the selector

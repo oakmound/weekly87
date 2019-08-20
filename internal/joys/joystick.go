@@ -4,8 +4,10 @@ import (
 	"math"
 	"sync"
 	"time"
+	"strings"
 
 	"github.com/oakmound/oak/joystick"
+	"github.com/oakmound/oak/event"
 )
 
 var (
@@ -48,6 +50,9 @@ func (h *handler) Trigger(ev string, state interface{}) {
 		}
 		return
 	}
+	if strings.HasSuffix(ev, joystick.ButtonUp) {
+		event.Trigger(ev, state)
+	}
 	st, ok := state.(*joystick.State)
 	if !ok {
 		return
@@ -67,7 +72,10 @@ func Init() {
 				select {
 				case j := <-jCh:
 					j.Handler = &handler{}
-					j.Listen(nil)
+					j.Listen(&joystick.ListenOptions{
+						JoystickChanges: true,
+						ButtonPresses:   true,
+					})
 				}
 			}
 		}()
