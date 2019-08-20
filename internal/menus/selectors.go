@@ -2,6 +2,7 @@ package menus
 
 import (
 	"github.com/oakmound/oak/collision"
+	"github.com/oakmound/oak/joystick"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/entities/x/btn/grid"
 	"github.com/oakmound/oak/key"
@@ -21,12 +22,15 @@ func ButtonSelectorA(selectors grid.Grid) s.Option {
 	}
 	return s.And(
 		s.Layers(2, 3),
-		s.HorzArrowControl(),
+		s.VertArrowControl(),
+		s.JoystickVertDpadControl(),
 		s.Spaces(spcs...),
 		s.Callback(func(i int) {
 			btnList[i].Trigger(mouse.ClickOn, nil)
 		}),
 		s.SelectTrigger(key.Down+key.Spacebar),
+		s.SelectTrigger("A"+joystick.ButtonUp),
+		s.SelectTrigger("Start"+joystick.ButtonUp),
 		s.DestroyTrigger(key.Down+key.Escape),
 	)
 }
