@@ -126,6 +126,20 @@ func Drop(p Producer) DoOption {
 	}
 }
 
+func Perform(p Producer) DoOption {
+	return func(pt floatgeom.Point2) {
+		dlog.Info("An ability dropped something")
+		p.Start = pt
+		chrs, err := p.Produce()
+		if err != nil {
+			dlog.Error(err)
+			return
+		}
+
+		event.Trigger("AbilityFired", chrs)
+	}
+}
+
 func Then(do DoOption) Option {
 	return func(p Producer) Producer {
 		p.ThenFn = do

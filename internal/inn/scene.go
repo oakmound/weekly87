@@ -285,6 +285,19 @@ var Scene = scene.Scene{
 				render.Draw(p.R, layer.Play, 4)
 			}
 		})
+
+		oak.AddCommand("shake", func(args []string) {
+			//TODO: determine if default shaker is even noticable
+
+			ss := oak.ScreenShaker{
+				Random: false,
+				Magnitude: floatgeom.Point2{
+					3,
+					3,
+				},
+			}
+			ss.Shake(time.Duration(1000) * time.Millisecond)
+		})
 		oak.AddCommand("debug", func(args []string) {
 			if debugTree.DrawDisabled {
 				debugTree.DrawDisabled = false

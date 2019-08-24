@@ -21,12 +21,12 @@ import (
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/particle"
-	"github.com/oakmound/weekly87/internal/abilities/vfx"
 	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/enemies"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/joys"
 	"github.com/oakmound/weekly87/internal/layer"
+	"github.com/oakmound/weekly87/internal/vfx"
 )
 
 type Party struct {
@@ -171,6 +171,8 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			if ply.Invulnerable > 0 || !en.Active {
 				return
 			}
+
+			vfx.SmallShaker.Shake(time.Duration(1000) * time.Millisecond)
 
 			if ply.Shield > 0 {
 				dlog.Info("Enemy hit us be we were shielded")

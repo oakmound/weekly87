@@ -1,13 +1,12 @@
 package vfx
 
 import (
+	"image/color"
+
 	"github.com/200sc/go-dist/floatrange"
 	"github.com/200sc/go-dist/intrange"
-
 	"github.com/oakmound/oak/render/particle"
 	"github.com/oakmound/oak/shape"
-
-	"image/color"
 )
 
 var (
