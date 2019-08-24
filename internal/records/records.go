@@ -20,6 +20,7 @@ type Records struct {
 	// Todo: more
 	FarthestGoneInSections int64 `json:"farthestGoneInSections"`
 	PartyComp              []int `json:"partyComp"`
+	Deaths                 int   `json:"deaths"`
 }
 
 // Store a record to a file

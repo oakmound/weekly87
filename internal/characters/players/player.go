@@ -67,6 +67,7 @@ func (pc *Constructor) Copy() *Constructor {
 type Player struct {
 	*entities.Interactive
 	facing       string
+	Name         string
 	Swtch        *render.Switch
 	Special1     abilities.Ability
 	Special2     abilities.Ability
