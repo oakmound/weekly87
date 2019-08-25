@@ -281,9 +281,13 @@ var Scene = scene.Scene{
 			return 0
 		}, "EnterFrame")
 
+		runbackDisabled := false
 		runbackOnce := sync.Once{}
 
 		event.GlobalBind(func(int, interface{}) int {
+			if runbackDisabled {
+				return 0
+			}
 			runbackOnce.Do(func() {
 				facing = -1
 				event.Trigger("RunBack", nil)
@@ -378,6 +382,12 @@ var Scene = scene.Scene{
 				}
 			}
 		})
+		oak.AddCommand("stopRunback", func(args []string) {
+
+			runbackDisabled = !runbackDisabled
+			dlog.Warn("Cheating to toggle runbackDisabled to:", runbackDisabled)
+		})
+
 		oak.AddCommand("debug", func(args []string) {
 			dlog.Warn("Cheating to toggle debug mode")
 			if debugTree.DrawDisabled {
@@ -394,6 +404,7 @@ var Scene = scene.Scene{
 				dlog.ErrorCheck(err)
 			}
 			pty.SpeedUp(up)
+			dlog.Warn("Cheating to toggle speedup party by ", up)
 		})
 		oak.AddCommand("killme", func(args []string) {
 			for _, p := range pty.Players {
@@ -402,13 +413,11 @@ var Scene = scene.Scene{
 			event.Trigger("PlayerDeath", nil)
 		})
 		oak.AddCommand("grantchest", func(args []string) {
-			if len(args) < 1 {
-				// pty.Players[0
-				c := doodads.NewChest(10)
-				_, h := c.R.GetDims()
-				pty.Players[0].AddChest(h, c.R.(render.Modifiable), c.Value)
-				return
-			}
+			dlog.Warn("Cheating to grant a chest to a player")
+
+			c := doodads.NewChest(10)
+			_, h := c.R.GetDims()
+			pty.Players[0].AddChest(h, c.R.(render.Modifiable), c.Value)
 
 		})
 		oak.AddCommand("win", func(args []string) {

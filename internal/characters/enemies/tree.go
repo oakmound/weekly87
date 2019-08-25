@@ -50,10 +50,10 @@ func initTree() {
 	anims["walkLT"] = sheet[0][0].Copy().Modify(mod.FlipX)
 
 	baseConstructor := Constructor{
-		Dimensions:   floatgeom.Point2{22, 50},
+		Dimensions:   floatgeom.Point2{20, 50},
 		AnimationMap: anims,
 		Speed:        floatgeom.Point2{0, 0},
-		SpaceOffset:  physics.NewVector(-6, 0),
+		SpaceOffset:  physics.NewVector(-22, -6),
 		Bindings: map[string]func(*BasicEnemy, interface{}) int{
 			"EnterFrame": func(b *BasicEnemy, frame interface{}) int {
 
