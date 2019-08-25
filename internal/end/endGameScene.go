@@ -325,20 +325,26 @@ func tossChests(p *players.Player) {
 
 	for _, c := range p.Chests {
 		c.(*render.Sprite).Vector = c.(*render.Sprite).Vector.Detach()
-
-		p.CheckedBind(func(ply *players.Player, _ interface{}) int {
-			c.ShiftX((pitX - presentationX) / 100.0)
-			c.ShiftY((pitY - presentationY + hopDistance) / 100.0)
-
-			if c.X() > pitX {
-				explodeChest(c.X(), c.Y())
-				c.Undraw()
-				return event.UnbindSingle
-			}
-			return 0
-		}, "EnterFrame")
-
 	}
+	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
+
+		done := false
+		for _, cr := range p.Chests {
+
+			cr.ShiftX((pitX - presentationX) / 100.0)
+			cr.ShiftY((pitY - presentationY + hopDistance) / 100.0)
+
+			if cr.X() > pitX {
+				explodeChest(cr.X(), cr.Y())
+				cr.Undraw()
+				done = true
+			}
+		}
+		if done {
+			return event.UnbindSingle
+		}
+		return 0
+	}, "EnterFrame")
 }
 func liviningExit(p *players.Player) {
 	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
