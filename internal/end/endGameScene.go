@@ -161,7 +161,7 @@ var Scene = scene.Scene{
 		textX += 200
 		render.Draw(sectionText, 2, 2)
 
-		enemy := blueFnt.NewStrText("Enemies Defeated: "+strconv.Itoa(runInfo.EnemiesDefeated), textX, textY)
+		enemy := blueFnt.NewStrText("Enemies Defeated: "+strconv.FormatInt(runInfo.EnemiesDefeated, 10), textX, textY)
 		textX += 200
 		render.Draw(enemy, 2, 2)
 
@@ -286,7 +286,6 @@ func presentSpoils(party *players.Party, graveCount *int, index int) {
 				}, "EnterFrame")
 			} else {
 				*graveCount++
-				fmt.Printf("Graves is now %d\n ", *graveCount)
 				deadMovement(p)
 			}
 

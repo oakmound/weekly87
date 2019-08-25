@@ -7,5 +7,5 @@ import "github.com/oakmound/weekly87/internal/characters/players"
 type RunInfo struct {
 	Party           *players.Party
 	SectionsCleared int
-	EnemiesDefeated int
+	EnemiesDefeated int64
 }

@@ -332,6 +332,8 @@ var Scene = scene.Scene{
 				section.Change{
 					Typ: section.EntityDestroyed,
 					Val: int(info[1])})
+			runInfo.EnemiesDefeated += info[0]
+
 			return 0
 		}, "EnemyDeath")
 
