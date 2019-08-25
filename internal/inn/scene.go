@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	klg "github.com/200sc/klangsynthese/audio"
@@ -132,7 +133,7 @@ var Scene = scene.Scene{
 
 		//interactDelay := time.Second
 		//pcLastInteract := time.Now()
-		//interactLock := &sync.Mutex{}
+
 		//Create an example person to navigate the space
 		pc := NewInnWalker(npcScale, pty.Players)
 
@@ -189,76 +190,84 @@ var Scene = scene.Scene{
 			}, "EnterFrame")
 		})
 
+		interactLock := &sync.Mutex{}
 		event.GlobalBind(func(int, interface{}) int {
-			if lastInteractedNPC != nil {
-				npc := lastInteractedNPC
-				npc.Button.Undraw()
-				npcW, _ := npc.R.GetDims()
-				bkgW, bkgH := partyBackground.GetDims()
-				// Disable all controls
-				pc.inMenu = true
-				// Spawn a box with the party above the npc being selected
-				partyBackground.SetPos(npc.X()+float64(npcW-bkgW)/2, npc.Y()-10-float64(bkgH))
-				ptycon.Players[0].Position = floatgeom.Point2{partyBackground.X() + 20, partyBackground.Y() + 10}
-				render.Draw(partyBackground, layer.UI, 1)
 
-				pty, err := ptycon.NewParty(true)
-				dlog.ErrorCheck(err)
-				spcs := make([]*collision.Space, len(pty.Players))
-				for i, p := range pty.Players {
-					render.Draw(p.R, layer.UI, 2)
-					spcs[i] = p.GetSpace()
-				}
-
-				// Show a confirm button (and a cancel button)
-				cnfrm := getConfirmBtn()
-				cnfrm.SetPos(partyBackground.X(), partyBackground.Y()+float64(bkgH)+2)
-				render.Draw(cnfrm, layer.UI, 1)
-				cancl := getCancelBtn()
-				canclW, _ := cancl.GetDims()
-				cancl.SetPos(partyBackground.X()+float64(bkgW-canclW), partyBackground.Y()+float64(bkgH)+2)
-				render.Draw(cancl, layer.UI, 1)
-
-				// Let arrow keys / joystick or mouse even control which party member is selected
-				selector.New(
-					selector.Layers(layer.UI, 3),
-					selector.HorzArrowControl(),
-					selector.JoystickHorzDpadControl(),
-					selector.Spaces(spcs...),
-					selector.Callback(func(i int) {
-						// modify party
-						curRecord.PartyComp[i] = npc.Class
-						ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
-
-					}),
-					selector.Cleanup(func(i int) {
-						// undraw menu
-						for _, p := range pty.Players {
-							p.R.Undraw()
-							collision.Remove(p.GetSpace())
-						}
-						cnfrm.Undraw()
-						cancl.Undraw()
-						partyBackground.Undraw()
-
-						pty, err = ptycon.NewParty(true)
-						if err != nil {
-							dlog.Error(err)
-							return
-						}
-						pc.SetParty(pty.Players)
-
-						// end selection
-						pc.inMenu = false
-						event.Trigger("EndPartySelect", nil)
-					}),
-					selector.SelectTrigger(key.Down+key.Spacebar),
-					selector.SelectTrigger("A"+joystick.ButtonUp),
-					selector.DestroyTrigger("EndPartySelect"),
-					selector.DestroyTrigger(key.Down+key.Escape),
-					selector.DestroyTrigger("B"+joystick.ButtonUp),
-				)
+			interactLock.Lock()
+			if lastInteractedNPC == nil {
+				interactLock.Unlock()
+				return 0
 			}
+			npc := lastInteractedNPC
+			lastInteractedNPC = nil
+			npc.Button.Undraw()
+			interactLock.Unlock()
+			npcW, _ := npc.R.GetDims()
+			bkgW, bkgH := partyBackground.GetDims()
+			// Disable all controls
+			pc.inMenu = true
+			// Spawn a box with the party above the npc being selected
+			partyBackground.SetPos(npc.X()+float64(npcW-bkgW)/2, npc.Y()-10-float64(bkgH))
+			ptycon.Players[0].Position = floatgeom.Point2{partyBackground.X() + 20, partyBackground.Y() + 10}
+			render.Draw(partyBackground, layer.UI, 1)
+
+			pty, err := ptycon.NewParty(true)
+			dlog.ErrorCheck(err)
+			spcs := make([]*collision.Space, len(pty.Players))
+			for i, p := range pty.Players {
+				render.Draw(p.R, layer.UI, 2)
+				spcs[i] = p.GetSpace()
+			}
+
+			// Show a confirm button (and a cancel button)
+			cnfrm := getConfirmBtn()
+			cnfrm.SetPos(partyBackground.X(), partyBackground.Y()+float64(bkgH)+2)
+			render.Draw(cnfrm, layer.UI, 1)
+			cancl := getCancelBtn()
+			canclW, _ := cancl.GetDims()
+			cancl.SetPos(partyBackground.X()+float64(bkgW-canclW), partyBackground.Y()+float64(bkgH)+2)
+			render.Draw(cancl, layer.UI, 1)
+
+			// Let arrow keys / joystick or mouse even control which party member is selected
+			selector.New(
+				selector.Layers(layer.UI, 3),
+				selector.HorzArrowControl(),
+				selector.JoystickHorzDpadControl(),
+				selector.Spaces(spcs...),
+				selector.Callback(func(i int) {
+					// modify party
+					curRecord.PartyComp[i] = npc.Class
+					ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
+
+				}),
+				selector.Cleanup(func(i int) {
+					// undraw menu
+					for _, p := range pty.Players {
+						p.R.Undraw()
+						collision.Remove(p.GetSpace())
+					}
+					cnfrm.Undraw()
+					cancl.Undraw()
+					partyBackground.Undraw()
+
+					pty, err = ptycon.NewParty(true)
+					if err != nil {
+						dlog.Error(err)
+						return
+					}
+					pc.SetParty(pty.Players)
+
+					// end selection
+					pc.inMenu = false
+					event.Trigger("EndPartySelect", nil)
+				}),
+				selector.SelectTrigger(key.Down+key.Spacebar),
+				selector.SelectTrigger("A"+joystick.ButtonUp),
+				selector.DestroyTrigger("EndPartySelect"),
+				selector.DestroyTrigger(key.Down+key.Escape),
+				selector.DestroyTrigger("B"+joystick.ButtonUp),
+			)
+
 			return 0
 		}, key.Down+key.ReturnEnter)
 
