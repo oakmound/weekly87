@@ -16,6 +16,7 @@ import (
 
 	klg "github.com/200sc/klangsynthese/audio"
 
+	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/records"
@@ -399,6 +400,20 @@ var Scene = scene.Scene{
 				p.Alive = false
 			}
 			event.Trigger("PlayerDeath", nil)
+		})
+		oak.AddCommand("grantchest", func(args []string) {
+			if len(args) < 1 {
+				// pty.Players[0
+				c := doodads.NewChest(10)
+				_, h := c.R.GetDims()
+				pty.Players[0].AddChest(h, c.R.(render.Modifiable), c.Value)
+				return
+			}
+
+		})
+		oak.AddCommand("win", func(args []string) {
+			nextscene = "endGame"
+			stayInGame = false
 		})
 
 		dlog.Info("Current Debug Commands are: ", strings.Join(oak.GetDebugKeys(), " , "))

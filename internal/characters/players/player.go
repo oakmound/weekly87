@@ -103,6 +103,16 @@ func (p *Player) AddBuff(b buff.Buff) {
 
 }
 
+func (p *Player) AddChest(h int, r render.Modifiable, contents int64) {
+	p.ChestsHeight += float64(h)
+	chestHeight := p.ChestsHeight
+
+	r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -chestHeight)
+	p.ChestValues = append(p.ChestValues, contents)
+	p.Chests = append(p.Chests, r)
+	render.Draw(r, layer.Play, 2)
+}
+
 func (p *Player) ReorderBuffs() {
 	xOffset := abilities.BuffIconSize + 4
 	yOffset := abilities.BuffIconSize + 4

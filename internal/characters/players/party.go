@@ -25,7 +25,6 @@ import (
 	"github.com/oakmound/weekly87/internal/characters/enemies"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/joys"
-	"github.com/oakmound/weekly87/internal/layer"
 	"github.com/oakmound/weekly87/internal/vfx"
 )
 
@@ -243,15 +242,18 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			r := ch.R.(render.Modifiable).Copy()
 			_, h := r.GetDims()
 
-			p.ChestsHeight += float64(h)
-			chestHeight := p.ChestsHeight
+			p.AddChest(h, r, ch.Value)
 
-			r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -chestHeight)
-			p.ChestValues = append(p.ChestValues, ch.Value)
-			p.Chests = append(p.Chests, r)
+			// p.ChestsHeight += float64(h)
+			// chestHeight := p.ChestsHeight
+
+			// r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -chestHeight)
+			// p.ChestValues = append(p.ChestValues, ch.Value)
+			// p.Chests = append(p.Chests, r)
+			// render.Draw(r, layer.Play, 2)
 
 			ch.Destroy()
-			render.Draw(r, layer.Play, 2)
+
 			event.Trigger("RunBackOnce", nil)
 		})
 

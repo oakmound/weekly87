@@ -53,7 +53,7 @@ func (is intStringer) String() string {
 }
 
 var (
-	presentationX, presentationY, startY, pitX, pitY float64
+	presentationX, presentationY, startY, pitX, pitY, hopDistance float64
 )
 
 // Scene is a scene in the same package as run to allow for easy variable access.
@@ -76,6 +76,7 @@ var Scene = scene.Scene{
 		pitX = float64(oak.ScreenWidth) - 180.0
 		pitY = float64(oak.ScreenHeight) - 100.0
 
+		hopDistance = 100.0
 		// partyJson, _ := json.Marshal(runInfo.Party)
 
 		// Update info in the records with info from the most recent run
@@ -227,16 +228,30 @@ func presentSpoils(party *players.Party, graveCount *int, index int) {
 	//Player enters stage right
 	p.SetPos(float64(oak.ScreenWidth-64), startY)
 	render.Draw(p.R, layer.Play, 20)
+	p.ChestsHeight = 0
+	for _, r := range p.Chests {
+		_, h := r.GetDims()
+		p.ChestsHeight += float64(h)
+		chestHeight := p.ChestsHeight
+		r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -chestHeight)
+		render.Draw(r, layer.Play, 21)
+	}
 
 	fmt.Printf("\nCharacter %d walking through and is Alive:%t ", index, p.Alive)
 
 	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
 
-		ply.R.ShiftX(-2)
-		ply.Swtch.Set("deadLT")
-		if ply.Alive {
-			ply.Swtch.Set("walkLT")
+		ply.ShiftPos(-2, 0)
+
+		ply.Swtch.Set("walkLT")
+		if len(ply.ChestValues) > 0 {
+			ply.Swtch.Set("walkHold")
 		}
+		if !ply.Alive {
+			ply.Swtch.Set("deadLT")
+
+		}
+
 		// TODO: the following
 		// Player comes to middle ish
 
@@ -255,17 +270,16 @@ func presentSpoils(party *players.Party, graveCount *int, index int) {
 
 			if p.Alive {
 
-				t := time.Now()
+				if len(p.ChestValues) > 0 {
+					hop(p)
+
+				}
+
+				t := time.Now().Add(time.Second)
 				p.CheckedBind(func(ply *players.Player, _ interface{}) int {
+
 					if time.Now().After(t) {
-					}
-					//toss
-
-					explodeChest(p.R.X(), p.R.Y())
-
-					ply.R.ShiftY(2)
-					if ply.R.Y() > float64(oak.ScreenHeight) {
-
+						liviningExit(p)
 						return event.UnbindSingle
 					}
 					return 0
@@ -274,7 +288,6 @@ func presentSpoils(party *players.Party, graveCount *int, index int) {
 				*graveCount++
 				fmt.Printf("Graves is now %d\n ", *graveCount)
 				deadMovement(p)
-
 			}
 
 			presentSpoils(party, graveCount, index+1)
@@ -286,6 +299,59 @@ func presentSpoils(party *players.Party, graveCount *int, index int) {
 
 }
 
+func hop(p *players.Player) {
+	p.Swtch.Set("standRT")
+	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
+		if ply.Y() < presentationY-hopDistance {
+			tossChests(ply)
+			ply.CheckedBind(func(plyz *players.Player, _ interface{}) int {
+
+				if plyz.Y() > presentationY {
+					plyz.Swtch.Set("walkLT")
+					return event.UnbindSingle
+				}
+				plyz.ShiftPos(0, 4)
+				return 0
+			}, "EnterFrame")
+			return event.UnbindSingle
+		}
+
+		ply.ShiftPos(0, -4)
+		return 0
+	}, "EnterFrame")
+}
+
+func tossChests(p *players.Player) {
+
+	for _, c := range p.Chests {
+		c.(*render.Sprite).Vector = c.(*render.Sprite).Vector.Detach()
+
+		p.CheckedBind(func(ply *players.Player, _ interface{}) int {
+			c.ShiftX((pitX - presentationX) / 100.0)
+			c.ShiftY((pitY - presentationY + hopDistance) / 100.0)
+
+			if c.X() > pitX {
+				explodeChest(c.X(), c.Y())
+				c.Undraw()
+				return event.UnbindSingle
+			}
+			return 0
+		}, "EnterFrame")
+
+	}
+}
+func liviningExit(p *players.Player) {
+	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
+
+		ply.ShiftPos(0, 2)
+		if ply.R.Y() > float64(oak.ScreenHeight) {
+
+			return event.UnbindSingle
+		}
+		return 0
+	}, "EnterFrame")
+}
+
 // var deathParticles particle.Generator
 
 func deadMovement(p *players.Player) {
@@ -293,7 +359,7 @@ func deadMovement(p *players.Player) {
 
 		// ply.R.Undraw()
 
-		ply.R.ShiftX(-2)
+		ply.ShiftPos(-2, 0)
 		if ply.R.X() < graveX {
 			deathSprites(ply.R.X(), ply.R.Y())
 			ply.R.Undraw()
