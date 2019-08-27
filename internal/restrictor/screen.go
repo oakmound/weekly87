@@ -1,7 +1,6 @@
 package restrictor
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/oakmound/oak"
@@ -102,12 +101,12 @@ func screenEnter(id int, frame interface{}) int {
 		offScreen := false
 		if !s.runningLeft {
 			if x+w < oak.ViewPos.X {
-				fmt.Println("Offscreen A", x, w, oak.ViewPos.X)
+				//fmt.Println("Offscreen A", x, w, oak.ViewPos.X)
 				offScreen = true
 			}
 		} else {
 			if x > oak.ViewPos.X+oak.ScreenWidth {
-				fmt.Println("Offscreen B", x, oak.ScreenWidth, oak.ViewPos.X)
+				//fmt.Println("Offscreen B", x, oak.ScreenWidth, oak.ViewPos.X)
 				offScreen = true
 			}
 		}
@@ -129,22 +128,3 @@ type Restrictable interface {
 	GetPos() (float64, float64)
 	GetDims() (int, int)
 }
-
-/*   A                B                 C
- S E C T I O N 1  | S E C T I O N 2 | S E C T I O N 1 |
-		z	  			   y	              x
-*/
-
-// Going Right
-// When player reaches y:
-
-
-// When player reaches x:
-
-
-// Going Left
-// When player reaches z:
-
-
-// When player reaches y:
-

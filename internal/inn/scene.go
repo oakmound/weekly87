@@ -191,7 +191,7 @@ var Scene = scene.Scene{
 		})
 
 		interactLock := &sync.Mutex{}
-		event.GlobalBind(func(int, interface{}) int {
+		partySelectStart := func(int, interface{}) int {
 
 			interactLock.Lock()
 			if lastInteractedNPC == nil {
@@ -269,7 +269,9 @@ var Scene = scene.Scene{
 			)
 
 			return 0
-		}, key.Down+key.ReturnEnter)
+		}
+		event.GlobalBind(partySelectStart, key.Down+key.ReturnEnter)
+		event.GlobalBind(partySelectStart, "A"+joystick.ButtonUp)
 
 		bkgMusic, err = music.Start(true, "inn1.wav")
 		dlog.ErrorCheck(err)
