@@ -2,12 +2,12 @@ package joys
 
 import (
 	"math"
+	"strings"
 	"sync"
 	"time"
-	"strings"
 
-	"github.com/oakmound/oak/joystick"
 	"github.com/oakmound/oak/event"
+	"github.com/oakmound/oak/joystick"
 )
 
 var (

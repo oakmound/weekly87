@@ -1,7 +1,6 @@
 package inn
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/oakmound/oak"
@@ -159,8 +158,8 @@ func (iw *InnWalker) bindFront() {
 		}
 
 		if p.Delta.Magnitude() != 0 {
-			fmt.Println("delta x, y", p.Delta.X(), p.Delta.Y())
-			fmt.Println("lag index", iw.lagIdx)
+			//fmt.Println("delta x, y", p.Delta.X(), p.Delta.Y())
+			//fmt.Println("lag index", iw.lagIdx)
 			// Store this event in our frame delay
 			iw.lagDeltas[iw.lagIdx] = floatgeom.Point2{p.Delta.X(), p.Delta.Y()}
 
