@@ -18,9 +18,9 @@ type Records struct {
 	SectionsCleared int64 `json:"sectionsCleared"`
 	BaseSeed        int64 `json:"baseSeed"`
 	// Todo: more
-	FarthestGoneInSections int64 `json:"farthestGoneInSections"`
-	PartyComp              []int `json:"partyComp"`
-	Deaths                 int   `json:"deaths"`
+	FarthestGoneInSections int64                 `json:"farthestGoneInSections"`
+	PartyComp              []players.PartyMember `json:"partyComp"`
+	Deaths                 int                   `json:"deaths"`
 }
 
 // Store a record to a file
@@ -42,7 +42,7 @@ func Load() *Records {
 		f, err := os.Create(recordsFile)
 		dlog.ErrorCheck(err)
 		r.BaseSeed = rand.Int63()
-		r.PartyComp = []int{players.Spearman}
+		r.PartyComp = []players.PartyMember{{players.Spearman, 0, "Dan the Default"}}
 		data, err := json.Marshal(r)
 		dlog.ErrorCheck(err)
 		_, err = f.Write(data)
@@ -51,7 +51,7 @@ func Load() *Records {
 		dc := json.NewDecoder(f)
 		dlog.ErrorCheck(dc.Decode(r))
 		if r.PartyComp == nil {
-			r.PartyComp = []int{players.Spearman}
+			r.PartyComp = []players.PartyMember{{players.Spearman, 0, "Dan the Default"}}
 		}
 	}
 	if f != nil {

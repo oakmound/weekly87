@@ -153,7 +153,8 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 		if i != 0 {
 			p.Delta = pty.Players[0].Delta
 		}
-
+		p.Name = pcon.Name
+		p.AccruedValue = pcon.AccruedValue
 		// Interaction with Enemies
 		p.RSpace.Add(labels.Enemy, func(s, e *collision.Space) {
 			ply, ok := s.CID.E().(*Player)

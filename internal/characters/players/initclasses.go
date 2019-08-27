@@ -36,6 +36,7 @@ func filterCharMap(baseCharMap map[string]render.Modifiable, filter mod.Filter) 
 	return outputMap
 }
 
+// Character type enum enum
 const (
 	Swordsman = iota
 	Berserker
@@ -49,18 +50,26 @@ const (
 
 var classmapping map[int]*Constructor
 
-// ClassConstructor creates the classes from a int64 list
-func ClassConstructor(partyComp []int) []Constructor {
+// ClassConstructor creates the character types from a PartyMember list
+func ClassConstructor(partyComp []PartyMember) []Constructor {
 	classes := make([]Constructor, len(partyComp))
 	for i, c := range partyComp {
-		classes[i] = *classmapping[c].Copy()
+		classes[i] = *classmapping[c.PlayerClass].Copy()
 	}
 	return classes
 }
 
+// ClassDefinition specifies what makes a class special!
 type ClassDefinition struct {
 	Name        string
 	LayerColors map[string]color.RGBA
 	Special1    abilities.Ability
 	Special2    abilities.Ability
+}
+
+// PartyMember information for storage
+type PartyMember struct {
+	PlayerClass  int
+	AccuredValue int
+	Name         string
 }

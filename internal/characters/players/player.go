@@ -46,6 +46,8 @@ type Constructor struct {
 	Special1     abilities.Ability
 	Special2     abilities.Ability
 	RunSpeed     float64
+	Name         string
+	AccruedValue int
 }
 
 // Copy returns a shallow copy of the constructor.
@@ -61,13 +63,17 @@ func (pc *Constructor) Copy() *Constructor {
 		Special1:     pc.Special1,
 		Special2:     pc.Special2,
 		RunSpeed:     pc.RunSpeed,
+		Name:         pc.Name,
+		AccruedValue: pc.AccruedValue,
 	}
 }
 
+// Player contains all the information for the pcs
 type Player struct {
 	*entities.Interactive
 	facing       string
 	Name         string
+	AccruedValue int
 	Swtch        *render.Switch
 	Special1     abilities.Ability
 	Special2     abilities.Ability

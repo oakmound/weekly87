@@ -236,7 +236,7 @@ var Scene = scene.Scene{
 				selector.Spaces(spcs...),
 				selector.Callback(func(i int) {
 					// modify party
-					curRecord.PartyComp[i] = npc.Class
+					curRecord.PartyComp[i].PlayerClass = npc.Class
 					ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
 
 				}),
@@ -277,7 +277,7 @@ var Scene = scene.Scene{
 		// Clear, set and report on the debug commands available
 		oak.ResetCommands()
 		oak.AddCommand("resetParty", func(args []string) {
-			curRecord.PartyComp = []int{players.Spearman}
+			curRecord.PartyComp = []players.PartyMember{{players.Spearman, 0, "Dan the Almost Default"}}
 			ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
 			ptycon.Players[0].Position = ptyOffset
 			for _, p := range pty.Players {

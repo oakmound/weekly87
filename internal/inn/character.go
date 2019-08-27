@@ -246,7 +246,7 @@ func (n NPC) FaceLeft(shouldFaceLeft bool) NPC {
 
 // NewInnNPC creates a npc to interact with for setting up party
 func NewInnNPC(class int, scale, x, y float64) NPC {
-	pcon := players.ClassConstructor([]int{class})[0]
+	pcon := players.ClassConstructor([]players.PartyMember{{class, 0, "NPC How did you find me"}})[0]
 	n := NPC{}
 	n.Class = class
 	n.Swtch = render.NewSwitch("standRT", pcon.AnimationMap).Copy().(*render.Switch)
