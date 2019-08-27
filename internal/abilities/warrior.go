@@ -36,7 +36,7 @@ var (
 		func(u User) []characters.Character {
 			dlog.Info("Trying to swipe at enemies")
 
-			yDelta := 40.0
+			yDelta := 10.0
 			xOffset := 100.0
 			xDelta := 150.0
 			if u.Direction() == "LT" {
@@ -47,27 +47,20 @@ var (
 			pos := u.Vec().Copy()
 			pos.Add(physics.NewVector(xOffset, 16.0))
 			start := floatgeom.Point2{pos.X(), pos.Y() - yDelta}
-			mid := floatgeom.Point2{pos.X() + xDelta, pos.Y()}
-			end := floatgeom.Point2{pos.X(), pos.Y() + yDelta}
 
-			// Spell Display
-			pg := particle.NewColorGenerator(
-				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
-					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
-				particle.Shape(shape.Diamond),
-				particle.Size(intrange.NewConstant(10)),
-				particle.EndSize(intrange.NewConstant(5)),
-				particle.Speed(floatrange.NewConstant(2)),
-				particle.LifeSpan(floatrange.NewConstant(10)),
-			)
+			// Swipe
+			// Should this be bigger?
+			seq, err := render.LoadSheetSequence(filepath.Join("32x32", "BaseSlash.png"), 32, 32, 0, 32,
+				0, 0, 1, 0, 2, 0, 3, 0, 0, 1, 1, 1, 2, 1, 3, 1)
+			dlog.ErrorCheck(err)
 
 			chrs, err := Produce(
 				StartAt(start),
-				FrameLength(20),
-				ArcTo(mid, end),
+				LineTo(start),
+				FrameLength(16),
 				FollowSpeed(u.GetDelta().Xp(), u.GetDelta().Yp()),
 				WithLabel(labels.EffectsEnemy),
-				WithParticles(pg),
+				WithRenderable(seq),
 			)
 
 			dlog.ErrorCheck(err)
@@ -81,7 +74,7 @@ var (
 		func(u User) []characters.Character {
 			dlog.Info("Trying to swipe at enemies")
 
-			yDelta := 40.0
+			yDelta := 10.0
 			xOffset := 100.0
 			xDelta := 150.0
 			if u.Direction() == "LT" {
@@ -92,27 +85,20 @@ var (
 			pos := u.Vec().Copy()
 			pos.Add(physics.NewVector(xOffset, 16.0))
 			start := floatgeom.Point2{pos.X(), pos.Y() - yDelta}
-			mid := floatgeom.Point2{pos.X() + xDelta, pos.Y()}
-			end := floatgeom.Point2{pos.X(), pos.Y() + yDelta}
 
-			// Spell Display
-			pg := particle.NewColorGenerator(
-				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
-					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
-				particle.Shape(shape.Diamond),
-				particle.Size(intrange.NewConstant(10)),
-				particle.EndSize(intrange.NewConstant(5)),
-				particle.Speed(floatrange.NewConstant(2)),
-				particle.LifeSpan(floatrange.NewConstant(10)),
-			)
+			// Swipe
+			// Should this be bigger?
+			seq, err := render.LoadSheetSequence(filepath.Join("32x32", "BaseSlash.png"), 32, 32, 0, 32,
+				0, 0, 1, 0, 2, 0, 3, 0, 0, 1, 1, 1, 2, 1, 3, 1)
+			dlog.ErrorCheck(err)
 
 			chrs, err := Produce(
 				StartAt(start),
-				FrameLength(20),
-				ArcTo(mid, end),
+				LineTo(start),
+				FrameLength(16),
 				FollowSpeed(u.GetDelta().Xp(), u.GetDelta().Yp()),
 				WithLabel(labels.EffectsEnemy),
-				WithParticles(pg),
+				WithRenderable(seq),
 			)
 
 			dlog.ErrorCheck(err)
@@ -124,7 +110,7 @@ var (
 		render.NewColorBox(64, 64, color.RGBA{230, 5, 0, 255}),
 		time.Second*5,
 		func(u User) []characters.Character {
-			fmt.Println("Just tried to stab a guy ", u)
+			fmt.Println("Just tried to rage a guy ", u)
 			return nil
 		},
 	)
@@ -133,7 +119,7 @@ var (
 		render.NewColorBox(64, 64, color.RGBA{200, 50, 150, 255}),
 		time.Second*5,
 		func(u User) []characters.Character {
-			fmt.Println("Just tried to stab a guy ", u)
+			fmt.Println("Just tried to spear throw a guy ", u)
 			return nil
 		},
 	)
