@@ -214,11 +214,15 @@ func (s *Selector) MoveTo(i int) error {
 
 func (s *Selector) Select() {
 	s.Callback(s.Pos)
-	s.Cleanup(s.Pos)
+	if s.Cleanup != nil {
+		s.Cleanup(s.Pos)
+	}
 }
 
 func (s *Selector) Destroy() {
-	s.Cleanup(s.Pos)
+	if s.Cleanup != nil {
+		s.Cleanup(s.Pos)
+	}
 	event.DestroyEntity(int(s.CID))
 	s.R.Undraw()
 }
