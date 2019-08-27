@@ -153,4 +153,25 @@ func (p *Player) Ready() bool {
 	return p.Alive
 }
 
+func (p *Player) Kill() {
+	p.Alive = false
+	p.Special1.Enable(false)
+	p.Special2.Enable(false)
+	dlog.ErrorCheck(p.Swtch.Set("dead" + p.facing))
+	for _, r := range p.Chests {
+		r.Undraw()
+	}
+	p.ChestValues = []int64{}
+	p.ChestsHeight = 0
+	p.Chests = []render.Renderable{}
+	// Consider: Drop the chests?
+}
+
+func (p *Player) Revive() {
+	p.Alive = true
+	p.Special1.Enable(true)
+	p.Special2.Enable(true)
+	dlog.ErrorCheck(p.Swtch.Set("walk" + p.facing))
+}
+
 const WallOffset = 50

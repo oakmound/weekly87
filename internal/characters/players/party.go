@@ -215,13 +215,7 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 				return
 			}
 
-			ply.Alive = false
-			for _, r := range ply.Chests {
-				r.Undraw()
-			}
-			ply.ChestValues = []int64{}
-			ply.ChestsHeight = 0
-			ply.Trigger("Kill", nil)
+			ply.Kill()
 			event.Trigger("PlayerDeath", nil)
 		})
 
@@ -293,11 +287,6 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			return 0
 		}, "RunBack")
 
-		p.CheckedBind(func(p *Player, _ interface{}) int {
-			dlog.ErrorCheck(p.Swtch.Set("dead" + p.facing))
-			return 0
-		}, "Kill")
-
 		for ev, b := range pcon.Bindings {
 			p.CheckedBind(b, ev)
 		}
@@ -331,6 +320,17 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 		}
 		return event.UnbindSingle
 	}, "RunBack")
+
+	pty.CheckedBind(func(pty *Party, _ interface{}) int {
+		// Find the first player that's dead
+		for _, p := range pty.Players {
+			if !p.Alive {
+				p.Revive()
+				break
+			}
+		}
+		return 0
+	}, "Rez")
 
 	pty.CheckedBind(func(pty *Party, _ interface{}) int {
 		p0 := pty.Players[0]

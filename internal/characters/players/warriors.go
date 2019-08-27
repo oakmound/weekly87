@@ -1,7 +1,6 @@
 package players
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"path/filepath"
@@ -73,7 +72,7 @@ func WarriorsInit() {
 			}
 			sp := render.NewSprite(float64(layer.Rectangle.X), float64(layer.Rectangle.Y), rgba)
 			if c, ok := def.LayerColors[strings.ToLower(layer.Name)]; ok {
-				fmt.Println("We found the right layer", layer.Name)
+				//fmt.Println("We found the right layer", layer.Name)
 				// Recolor this layer
 				sp.Filter(recolor.WithStrategy(recolor.ColorMix(c)))
 			}
