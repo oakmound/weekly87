@@ -32,13 +32,20 @@ var (
 	BtnCfgB    = btn.And(
 		BtnCfgC,
 		btn.Binding(mouse.Start, func(id int, _ interface{}) int {
-			r := event.GetEntity(id).(btn.Btn).GetRenderable()
+			b := event.GetEntity(id).(btn.Btn)
+			if _, ok := b.Metadata("inactive"); ok {
+				return 0
+			}
+			r := b.GetRenderable()
 			m := r.(render.Modifiable)
 			m.Filter(mod.Brighten(25))
 			return 0
 		}),
 		btn.Binding(mouse.Stop, func(id int, _ interface{}) int {
 			b := event.GetEntity(id).(btn.Btn)
+			if _, ok := b.Metadata("inactive"); ok {
+				return 0
+			}
 			err := btn.Revert(b, 1)
 			dlog.ErrorCheck(err)
 			return 0

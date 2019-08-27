@@ -121,12 +121,14 @@ var Scene = scene.Scene{
 					}))
 				keyToBind := key.Down + strconv.Itoa(i)
 				if i < 10 {
+					// Todo joystick triggers
 					btnOpts = btn.And(btn.Binding(keyToBind, func(int, interface{}) int {
 						trg()
 						return 0
 					}), btnOpts)
 				}
-				btn.New(btnOpts)
+				newBtn := btn.New(btnOpts)
+				p.Special1.SetButton(newBtn)
 			}
 			if p.Special2 != nil {
 				p.Special2.Renderable().SetPos(abilityX, cornerPad+aPad)
@@ -145,7 +147,9 @@ var Scene = scene.Scene{
 					return 0
 				}), btnOpts)
 
-				btn.New(btnOpts)
+				newBtn := btn.New(btnOpts)
+				p.Special2.SetButton(newBtn)
+
 			}
 		}
 
