@@ -266,6 +266,7 @@ var Scene = scene.Scene{
 				selector.DestroyTrigger("EndPartySelect"),
 				selector.DestroyTrigger(key.Down+key.Escape),
 				selector.DestroyTrigger("B"+joystick.ButtonUp),
+				selector.MouseBindings(true),
 			)
 
 			return 0

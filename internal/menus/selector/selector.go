@@ -10,6 +10,7 @@ import (
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/joystick"
 	"github.com/oakmound/oak/key"
+	"github.com/oakmound/oak/mouse"
 	"github.com/oakmound/oak/render"
 )
 
@@ -130,16 +131,33 @@ func DestroyTrigger(trigger string) Option {
 	}
 }
 
+// MouseBindings sets whether selection options should react to mouseover and clicking
+func MouseBindings(on bool) Option {
+	return func(sc *Constructor) {
+		sc.MouseBindings = on
+	}
+}
+
+type mousePhaser struct {
+	id event.CID
+	mouse.CollisionPhase
+}
+
+func (mp *mousePhaser) Init() event.CID {
+	mp.id = event.NextID(mp)
+	return mp.id
+}
+
 type Constructor struct {
 	Display func(size floatgeom.Point2) render.Renderable
 	// Step/Limit/Size should be option A; Slice of floatgeom.Rect2 should be option B;
 	// StepFn/Size should be option C;
-	Spots    []floatgeom.Rect2
-	Layers   []int
-	Callback func(i int)
-	Cleanup  func(i int)
-	// Todo: mouse over
-	Bindings map[string]func(*Selector)
+	Spots         []floatgeom.Rect2
+	Layers        []int
+	Callback      func(i int)
+	Cleanup       func(i int)
+	MouseBindings bool
+	Bindings      map[string]func(*Selector)
 }
 
 type Selector struct {
@@ -179,6 +197,26 @@ func (sc *Constructor) Generate() (*Selector, error) {
 			bnd(s)
 			return 0
 		}, ev)
+	}
+	if sc.MouseBindings {
+		// Make collisionPhase objects for each spot
+		for i, spt := range sc.Spots {
+			i := i
+			mp := &mousePhaser{}
+			mp.Init()
+			sp := collision.NewSpace(spt.Min.X(), spt.Min.Y(), spt.W(), spt.H(), mp.id)
+			mouse.Add(sp)
+			mouse.PhaseCollision(sp)
+			mp.id.Bind(func(int, interface{}) int {
+				s.MoveTo(i)
+				return 0
+			}, mouse.Start)
+			mp.id.Bind(func(int, interface{}) int {
+				s.MoveTo(i)
+				s.Select()
+				return 0
+			}, mouse.ClickOn)
+		}
 	}
 
 	s.MoveTo(0)
