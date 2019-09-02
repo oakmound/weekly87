@@ -10,6 +10,7 @@ import (
 
 	"github.com/200sc/go-dist/floatrange"
 	"github.com/200sc/go-dist/intrange"
+	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/render/particle"
 	"github.com/oakmound/oak/shape"
@@ -21,16 +22,28 @@ import (
 )
 
 var (
+	baseHit = map[collision.Label]collision.OnHit{
+		labels.Enemy: func(a, b *collision.Space) {
+			b.CID.Trigger("Attacked", map[string]float64{"damage": 1.0})
+		},
+	}
+
+	frostHit = map[collision.Label]collision.OnHit{
+		labels.Enemy: func(a, b *collision.Space) {
+			b.CID.Trigger("Attacked", map[string]float64{"frost": 5.0})
+		},
+	}
+
 	// FrostBolt is a simple projectile with slowing
 	FrostBolt = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 255}),
-		time.Second*20,
+		time.Second*3,
 		func(u User) []characters.Character {
-			dlog.Info("Firing a frostbolt")
+			dlog.Info("Firing a frostbolt!")
 			pos := u.Vec()
 
 			// Spell Display
-			pg := particle.NewColorGenerator(
+			pgc := particle.NewColorGenerator(
 				particle.Color(color.RGBA{10, 10, 255, 255}, color.RGBA{0, 0, 0, 0},
 					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
 				particle.Shape(shape.Diamond),
@@ -38,6 +51,11 @@ var (
 				particle.EndSize(intrange.NewConstant(3)),
 				particle.Speed(floatrange.NewConstant(1)),
 				particle.LifeSpan(floatrange.NewConstant(30)),
+			)
+			pg := particle.NewCollisionGenerator(
+				pgc,
+				particle.Fragile(true),
+				particle.HitMap(frostHit),
 			)
 			endDelta := 600.0
 			if u.Direction() == "LT" {
@@ -49,7 +67,7 @@ var (
 				//ArcTo(end),
 				LineTo(end),
 				WithParticles(pg),
-				WithLabel(labels.EffectsEnemy),
+				// WithLabel(labels.EffectsEnemy),
 			)
 			dlog.ErrorCheck(err)
 			return chrs

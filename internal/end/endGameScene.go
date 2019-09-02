@@ -33,7 +33,7 @@ import (
 
 func Init() {
 	_, err := render.LoadSprite("", filepath.Join("raw", "wood_junk.png"))
-	dlog.Error("OH MY " + err.Error())
+	dlog.Error("Something went wrong loading in wood junk " + err.Error())
 }
 
 var (

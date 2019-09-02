@@ -3,6 +3,7 @@ package enemies
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/restrictor"
@@ -43,18 +44,19 @@ type Constructor struct {
 	Health       int
 }
 
-func (c *Constructor) Copy() *Constructor {
+// Copy the data values to new instances of an enemy constructor
+func (ec *Constructor) Copy() *Constructor {
 	c2 := &Constructor{
-		Position:    c.Position,
-		Dimensions:  c.Dimensions,
-		SpaceOffset: c.SpaceOffset,
-		Speed:       c.Speed,
+		Position:    ec.Position,
+		Dimensions:  ec.Dimensions,
+		SpaceOffset: ec.SpaceOffset,
+		Speed:       ec.Speed,
 		// Todo: Assuming right now that the bindings map never gets modified (by a variant)
-		Bindings:     c.Bindings,
-		Health:       c.Health,
-		AnimationMap: make(map[string]render.Modifiable, len(c.AnimationMap)),
+		Bindings:     ec.Bindings,
+		Health:       ec.Health,
+		AnimationMap: make(map[string]render.Modifiable, len(ec.AnimationMap)),
 	}
-	for k, v := range c.AnimationMap {
+	for k, v := range ec.AnimationMap {
 		c2.AnimationMap[k] = v.Copy()
 	}
 	return c2
@@ -78,6 +80,7 @@ type BasicEnemy struct {
 	beenDisplayed bool
 	PushBack      physics.Vector
 	baseSpeed     physics.Vector
+	Health        int
 }
 
 func (be *BasicEnemy) Init() event.CID {
@@ -141,6 +144,7 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		0,
 	)
 	// be.swtch.SetOffsets("walkLT", )
+	be.Health = ec.Health
 	be.Speed = physics.NewVector(ec.Speed.X(), ec.Speed.Y())
 	be.baseSpeed = be.Speed.Copy()
 	be.facing = "LT"
@@ -190,10 +194,42 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 			return
 		}
 
-		fmt.Println("Trying to effect an enemy but for now we will be lazy and murder the enemy ", be)
+		fmt.Println("Consider moving this effect to trigger vie the attacked event", be)
 		event.Trigger("EnemyDeath", []int64{secid, idx})
 		be.Destroy()
 	})
+	be.CheckedBind(func(be *BasicEnemy, data interface{}) int {
+
+		effectMap, ok := data.(map[string]float64)
+		if !ok {
+			dlog.Warn("Data sent on attack was not in the right format")
+			return 0
+		}
+
+		for k, v := range effectMap {
+			switch k {
+			case "damage":
+				be.Health -= int(v)
+				if be.Health < 1 {
+					event.Trigger("EnemyDeath", []int64{secid, idx})
+					be.Destroy()
+				}
+			case "frost":
+				endDebuff := time.Now().Add(time.Second * 3)
+				be.CheckedBind(func(be *BasicEnemy, data interface{}) int {
+					if !time.Now().After(endDebuff) {
+						return 0
+					}
+					be.Speed = be.Speed.Scale(v)
+					return event.UnbindSingle
+				}, "EnterFrame")
+				be.Speed = be.Speed.Scale(1 / v)
+				dlog.Info("BE speed is now", be.Speed)
+			}
+		}
+
+		return 0
+	}, "Attacked")
 	// be.RSpace.Add(labels.PlayerAttack, func(s, _ *collision.Space) {
 	// 	be, ok := s.CID.E().(*BasicEnemy)
 	// 	if !ok {
