@@ -208,6 +208,12 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 		prd.source = p.Generator.Generate(3)
 	}
 
+	if p.R != nil && p.W == 1 && p.H == 1 {
+		w, h := p.R.GetDims()
+		p.W = float64(w)
+		p.H = float64(h)
+	}
+
 	prd.Interactive = entities.NewInteractive(
 		p.Start.X(), p.Start.Y(),
 		p.W, p.H,
