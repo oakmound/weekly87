@@ -17,6 +17,7 @@ type Buff struct {
 	Disable          func(*Status)
 	R                *render.Switch
 	RGen             func() render.Modifiable
+	SinglePlayer     bool
 }
 
 type Name int
@@ -53,7 +54,7 @@ func Invulnerable(r render.Modifiable, dur time.Duration) Buff {
 		},
 	}
 }
-func Shield(r render.Modifiable, dur time.Duration, charges int) Buff {
+func Shield(r render.Modifiable, dur time.Duration, charges int, singlePlayer bool) Buff {
 	return Buff{
 		Duration: dur,
 		Enable: func(s *Status) {
@@ -65,7 +66,8 @@ func Shield(r render.Modifiable, dur time.Duration, charges int) Buff {
 		RGen: func() render.Modifiable {
 			return r.Copy()
 		},
-		Name:    NameShield,
-		Charges: charges,
+		Name:         NameShield,
+		Charges:      charges,
+		SinglePlayer: singlePlayer,
 	}
 }

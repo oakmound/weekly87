@@ -272,6 +272,10 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			}
 			bfs := bfr.Buffs()
 			for _, b := range bfs {
+				if b.SinglePlayer {
+					p.AddBuff(b)
+					continue
+				}
 				for _, ply := range pty.Players {
 					ply.AddBuff(b)
 				}
