@@ -277,7 +277,9 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 					continue
 				}
 				for _, ply := range pty.Players {
-					ply.AddBuff(b)
+					if ply.Alive {
+						ply.AddBuff(b)
+					}
 				}
 			}
 			if dstr, ok := bfr.(Destroyable); ok {
