@@ -75,7 +75,7 @@ var (
 	HammerSmack = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{200, 80, 80, 255}),
 		time.Second*8,
-		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 10, mod.Scale(2, 2)),
+		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 26, mod.Scale(2, 2)),
 	)
 
 	Rage = NewAbility(
