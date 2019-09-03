@@ -25,6 +25,7 @@ type Name int
 const (
 	unnamed = iota
 	NameShield
+	NameRez
 )
 
 type Status struct {
@@ -70,4 +71,8 @@ func Shield(r render.Modifiable, dur time.Duration, charges int, singlePlayer bo
 		Charges:      charges,
 		SinglePlayer: singlePlayer,
 	}
+}
+
+var Rez = Buff{
+	Name: NameRez,
 }

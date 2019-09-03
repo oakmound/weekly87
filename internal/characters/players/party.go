@@ -272,13 +272,22 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			}
 			bfs := bfr.Buffs()
 			for _, b := range bfs {
-				if b.SinglePlayer {
-					p.AddBuff(b)
-					continue
-				}
-				for _, ply := range pty.Players {
-					if ply.Alive {
-						ply.AddBuff(b)
+				if b.Name == buff.NameRez {
+					for _, ply := range pty.Players {
+						if !ply.Alive {
+							ply.Revive()
+							break
+						}
+					}
+				} else {
+					if b.SinglePlayer {
+						p.AddBuff(b)
+						continue
+					}
+					for _, ply := range pty.Players {
+						if ply.Alive {
+							ply.AddBuff(b)
+						}
 					}
 				}
 			}
