@@ -7,10 +7,12 @@ import (
 
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/restrictor"
+	"github.com/oakmound/weekly87/internal/vfx"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/physics"
+	"github.com/oakmound/oak/render/particle"
 
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
@@ -105,6 +107,24 @@ func (be *BasicEnemy) DeathEffect(secid, idx int64) {
 			return 0
 		}
 		event.Trigger("EnemyDeath", []int64{secid, idx})
+
+		// Create a visual effect, overwrite?
+		source := vfx.Death1().Generate(2)
+		source.SetPos(be.X(), be.Y())
+		endSource := time.Now().Add(time.Millisecond * 700)
+		source.CID.Bind(func(id int, data interface{}) int {
+			eff, ok := event.GetEntity(id).(*particle.Source)
+			if ok {
+				eff.ShiftX(be.Delta.X() + 1)
+
+				if endSource.Before(time.Now()) {
+					eff.Stop()
+					return 1
+				}
+			}
+			return 0
+		}, "EnterFrame")
+
 		be.Destroy()
 		return event.UnbindSingle
 	}, "EnterFrame")
