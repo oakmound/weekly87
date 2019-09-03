@@ -97,6 +97,20 @@ func (be *BasicEnemy) Destroy() {
 	be.Interactive.Destroy()
 }
 
+func (be *BasicEnemy) DeathEffect(secid, idx int64) {
+	be.RSpace.Label = 0
+	be.PushBack.Add(physics.NewVector(100, 0))
+	be.CheckedBind(func(be *BasicEnemy, data interface{}) int {
+		if be.PushBack.Magnitude() > 0.15 {
+			return 0
+		}
+		event.Trigger("EnemyDeath", []int64{secid, idx})
+		be.Destroy()
+		return event.UnbindSingle
+	}, "EnterFrame")
+
+}
+
 func (be *BasicEnemy) CheckedBind(bnd func(*BasicEnemy, interface{}) int, ev string) {
 	be.Bind(func(id int, data interface{}) int {
 		be, ok := event.GetEntity(id).(*BasicEnemy)
@@ -195,8 +209,9 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		}
 
 		fmt.Println("Consider moving this effect to trigger vie the attacked event", be)
-		event.Trigger("EnemyDeath", []int64{secid, idx})
-		be.Destroy()
+
+		be.DeathEffect(secid, idx)
+
 	})
 	be.CheckedBind(func(be *BasicEnemy, data interface{}) int {
 
