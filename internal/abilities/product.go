@@ -54,7 +54,6 @@ func FrameLength(frames int) Option {
 }
 
 func FollowSpeed(xFollow, yFollow *float64) Option {
-
 	return func(p Producer) Producer {
 		p.FollowX = xFollow
 		p.FollowY = yFollow
@@ -203,9 +202,9 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 	if p.Generator != nil {
 		// Todo: what layer?
 		particle.Layer(func(physics.Vector) int {
-			return 3
+			return layer.Play
 		})(p.Generator)
-		prd.source = p.Generator.Generate(3)
+		prd.source = p.Generator.Generate(layer.Play)
 	}
 
 	if p.R != nil && p.W == 1 && p.H == 1 {
@@ -230,7 +229,8 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 	}
 
 	if prd.source != nil {
-		prd.source.SetPos(p.Start.X(), p.Start.Y())
+		x, y := p.Generator.GetPos()
+		prd.source.SetPos(p.Start.X()+x, p.Start.Y()+y)
 	}
 	prd.FollowX = p.FollowX
 	prd.FollowY = p.FollowY
