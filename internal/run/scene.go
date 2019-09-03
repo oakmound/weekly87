@@ -307,10 +307,7 @@ var Scene = scene.Scene{
 			endLock.Lock()
 			defer endLock.Unlock()
 			if pty.Defeated() && !defeatedShowing {
-				for _, ply := range pty.Players {
-					ply.RunSpeed = 0
-				}
-				pty.Acceleration = 0
+				pty.UnbindAll()
 				defeatedShowing = true
 				// Show pop up to go to endgame scene
 				menuX := (float64(oak.ScreenWidth) - 180) / 2

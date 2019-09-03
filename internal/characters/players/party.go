@@ -288,6 +288,15 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 
 		p.CheckedBind(func(p *Player, _ interface{}) int {
 			p.facing = "LT"
+			if len(p.ChestValues) > 0 {
+				p.Swtch.Set("walkHold")
+			} else {
+				if !p.Alive {
+					p.Swtch.Set("dead" + p.facing)
+				} else {
+					p.Swtch.Set("walk" + p.facing)
+				}
+			}
 			return 0
 		}, "RunBack")
 
@@ -360,36 +369,29 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			p0.Vector.SetY((float64(oak.ScreenHeight) - hf))
 		}
 
-		for i, p := range pty.Players {
+		for i := 1; i < len(pty.Players); i++ {
+			p := pty.Players[i]
+			p.Vector.Add(p0.Delta)
+		}
+		flashStartTime := time.Now().Add(time.Second * 5)
+		flashCounter := 5
+		for _, p := range pty.Players {
 			// The idea behind splitting up the move functions is
 			// flawed when they're all working together--we only want
 			// to shift everything -once-, otherwise there are jitters
 			// or other awkward bits to moving around.
-			if i != 0 {
-				p.Vector.Add(p0.Delta)
-				p.Vector.SetY(p0.Vector.Y())
-			}
 			p.R.SetPos(p.Vector.X(), p0.Vector.Y())
 
 			if !p.Alive {
-				p.Swtch.Set("dead" + p.facing)
-			} else {
-				p.RSpace.Update(p.Vector.X(), p.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
-				<-p.RSpace.CallOnHits()
-				if p0.Delta.X() != 0 || p0.Delta.Y() != 0 {
-					if len(p.ChestValues) > 0 {
-						p.Swtch.Set("walkHold")
-					} else {
-						p.Swtch.Set("walk" + p.facing)
-					}
-				} else {
-					if len(p.ChestValues) > 0 {
-						p.Swtch.Set("standHold")
-					} else {
-						p.Swtch.Set("stand" + p.facing)
-					}
-				}
+				continue
 			}
+			p.RSpace.Update(p.Vector.X(), p0.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
+			<-p.RSpace.CallOnHits()
+			// Player could have died in their collision reactions
+			if !p.Alive {
+				continue
+			}
+
 			for len(p.Buffs) > 0 {
 				if p.Buffs[0].ExpireAt.Before(time.Now()) {
 					p.BuffLock.Lock()
@@ -402,8 +404,6 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 					break
 				}
 			}
-			flashStartTime := time.Now().Add(time.Second * 5)
-			flashCounter := 5
 			for bIndex := 0; bIndex < len(p.Buffs); bIndex++ {
 				if p.Buffs[bIndex].PreExpireCounter == 0 && p.Buffs[bIndex].ExpireAt.Before(flashStartTime) {
 					p.Buffs[bIndex].PreExpireCounter++

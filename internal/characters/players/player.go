@@ -117,6 +117,10 @@ func (p *Player) AddChest(h int, r render.Modifiable, contents int64) {
 	p.ChestValues = append(p.ChestValues, contents)
 	p.Chests = append(p.Chests, r)
 	render.Draw(r, layer.Play, 2)
+
+	if len(p.ChestValues) == 1 {
+		p.Swtch.Set("walkHold")
+	}
 }
 
 func (p *Player) ReorderBuffs() {
@@ -154,7 +158,6 @@ func (p *Player) Ready() bool {
 }
 
 func (p *Player) Kill() {
-	p.Alive = false
 	p.Special1.Enable(false)
 	p.Special2.Enable(false)
 	dlog.ErrorCheck(p.Swtch.Set("dead" + p.facing))
@@ -164,7 +167,15 @@ func (p *Player) Kill() {
 	p.ChestValues = []int64{}
 	p.ChestsHeight = 0
 	p.Chests = []render.Renderable{}
+	p.BuffLock.Lock()
+	for _, b := range p.Buffs {
+		b.Disable(p.Status)
+		b.R.Undraw()
+	}
+	p.Buffs = []buff.Buff{}
+	p.BuffLock.Unlock()
 	// Consider: Drop the chests?
+	p.Alive = false
 }
 
 func (p *Player) Revive() {
