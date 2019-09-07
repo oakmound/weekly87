@@ -109,6 +109,25 @@ func (p *Player) AddBuff(b buff.Buff) {
 
 }
 
+// DropChest if the player has one
+func (p *Player) DropChest() {
+	if len(p.ChestValues) == 0 {
+		return
+	}
+
+	_, h := p.Chests[len(p.Chests)].GetDims()
+	p.ChestsHeight -= float64(h)
+	p.ChestValues = p.ChestValues[:len(p.ChestValues)-1]
+	p.Chests = p.Chests[:len(p.Chests)-1]
+
+	if len(p.ChestValues) > 0 {
+		return
+	}
+	p.Swtch.Set("walkLT")
+	p.Special1.Enable(true)
+	p.Special2.Enable(true)
+}
+
 func (p *Player) AddChest(h int, r render.Modifiable, contents int64) {
 	p.ChestsHeight += float64(h)
 	chestHeight := p.ChestsHeight
@@ -120,6 +139,8 @@ func (p *Player) AddChest(h int, r render.Modifiable, contents int64) {
 
 	if len(p.ChestValues) == 1 {
 		p.Swtch.Set("walkHold")
+		p.Special1.Enable(false)
+		p.Special2.Enable(false)
 	}
 }
 
