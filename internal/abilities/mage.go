@@ -59,6 +59,50 @@ func bolt(image string, frames int, endDelta float64, opts func(particle.Generat
 	}
 }
 
+func storm(speed floatrange.Range, sc, ec color.Color, xSpreadFactor float64, opts func(particle.Generator),
+	hitEffects map[string]float64) func(u User) []characters.Character {
+	return func(u User) []characters.Character {
+		delta := u.GetDelta()
+		pg := particle.NewColorGenerator(
+			particle.Angle(floatrange.NewLinear(240, 300)),
+			particle.Color(sc, color.RGBA{0, 0, 0, 0},
+				ec, color.RGBA{0, 0, 0, 0}),
+			particle.Shape(shape.Diamond),
+			particle.Size(intrange.NewConstant(10)),
+			particle.EndSize(intrange.NewConstant(3)),
+			particle.Speed(speed),
+			particle.NewPerFrame(floatrange.NewLinear(2, 7)),
+			particle.LifeSpan(floatrange.NewLinear(200, 201)),
+			particle.Spread(float64(oak.ScreenWidth)*xSpreadFactor, 0),
+			opts,
+		)
+		endDelta := 600.0
+		if u.Direction() == "LT" {
+			endDelta *= -1
+		}
+
+		cpg := particle.NewCollisionGenerator(
+			pg,
+			particle.Fragile(true),
+			particle.HitMap(map[collision.Label]collision.OnHit{
+				labels.Enemy: func(a, b *collision.Space) {
+					b.CID.Trigger("Attacked", hitEffects)
+				},
+			}),
+		)
+
+		// end := floatgeom.Point2{pos.X() + endDelta, pos.Y()}
+		chrs, err := Produce(
+			StartAt(floatgeom.Point2{float64(oak.ViewPos.X), 0}),
+			WithParticles(cpg),
+			WithLabel(labels.EffectsEnemy),
+			FollowSpeed(delta.Xp(), nil),
+		)
+		dlog.ErrorCheck(err)
+		return chrs
+	}
+}
+
 var (
 	baseHit = map[collision.Label]collision.OnHit{
 		labels.Enemy: func(a, b *collision.Space) {
@@ -131,70 +175,14 @@ var (
 	Blizzard = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{10, 10, 250, 255}),
 		time.Second*10,
-		func(u User) []characters.Character {
-			dlog.Info("making a blizzard")
-			pos := u.Vec()
-
-			// Spell Display
-			pg := particle.NewColorGenerator(
-				particle.Color(color.RGBA{10, 10, 255, 255}, color.RGBA{0, 0, 0, 0},
-					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
-				particle.Shape(shape.Diamond),
-				particle.Size(intrange.NewConstant(10)),
-				particle.EndSize(intrange.NewConstant(3)),
-				particle.Speed(floatrange.NewConstant(1)),
-				particle.LifeSpan(floatrange.NewConstant(20)),
-			)
-			endDelta := 600.0
-			if u.Direction() == "LT" {
-				endDelta *= -1
-			}
-			end := floatgeom.Point2{pos.X() + endDelta, pos.Y()}
-			chrs, err := Produce(
-				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
-				//ArcTo(end),
-				LineTo(end),
-				WithParticles(pg),
-				WithLabel(labels.EffectsEnemy),
-			)
-			dlog.ErrorCheck(err)
-			return chrs
-		},
+		storm(floatrange.NewLinear(3, 8), color.RGBA{10, 10, 255, 255}, color.RGBA{125, 125, 125, 125}, 1.5, particle.And(), map[string]float64{"frost": 1.2}),
 	)
 
 	// Firewall
 	FireWall = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 255}),
-		time.Second*10,
-		func(u User) []characters.Character {
-			dlog.Info("Firing a fireball")
-			pos := u.Vec()
-
-			// Spell Display
-			pg := particle.NewColorGenerator(
-				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
-					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
-				particle.Shape(shape.Diamond),
-				particle.Size(intrange.NewConstant(10)),
-				particle.EndSize(intrange.NewConstant(3)),
-				particle.Speed(floatrange.NewConstant(1)),
-				particle.LifeSpan(floatrange.NewConstant(20)),
-			)
-			endDelta := 600.0
-			if u.Direction() == "LT" {
-				endDelta *= -1
-			}
-			end := floatgeom.Point2{pos.X() + endDelta, pos.Y()}
-			chrs, err := Produce(
-				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
-				//ArcTo(end),
-				LineTo(end),
-				WithParticles(pg),
-				WithLabel(labels.EffectsEnemy),
-			)
-			dlog.ErrorCheck(err)
-			return chrs
-		},
+		time.Second*1,
+		storm(floatrange.NewLinear(3, 8), color.RGBA{255, 10, 10, 255}, color.RGBA{125, 125, 125, 125}, 1, particle.And(particle.NewPerFrame(floatrange.NewLinear(2, 4)), particle.Size(intrange.NewConstant(20))), map[string]float64{"damage": 1}),
 	)
 
 	// Rez
