@@ -259,7 +259,7 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 					return event.UnbindSingle
 				}, "EnterFrame")
 				be.Speed = be.Speed.Scale(1 / v)
-				dlog.Info("BE speed is now", be.Speed)
+				dlog.Verb("BE speed is now", be.Speed)
 			}
 		}
 

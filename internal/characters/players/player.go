@@ -91,7 +91,7 @@ type Player struct {
 }
 
 func (p *Player) GetDelta() physics.Vector {
-	return p.Delta
+	return p.Party.Players[0].Delta
 }
 
 func (p *Player) AddBuff(b buff.Buff) {
