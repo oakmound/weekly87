@@ -12,6 +12,7 @@ import (
 func Init() {
 	WarriorsInit()
 	MageInit()
+	EmptyInit()
 	classmapping = map[int]*Constructor{
 		Spearman:  WarriorConstructors["Spearman"],
 		Swordsman: WarriorConstructors["Swordsman"],
