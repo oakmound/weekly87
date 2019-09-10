@@ -90,14 +90,15 @@ var Scene = scene.Scene{
 		// Create all possible NPCs
 		npcScale := 1.6
 		npcs := []NPC{
-			NewInnNPC(players.Swordsman, npcScale, 680, 230).FaceLeft(true),
+			NewInnNPC(players.Swordsman, npcScale, 243, 400).FaceLeft(true),
 			NewInnNPC(players.Mage, npcScale, 440, 210),
 			NewInnNPC(players.WhiteMage, npcScale, 670, 423).FaceLeft(true),
 			NewInnNPC(players.Berserker, npcScale, 445, 460),
 			NewInnNPC(players.BlueMage, npcScale, 241, 210).FaceLeft(true),
 			NewInnNPC(players.Paladin, npcScale, 240, 280).FaceLeft(true),
-			NewInnNPC(players.Spearman, npcScale, 243, 400).FaceLeft(true),
-			NewInnNPC(players.TimeMage, npcScale, 675, 477).FaceLeft(true),
+			// 	NewInnNPC(players.Spearman, npcScale, 675, 477).FaceLeft(true),
+			// 	NewInnNPC(players.TimeMage, npcScale, 680, 230).FaceLeft(true),
+
 		}
 
 		// Inn does quite a few operations on our record (mainly for party purposes)
