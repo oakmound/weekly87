@@ -11,6 +11,7 @@ import (
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/physics"
+	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/mod"
 	"github.com/oakmound/oak/render/particle"
@@ -82,8 +83,69 @@ var (
 		render.NewColorBox(64, 64, color.RGBA{230, 5, 0, 255}),
 		time.Second*5,
 		func(u User) []characters.Character {
-			fmt.Println("Just tried to rage a guy ", u)
-			return nil
+			var down render.Modifiable
+			var err error
+			// For efficiency in the future, we could pre-load these assets
+			down, err = render.LoadSheetSequence(filepath.Join("32x32", "BaseSlash.png"), 32, 32, 0, 32,
+				0, 0, 1, 0, 2, 0, 3, 0, 0, 1, 1, 1, 2, 1, 3, 1)
+			up := down.Copy().Modify(mod.FlipY)
+
+			xOffset := float64(100)
+			yDelta := float64(16)
+
+			dlog.Info("Trying to swipe at enemies")
+			if u.Direction() == "LT" {
+				xOffset *= -1
+				down = down.Copy().Modify(mod.FlipX)
+				up = up.Copy().Modify(mod.FlipX)
+			}
+
+			pos := u.Vec().Copy()
+			pos.Add(physics.NewVector(xOffset, 16.0))
+			start := floatgeom.Point2{pos.X(), pos.Y() - yDelta}
+
+			dlog.ErrorCheck(err)
+			
+			delta := u.GetDelta()
+
+			hit4 := And(
+				StartAt(floatgeom.Point2{0, -yDelta*6}),
+				FrameLength(16),
+				FollowSpeed(delta.Xp(), delta.Yp()),
+				WithLabel(labels.EffectsEnemy),
+				WithRenderable(down.Copy()),
+			)(Producer{})
+
+			hit3 := And(
+				StartAt(floatgeom.Point2{xOffset / 2, 0}),
+				FrameLength(16),
+				FollowSpeed(delta.Xp(), delta.Yp()),
+				WithLabel(labels.EffectsEnemy),
+				WithRenderable(up.Copy()),
+				Then(Chain(hit4)),
+			)(Producer{})
+
+			hit2 := And(
+				StartAt(floatgeom.Point2{0, yDelta*5}),
+				FrameLength(16),
+				FollowSpeed(delta.Xp(), delta.Yp()),
+				WithLabel(labels.EffectsEnemy),
+				WithRenderable(up.Copy()),
+				Then(Chain(hit3)),
+			)(Producer{})
+
+			chrs, err := Produce(
+				StartAt(start),
+				LineTo(start),
+				FrameLength(16),
+				FollowSpeed(delta.Xp(), delta.Yp()),
+				WithLabel(labels.EffectsEnemy),
+				WithRenderable(down),
+				Then(Chain(hit2)),
+			)
+			dlog.ErrorCheck(err)
+			event.Trigger("RageStart", nil)
+			return chrs
 		},
 	)
 

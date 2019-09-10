@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -356,6 +357,16 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 		return 0
 	}, "Rez")
 
+	buffIcon, err := render.LoadSprite(filepath.Join("assets/images", "16x16"), "place_holder_buff.png")
+	dlog.ErrorCheck(err)
+
+	pty.CheckedBind(func(pty *Party, _ interface{}) int {
+		for _, p := range pty.Players {
+			p.AddBuff(buff.Rage(buffIcon, 2*time.Second))
+		}
+		return 0
+	}, "RageStart")
+
 	pty.CheckedBind(func(pty *Party, _ interface{}) int {
 		p0 := pty.Players[0]
 		p0.Delta.Zero()
@@ -363,11 +374,13 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 		js := joys.StickState(pty.joystickID)
 
 		p0.Delta.SetX(float64(pty.RunSpeed()))
-		if oak.IsDown(key.UpArrow) || js.StickLY > 8000 {
-			p0.Delta.ShiftY(-pty.Speed().Y())
-		}
-		if oak.IsDown(key.DownArrow) || js.StickLY < -8000 {
-			p0.Delta.ShiftY(pty.Speed().Y())
+		if p0.Status.Rage <= 0 {
+			if oak.IsDown(key.UpArrow) || js.StickLY > 8000 {
+				p0.Delta.ShiftY(-pty.Speed().Y())
+			}
+			if oak.IsDown(key.DownArrow) || js.StickLY < -8000 {
+				p0.Delta.ShiftY(pty.Speed().Y())
+			}
 		}
 
 		p0.Vector.Add(p0.Delta)
