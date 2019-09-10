@@ -31,6 +31,7 @@ const (
 type Status struct {
 	Invulnerable int
 	Shield       int
+	Rage int
 }
 
 // BasicBuffSwitch is a utlity that creates our standard flicker setup
@@ -38,6 +39,21 @@ func BasicBuffSwitch(base render.Modifiable) *render.Switch {
 	flick := base.Copy()
 	flick.Filter(mod.Fade(120))
 	return render.NewSwitch("base", map[string]render.Modifiable{"base": base.Copy(), "flicker": flick})
+}
+
+func Rage(r render.Modifiable, dur time.Duration) Buff {
+	return Buff{
+		Duration: dur,
+		Enable: func(s *Status) {
+			s.Rage++
+		},
+		Disable: func(s *Status) {
+			s.Rage--
+		},
+		RGen: func() render.Modifiable {
+			return r.Copy()
+		},
+	}
 }
 
 func Invulnerable(r render.Modifiable, dur time.Duration) Buff {

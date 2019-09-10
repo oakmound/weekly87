@@ -83,7 +83,6 @@ func ArcTo(pts ...floatgeom.Point2) Option {
 func LineTo(pt floatgeom.Point2) Option {
 	return func(p Producer) Producer {
 		p.End = pt
-
 		return p
 	}
 }
@@ -129,6 +128,22 @@ func Perform(p Producer) DoOption {
 	return func(pt floatgeom.Point2) {
 		dlog.Info("An ability dropped something")
 		p.Start = pt
+		chrs, err := p.Produce()
+		if err != nil {
+			dlog.Error(err)
+			return
+		}
+
+		event.Trigger("AbilityFired", chrs)
+	}
+}
+
+// Perform from where you left off
+func Chain(p Producer) DoOption {
+	return func(pt floatgeom.Point2) {
+		dlog.Info("An ability dropped something")
+		p.Start = p.Start.Add(pt)
+		p.End = p.End.Add(pt)
 		chrs, err := p.Produce()
 		if err != nil {
 			dlog.Error(err)
@@ -207,7 +222,8 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 		prd.source = p.Generator.Generate(layer.Play)
 	}
 
-	if p.R != nil && p.W == 1 && p.H == 1 {
+	// Todo: and label?
+	if p.R != nil && p.W <= 1 && p.H <= 1 {
 		w, h := p.R.GetDims()
 		p.W = float64(w)
 		p.H = float64(h)

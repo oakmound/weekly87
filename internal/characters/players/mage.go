@@ -33,8 +33,8 @@ func MageInit() {
 			LayerColors: map[string]color.RGBA{
 				"clothes": color.RGBA{190, 190, 190, 190},
 			},
-			Special1: abilities.Rez,
-			Special2: abilities.Invulnerability,
+			Special1: abilities.Invulnerability,
+			Special2: abilities.Rez,
 		},
 		{
 			Name: "Red",

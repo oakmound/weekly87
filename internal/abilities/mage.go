@@ -360,7 +360,6 @@ var (
 			end := floatgeom.Point2{pos.X() + endDelta, pos.Y()}
 			chrs, err := Produce(
 				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
-				//ArcTo(end),
 				LineTo(end),
 				WithParticles(pg),
 				Then(Drop(banner)),
@@ -396,7 +395,6 @@ var (
 			end := floatgeom.Point2{pos.X() + endDelta, pos.Y()}
 			chrs, err := Produce(
 				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
-				//ArcTo(end),
 				FrameLength(400),
 				LineTo(end),
 				WithParticles(pg),
