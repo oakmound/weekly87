@@ -171,21 +171,21 @@ var (
 		),
 	)
 
-	// Blizzard ice storm
+	// Blizzard creates a large slowing icestorm
 	Blizzard = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{10, 10, 250, 255}),
 		time.Second*10,
 		storm(floatrange.NewLinear(3, 8), color.RGBA{10, 10, 255, 255}, color.RGBA{125, 125, 125, 125}, 1.5, particle.And(), map[string]float64{"frost": 1.2}),
 	)
 
-	// Firewall
+	// Firewall is a short lived long cooldown vertical destructive force
 	FireWall = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 255}),
-		time.Second*1,
+		time.Second*20,
 		storm(floatrange.NewLinear(3, 8), color.RGBA{255, 10, 10, 255}, color.RGBA{125, 125, 125, 125}, 1, particle.And(particle.NewPerFrame(floatrange.NewLinear(2, 4)), particle.Size(intrange.NewConstant(20))), map[string]float64{"damage": 1}),
 	)
 
-	// Rez
+	// Rez the first person who is dead in the party on pickup
 	Rez = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{200, 200, 200, 255}),
 		time.Second*10,
@@ -230,7 +230,7 @@ var (
 			return chrs
 		},
 	)
-	// Invulnerability
+	// Invulnerability gives a temp buff of near invuln to the entire living party
 	Invulnerability = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{90, 240, 90, 255}),
 		time.Second*10,
