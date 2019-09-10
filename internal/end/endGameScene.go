@@ -170,7 +170,7 @@ var Scene = scene.Scene{
 		render.Draw(chestValues, 2, 2)
 
 		currentDeathTollp := &currentDeathToll
-		render.Draw(graves.NewText(intStringer{currentDeathTollp}, 180, 300), 1, 10)
+		render.Draw(graves.NewText(intStringer{currentDeathTollp}, 100, 350), 1, 10)
 
 		debugElements := []render.Renderable{}
 		// debug locations
