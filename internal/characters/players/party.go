@@ -96,8 +96,9 @@ func (p *Party) ShiftX(f float64) {
 }
 
 type PartyConstructor struct {
-	Players  []Constructor
-	Bindings map[string]func(*Party, interface{}) int
+	Players    []Constructor
+	Bindings   map[string]func(*Party, interface{}) int
+	MaxPlayers int
 }
 
 // NewMovingParty creates a party for the run scene
@@ -108,6 +109,11 @@ func (pc *PartyConstructor) NewRunningParty() (*Party, error) {
 func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 	if len(pc.Players) == 0 {
 		return nil, errors.New("At least one player must be in a party")
+	}
+	for len(pc.Players) < pc.MaxPlayers && unmoving {
+		// Buffer with invisible players
+		// Note this is an assumption about future classes
+		pc.Players = append(pc.Players, *EmptyConstructor)
 	}
 
 	pty := &Party{}

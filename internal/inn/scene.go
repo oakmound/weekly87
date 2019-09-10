@@ -3,7 +3,6 @@ package inn
 import (
 	"fmt"
 	"image/color"
-	"math"
 	"math/rand"
 	"path/filepath"
 	"strings"
@@ -98,26 +97,66 @@ var Scene = scene.Scene{
 			NewInnNPC(players.Paladin, npcScale, 240, 280).FaceLeft(true),
 			// 	NewInnNPC(players.Spearman, npcScale, 675, 477).FaceLeft(true),
 			// 	NewInnNPC(players.TimeMage, npcScale, 680, 230).FaceLeft(true),
-
 		}
+
+		// Start: Swordsman, size 1 party
+		// 3 Sections: Mage
+		// 10 Sections: Two person party, white mage
+		// 25 Sections: Berserker
+		// 45 Sections: Three person party
+		// 75 Sections: BlueMage
+		// 120 Sections: Paladin
+		// 200 Sections: Four person party
+
+		// Future: More modes
+		// Custom: Choose your own abilities, model, color
+		// Chaos: All abilities, models, colors are random (no duplicate abilities for one char)
 
 		// Inn does quite a few operations on our record (mainly for party purposes)
 		curRecord = records.Load()
 
-		// Simple metric for determining number of NPCs in room
-		progress := int(math.Min(float64(curRecord.SectionsCleared)/10.0, float64(len(npcs))))
+		charUnlocks := []int{
+			0,
+			3,
+			10,
+			25,
+			75,
+			120,
+		}
+		progress := len(charUnlocks)
+		for i, cu := range charUnlocks {
+			if int64(cu) > curRecord.SectionsCleared {
+				progress = i
+				break
+			}
+		}
 		futureNpcs := npcs[progress:len(npcs)]
 		npcs = npcs[0:progress]
+		for _, np := range npcs {
+			np.Activate()
+		}
 		for _, fn := range futureNpcs {
 			fn.Destroy() // Being extra safe
 		}
-		for _, np := range npcs {
-			np.Activate()
+
+		partySizeUnlocks := []int{
+			0,
+			10,
+			45,
+			200,
+		}
+		partySize := len(partySizeUnlocks)
+		for i, psu := range partySizeUnlocks {
+			if int64(psu) > curRecord.SectionsCleared {
+				partySize = i
+				break
+			}
 		}
 
 		// Create the player and the display of the party at the top of the screen
 		ptycon := players.PartyConstructor{
-			Players: players.ClassConstructor(curRecord.PartyComp),
+			Players:    players.ClassConstructor(curRecord.PartyComp),
+			MaxPlayers: partySize,
 		}
 		// Draw the party in top left
 		partyBackground, _ := render.LoadSprite("", filepath.Join("raw", "selector_background.png"))
@@ -212,12 +251,16 @@ var Scene = scene.Scene{
 			ptycon.Players[0].Position = floatgeom.Point2{partyBackground.X() + 20, partyBackground.Y() + 10}
 			render.Draw(partyBackground, layer.UI, 1)
 
+			fmt.Println("Ptycon players", len(ptycon.Players))
 			pty, err := ptycon.NewParty(true)
 			dlog.ErrorCheck(err)
-			spcs := make([]*collision.Space, len(pty.Players))
-			for i, p := range pty.Players {
+			spcs := make([]*collision.Space, 0)
+			for _, p := range pty.Players {
 				render.Draw(p.R, layer.UI, 2)
-				spcs[i] = p.GetSpace()
+				spcs = append(spcs, p.GetSpace())
+				if p.Special1 == nil {
+					break
+				}
 			}
 
 			// Show a confirm button (and a cancel button)
@@ -237,9 +280,11 @@ var Scene = scene.Scene{
 				selector.Spaces(spcs...),
 				selector.Callback(func(i int) {
 					// modify party
+					if len(curRecord.PartyComp) <= i {
+						curRecord.PartyComp = append(curRecord.PartyComp, players.PartyMember{})
+					}
 					curRecord.PartyComp[i].PlayerClass = npc.Class
 					ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
-
 				}),
 				selector.Cleanup(func(i int) {
 					// undraw menu
