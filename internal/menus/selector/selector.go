@@ -87,7 +87,7 @@ func Layers(lys ...int) Option {
 }
 
 // Callback determines what shoud happen on a select event
-func Callback(cb func(i int)) Option {
+func Callback(cb func(i int, data ...interface{})) Option {
 	return func(sc *Constructor) {
 		sc.Callback = cb
 	}
@@ -115,6 +115,19 @@ func SelectTrigger(trigger string) Option {
 		}
 		sc.Bindings[trigger] = func(s *Selector) {
 			s.Select()
+		}
+	}
+}
+
+// InteractTrigger sets the input/event to trigger an interaction
+func InteractTrigger(trigger string, data ...interface{}) Option {
+	return func(sc *Constructor) {
+
+		if sc.Bindings == nil {
+			sc.Bindings = make(map[string]func(*Selector))
+		}
+		sc.Bindings[trigger] = func(s *Selector) {
+			s.Interact(data...)
 		}
 	}
 }
@@ -154,7 +167,7 @@ type Constructor struct {
 	// StepFn/Size should be option C;
 	Spots         []floatgeom.Rect2
 	Layers        []int
-	Callback      func(i int)
+	Callback      func(i int, data ...interface{})
 	Cleanup       func(i int)
 	MouseBindings bool
 	Bindings      map[string]func(*Selector)
@@ -248,6 +261,10 @@ func (s *Selector) MoveTo(i int) error {
 	}
 	s.Pos = i
 	return nil
+}
+
+func (s *Selector) Interact(data ...interface{}) {
+	s.Callback(s.Pos, data...)
 }
 
 func (s *Selector) Select() {

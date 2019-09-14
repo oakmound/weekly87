@@ -42,7 +42,7 @@ func Load() *Records {
 		f, err := os.Create(recordsFile)
 		dlog.ErrorCheck(err)
 		r.BaseSeed = rand.Int63()
-		r.PartyComp = []players.PartyMember{{players.Spearman, 0, "Dan the Default"}}
+		r.PartyComp = []players.PartyMember{{players.Swordsman, 0, "Dan the Default"}}
 		data, err := json.Marshal(r)
 		dlog.ErrorCheck(err)
 		_, err = f.Write(data)
@@ -51,7 +51,7 @@ func Load() *Records {
 		dc := json.NewDecoder(f)
 		dlog.ErrorCheck(dc.Decode(r))
 		if r.PartyComp == nil {
-			r.PartyComp = []players.PartyMember{{players.Spearman, 0, "Dan the Default"}}
+			r.PartyComp = []players.PartyMember{{players.Swordsman, 0, "Dan the Default"}}
 		}
 	}
 	if f != nil {

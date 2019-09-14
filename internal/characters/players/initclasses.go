@@ -14,6 +14,7 @@ func Init() {
 	MageInit()
 	EmptyInit()
 	classmapping = map[int]*Constructor{
+		Empty:     EmptyConstructor,
 		Spearman:  WarriorConstructors["Spearman"],
 		Swordsman: WarriorConstructors["Swordsman"],
 		Berserker: WarriorConstructors["Berserker"],
@@ -39,7 +40,8 @@ func filterCharMap(baseCharMap map[string]render.Modifiable, filter mod.Filter) 
 
 // Character type enum enum
 const (
-	Swordsman = iota
+	Empty = iota
+	Swordsman
 	Berserker
 	Paladin
 	Spearman

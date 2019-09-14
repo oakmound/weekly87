@@ -2,9 +2,9 @@ package menus
 
 import (
 	"github.com/oakmound/oak/collision"
-	"github.com/oakmound/oak/joystick"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/entities/x/btn/grid"
+	"github.com/oakmound/oak/joystick"
 	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/mouse"
 	s "github.com/oakmound/weekly87/internal/menus/selector"
@@ -25,7 +25,7 @@ func ButtonSelectorA(selectors grid.Grid) s.Option {
 		s.VertArrowControl(),
 		s.JoystickVertDpadControl(),
 		s.Spaces(spcs...),
-		s.Callback(func(i int) {
+		s.Callback(func(i int, _ ...interface{}) {
 			btnList[i].Trigger(mouse.ClickOn, nil)
 		}),
 		s.SelectTrigger(key.Down+key.Spacebar),

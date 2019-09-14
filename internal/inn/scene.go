@@ -272,19 +272,48 @@ var Scene = scene.Scene{
 			cancl.SetPos(partyBackground.X()+float64(bkgW-canclW), partyBackground.Y()+float64(bkgH)+2)
 			render.Draw(cancl, layer.UI, 1)
 
+			var cSelect *selector.Selector
+
 			// Let arrow keys / joystick or mouse even control which party member is selected
-			selector.New(
+			cSelect, _ = selector.New(
 				selector.Layers(layer.UI, 3),
 				selector.HorzArrowControl(),
 				selector.JoystickHorzDpadControl(),
 				selector.Spaces(spcs...),
-				selector.Callback(func(i int) {
-					// modify party
-					if len(curRecord.PartyComp) <= i {
-						curRecord.PartyComp = append(curRecord.PartyComp, players.PartyMember{})
+				selector.Callback(func(i int, data ...interface{}) {
+					if len(data) == 0 {
+						// modify party
+						if len(curRecord.PartyComp) <= i {
+							curRecord.PartyComp = append(curRecord.PartyComp, players.PartyMember{})
+						}
+						curRecord.PartyComp[i].PlayerClass = npc.Class
+						ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
+						return
 					}
-					curRecord.PartyComp[i].PlayerClass = npc.Class
+
+					dlog.Info("trying to interact  with selector ")
+					op, ok := data[0].(string)
+					if !ok {
+						dlog.Warn("Inn selector recieved a non-string", data[0])
+						return
+					}
+					switch op {
+					case "boot": // we kick the person and shift party left
+						if len(curRecord.PartyComp) == 1 || (i == 0 && curRecord.PartyComp[1].PlayerClass == 0) {
+							return
+						}
+
+						for j, p := range curRecord.PartyComp[i+1:] {
+							fmt.Println("issue with ", j, i, len(curRecord.PartyComp))
+							curRecord.PartyComp[j+i] = p
+						}
+
+						curRecord.PartyComp[len(curRecord.PartyComp)-1] = players.PartyMember{}
+
+					}
 					ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
+					cSelect.Cleanup(i)
+
 				}),
 				selector.Cleanup(func(i int) {
 					// undraw menu
@@ -309,6 +338,10 @@ var Scene = scene.Scene{
 				}),
 				selector.SelectTrigger(key.Down+key.Spacebar),
 				selector.SelectTrigger("A"+joystick.ButtonUp),
+
+				selector.InteractTrigger(key.Down+key.B, "boot"),
+				selector.InteractTrigger("X"+joystick.ButtonUp, "boot"),
+
 				selector.DestroyTrigger("EndPartySelect"),
 				selector.DestroyTrigger(key.Down+key.Escape),
 				selector.DestroyTrigger("B"+joystick.ButtonUp),
@@ -326,7 +359,7 @@ var Scene = scene.Scene{
 		// Clear, set and report on the debug commands available
 		oak.ResetCommands()
 		oak.AddCommand("resetParty", func(args []string) {
-			curRecord.PartyComp = []players.PartyMember{{players.Spearman, 0, "Dan the Almost Default"}}
+			curRecord.PartyComp = []players.PartyMember{{players.Swordsman, 0, "Dan the Almost Default"}}
 			ptycon.Players = players.ClassConstructor(curRecord.PartyComp)
 			ptycon.Players[0].Position = ptyOffset
 			for _, p := range pty.Players {
