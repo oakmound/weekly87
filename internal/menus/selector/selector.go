@@ -147,7 +147,45 @@ func DestroyTrigger(trigger string) Option {
 // MouseBindings sets whether selection options should react to mouseover and clicking
 func MouseBindings(on bool) Option {
 	return func(sc *Constructor) {
-		sc.MouseBindings = on
+		if !on {
+			sc.MouseLeft = nil
+			sc.MouseRight = nil
+			return
+		}
+
+		if sc.MouseLeft == nil {
+			sc.MouseLeft = defaultMouseSelect
+
+		}
+		if sc.MouseRight == nil {
+			sc.MouseRight = defaultMouseSelect
+		}
+	}
+}
+
+var defaultMouseSelect = func(s *Selector, i int) int {
+	s.MoveTo(i)
+	s.Select()
+	return 0
+}
+
+func MouseLeft(op func(s *Selector, i int) int) Option {
+	return func(sc *Constructor) {
+		sc.MouseLeft = op
+	}
+}
+func MouseRight(op func(s *Selector, i int) int) Option {
+	return func(sc *Constructor) {
+		sc.MouseRight = op
+	}
+}
+
+func MouseInteract(data ...interface{}) func(s *Selector, i int) int {
+	return func(s *Selector, i int) int {
+		dlog.Info("Interacting with ", i)
+		s.MoveTo(i)
+		s.Interact(data...)
+		return 0
 	}
 }
 
@@ -165,12 +203,13 @@ type Constructor struct {
 	Display func(size floatgeom.Point2) render.Renderable
 	// Step/Limit/Size should be option A; Slice of floatgeom.Rect2 should be option B;
 	// StepFn/Size should be option C;
-	Spots         []floatgeom.Rect2
-	Layers        []int
-	Callback      func(i int, data ...interface{})
-	Cleanup       func(i int)
-	MouseBindings bool
-	Bindings      map[string]func(*Selector)
+	Spots      []floatgeom.Rect2
+	Layers     []int
+	Callback   func(i int, data ...interface{})
+	Cleanup    func(i int)
+	MouseLeft  func(*Selector, int) int
+	MouseRight func(*Selector, int) int
+	Bindings   map[string]func(*Selector)
 }
 
 type Selector struct {
@@ -211,28 +250,46 @@ func (sc *Constructor) Generate() (*Selector, error) {
 			return 0
 		}, ev)
 	}
-	if sc.MouseBindings {
+
+	mouseSpaces := []*collision.Space{}
+	if sc.MouseLeft != nil || sc.MouseRight != nil {
 		// Make collisionPhase objects for each spot
 		for i, spt := range sc.Spots {
 			i := i
 			mp := &mousePhaser{}
 			mp.Init()
 			sp := collision.NewSpace(spt.Min.X(), spt.Min.Y(), spt.W(), spt.H(), mp.id)
+			mouseSpaces = append(mouseSpaces, sp)
 			mouse.Add(sp)
 			mouse.PhaseCollision(sp)
 			mp.id.Bind(func(int, interface{}) int {
 				s.MoveTo(i)
 				return 0
 			}, mouse.Start)
-			mp.id.Bind(func(int, interface{}) int {
-				s.MoveTo(i)
-				s.Select()
+			mp.id.Bind(func(_ int, data interface{}) int {
+				m := data.(mouse.Event)
+				switch m.Button {
+				case "LeftMouse":
+					return sc.MouseLeft(s, i)
+				case "RightMouse":
+					return sc.MouseRight(s, i)
+				}
 				return 0
 			}, mouse.ClickOn)
 		}
 	}
 
 	s.MoveTo(0)
+	oldCleanup := s.Cleanup
+	s.Cleanup = func(i int) {
+		for _, ms := range mouseSpaces {
+			mouse.Remove(ms)
+		}
+		if oldCleanup != nil {
+			oldCleanup(i)
+		}
+
+	}
 
 	return s, nil
 }

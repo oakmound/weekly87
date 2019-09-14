@@ -16,6 +16,7 @@ import (
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/joystick"
 	"github.com/oakmound/oak/key"
+	"github.com/oakmound/oak/mouse"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -263,13 +264,17 @@ var Scene = scene.Scene{
 				}
 			}
 
-			// Show a confirm button (and a cancel button)
+			// Show a confirm button, a cancel button and a boot button
 			cnfrm := getConfirmBtn()
 			cnfrm.SetPos(partyBackground.X(), partyBackground.Y()+float64(bkgH)+2)
 			render.Draw(cnfrm, layer.UI, 1)
+			boot := getBootButton()
+			intrctW, _ := boot.GetDims()
+			boot.SetPos(partyBackground.X()+float64(bkgW-intrctW), partyBackground.Y()+float64(bkgH)+2)
+			render.Draw(boot, layer.UI, 1)
 			cancl := getCancelBtn()
-			canclW, _ := cancl.GetDims()
-			cancl.SetPos(partyBackground.X()+float64(bkgW-canclW), partyBackground.Y()+float64(bkgH)+2)
+			canclW, canclH := cancl.GetDims()
+			cancl.SetPos(partyBackground.X()+float64(bkgW-canclW), partyBackground.Y()-float64(canclH-2))
 			render.Draw(cancl, layer.UI, 1)
 
 			var cSelect *selector.Selector
@@ -304,7 +309,6 @@ var Scene = scene.Scene{
 						}
 
 						for j, p := range curRecord.PartyComp[i+1:] {
-							fmt.Println("issue with ", j, i, len(curRecord.PartyComp))
 							curRecord.PartyComp[j+i] = p
 						}
 
@@ -320,9 +324,11 @@ var Scene = scene.Scene{
 					for _, p := range pty.Players {
 						p.R.Undraw()
 						collision.Remove(p.GetSpace())
+						mouse.Remove(p.GetSpace())
 					}
 					cnfrm.Undraw()
 					cancl.Undraw()
+					boot.Undraw()
 					partyBackground.Undraw()
 
 					pty, err = ptycon.NewParty(true)
@@ -346,6 +352,8 @@ var Scene = scene.Scene{
 				selector.DestroyTrigger(key.Down+key.Escape),
 				selector.DestroyTrigger("B"+joystick.ButtonUp),
 				selector.MouseBindings(true),
+
+				selector.MouseRight(selector.MouseInteract("boot")),
 			)
 
 			return 0
@@ -425,4 +433,9 @@ func getConfirmBtn() render.Renderable {
 func getCancelBtn() render.Renderable {
 	// todo: joystick
 	return render.NewColorBox(50, 20, color.RGBA{255, 100, 100, 255})
+}
+
+func getBootButton() render.Renderable {
+	// todo: joystick
+	return render.NewColorBox(50, 20, color.RGBA{100, 255, 100, 255})
 }

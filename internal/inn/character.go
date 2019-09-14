@@ -58,7 +58,6 @@ func (iw *InnWalker) SetParty(plys []*players.Player) {
 	}
 	render.Draw(iw.front.R, layer.Play, maxPartySize)
 
-	// Todo: remove followers when party shrinks
 	for i := 1; i < len(plys); i++ {
 		if i >= len(iw.followers) {
 			// make a new one for this position
