@@ -3,6 +3,7 @@ package abilities
 import (
 	"fmt"
 	"image/color"
+	"path/filepath"
 	"time"
 
 	"github.com/oakmound/oak/dlog"
@@ -13,6 +14,24 @@ import (
 
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/mod"
+)
+
+func Init() {
+	blast, err = render.LoadSprite("", filepath.Join("64x64", "BlastIcon.png"))
+	dlog.ErrorCheck(err)
+	_, err = render.LoadSprite("", filepath.Join("64x64", "ShieldAuraIcon.png"))
+	dlog.ErrorCheck(err)
+	_, err = render.LoadSprite("", filepath.Join("64x64", "ShieldIcon.png"))
+	dlog.ErrorCheck(err)
+	_, err = render.LoadSprite("", filepath.Join("64x64", "SlashIcon.png"))
+	dlog.ErrorCheck(err)
+
+	MageInit()
+}
+
+var (
+	err   error
+	blast *render.Sprite
 )
 
 var BuffIconSize = 16

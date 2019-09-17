@@ -8,6 +8,7 @@ import (
 
 	"golang.org/x/image/colornames"
 
+	"github.com/oakmound/weekly87/internal/abilities"
 	"github.com/oakmound/weekly87/internal/joys"
 	"github.com/oakmound/weekly87/internal/menus/selector"
 	"github.com/oakmound/weekly87/internal/run"
@@ -45,6 +46,7 @@ var Scene = scene.Scene{
 			saveHistory := records.Load()
 			run.BaseSeed = saveHistory.BaseSeed
 			joys.Init()
+			abilities.Init()
 			players.Init()
 			section.Init()
 			enemies.Init()

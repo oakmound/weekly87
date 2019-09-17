@@ -42,7 +42,7 @@ func MageInit() {
 				"clothes": color.RGBA{180, 70, 70, 180},
 			},
 			Special1: abilities.Fireball,
-			Special2: abilities.FireWall,
+			Special2: abilities.FireStorm,
 		},
 		{
 			Name: "Time",

@@ -59,7 +59,53 @@ func bolt(image string, frames int, endDelta float64, opts func(particle.Generat
 	}
 }
 
-func storm(speed floatrange.Range, sc, ec color.Color, xSpreadFactor float64, opts func(particle.Generator),
+func storm(image string, speed floatrange.Range, sc, ec color.Color, xSpreadFactor float64, opts func(particle.Generator),
+	hitEffects map[string]float64) func(u User) []characters.Character {
+	// Spell Display
+
+	return func(u User) []characters.Character {
+		rs, err := render.LoadSprites("", image, 16, 16, 0)
+		dlog.ErrorCheck(err)
+		delta := u.GetDelta()
+		pg := particle.NewSpriteGenerator(
+			particle.Sprite(rs[0][0]),
+			particle.Angle(floatrange.NewLinear(240, 300)),
+			particle.Size(intrange.NewConstant(10)),
+			particle.EndSize(intrange.NewConstant(3)),
+			particle.Speed(speed),
+			particle.NewPerFrame(floatrange.NewLinear(2, 7)),
+			particle.LifeSpan(floatrange.NewLinear(200, 201)),
+			particle.Spread(float64(oak.ScreenWidth)*xSpreadFactor, 0),
+			opts,
+		)
+		endDelta := 600.0
+		if u.Direction() == "LT" {
+			endDelta *= -1
+		}
+
+		cpg := particle.NewCollisionGenerator(
+			pg,
+			particle.Fragile(true),
+			particle.HitMap(map[collision.Label]collision.OnHit{
+				labels.Enemy: func(a, b *collision.Space) {
+					b.CID.Trigger("Attacked", hitEffects)
+				},
+			}),
+		)
+
+		// end := floatgeom.Point2{pos.X() + endDelta, pos.Y()}
+		chrs, err := Produce(
+			StartAt(floatgeom.Point2{float64(oak.ViewPos.X), 0}),
+			WithParticles(cpg),
+			WithLabel(labels.EffectsEnemy),
+			FollowSpeed(delta.Xp(), nil),
+		)
+		dlog.ErrorCheck(err)
+		return chrs
+	}
+}
+
+func shower(speed floatrange.Range, sc, ec color.Color, xSpreadFactor float64, opts func(particle.Generator),
 	hitEffects map[string]float64) func(u User) []characters.Character {
 	return func(u User) []characters.Character {
 		delta := u.GetDelta()
@@ -104,6 +150,8 @@ func storm(speed floatrange.Range, sc, ec color.Color, xSpreadFactor float64, op
 }
 
 var (
+	FrostBolt, Fireball, Blizzard, FireWall, FireStorm, Rez, Invulnerability, Slow, CooldownRework, GameBreakerFireBall *ability
+
 	baseHit = map[collision.Label]collision.OnHit{
 		labels.Enemy: func(a, b *collision.Space) {
 			b.CID.Trigger("Attacked", map[string]float64{"damage": 1.0})
@@ -115,10 +163,14 @@ var (
 			b.CID.Trigger("Attacked", map[string]float64{"frost": 5.0})
 		},
 	}
+)
+
+func MageInit() {
 
 	// FrostBolt is a simple projectile with slowing
 	FrostBolt = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 255}),
+		blast,
+		// render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 255}),
 		time.Second*3,
 		bolt(filepath.Join("16x16", "icebolt.png"),
 			200,
@@ -140,7 +192,8 @@ var (
 
 	//Fireball tries to cast a magical fire ball in front of the mage
 	Fireball = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 200}),
+		blast,
+		// render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 200}),
 		time.Second*10,
 		bolt(filepath.Join("16x16", "fireball.png"),
 			200,
@@ -175,14 +228,23 @@ var (
 	Blizzard = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{10, 10, 250, 255}),
 		time.Second*10,
-		storm(floatrange.NewLinear(3, 8), color.RGBA{10, 10, 255, 255}, color.RGBA{125, 125, 125, 125}, 1.5, particle.And(), map[string]float64{"frost": 1.2}),
+		shower(floatrange.NewLinear(3, 8), color.RGBA{10, 10, 255, 255}, color.RGBA{125, 125, 125, 125}, 1.5, particle.And(), map[string]float64{"frost": 1.2}),
 	)
 
-	// Firewall is a short lived long cooldown vertical destructive force
+	// FireWall is a short lived long cooldown vertical destructive force
 	FireWall = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 255}),
 		time.Second*20,
-		storm(floatrange.NewLinear(3, 8), color.RGBA{255, 10, 10, 255}, color.RGBA{125, 125, 125, 125}, 1, particle.And(particle.NewPerFrame(floatrange.NewLinear(2, 4)), particle.Size(intrange.NewConstant(20))), map[string]float64{"damage": 1}),
+		shower(floatrange.NewLinear(3, 8), color.RGBA{255, 10, 10, 255}, color.RGBA{125, 125, 125, 125}, 1, particle.And(particle.NewPerFrame(floatrange.NewLinear(2, 4)), particle.Size(intrange.NewConstant(20))), map[string]float64{"damage": 1}),
+	)
+
+	// FireStorm is a short lived long cooldown vertical destructive force
+	FireStorm = NewAbility(
+		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 255}),
+		time.Second*20,
+		storm(filepath.Join("16x16", "fireball.png"),
+			floatrange.NewLinear(3, 8), color.RGBA{255, 10, 10, 255}, color.RGBA{125, 125, 125, 125}, 2,
+			particle.And(particle.NewPerFrame(floatrange.NewLinear(0, 2)), particle.Size(intrange.NewConstant(20))), map[string]float64{"damage": 1}),
 	)
 
 	// Rez the first person who is dead in the party on pickup
@@ -404,4 +466,4 @@ var (
 			return chrs
 		},
 	)
-)
+}
