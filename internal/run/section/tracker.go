@@ -138,7 +138,17 @@ func (st *Tracker) Produce(delta int64) *Section {
 	if !(st.sectionsDeep == 1 && delta > 0) {
 		for i := 0; i < plan.enemyCount.Poll(); i++ {
 			typ := alg.WeightedChooseOneSeeded(enemyDist, st.rng)
-			cs := enemies.Constructors[typ*enemies.VariantCount+plan.enemyVariantRange.Poll()]
+			// section 1 - no variants <.1
+			// section 10 - some variants >.10
+			// section 50 - lots of variants >.50
+			randVal := st.rng.Float64()
+			isVariant := (randVal + float64(st.sectionsDeep)/100) > 1
+			dlog.Info("Variant calculation", randVal, st.sectionsDeep, isVariant)
+			enemyID := typ*enemies.VariantCount
+			if isVariant {
+				enemyID += plan.enemyVariantRange.Poll()
+			}
+			cs := enemies.Constructors[enemyID]
 			e, err := cs.NewEnemy(st.sectionsDeep, int64(len(st.entities)))
 			if delta < 0 {
 				e.RunBackwards()
