@@ -8,6 +8,8 @@ import (
 	"github.com/oakmound/oak/mouse"
 
 	"github.com/oakmound/oak"
+	"github.com/oakmound/oak/key"
+	"github.com/oakmound/oak/joystick"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/mod"
@@ -17,6 +19,7 @@ import (
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities/x/mods"
 	"github.com/oakmound/weekly87/internal/menus"
+	"github.com/oakmound/weekly87/internal/menus/selector"
 )
 
 var (
@@ -74,12 +77,14 @@ var Scene = scene.Scene{
 
 		showFps := btn.And(
 			menus.BtnCfgB,
+			btn.Width(150),
+			btn.Height(32),
 			btn.Toggle(infR2, infR1,
 				&Active.ShowFpsToggle),
 			btn.Pos(x, y),
 			btn.Text("Show FPS"),
 		)
-		btn.New(showFps)
+		fpsBtn := btn.New(showFps)
 
 		sfxVolume := menus.NewSlider(0, x, y+50, sliderWidth, sliderHeight, 10, 20, nil,
 			volBackground.Copy(), 0, 100, 100*(*sfxLevel),
@@ -111,7 +116,7 @@ var Scene = scene.Scene{
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := float64(oak.ScreenHeight) * 3 / 4
 
-		btn.New(menus.BtnCfgB,
+		returnBtn := btn.New(menus.BtnCfgB,
 			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
 			btn.Pos(menuX, menuY),
 			btn.Text("Return To Menu"),
@@ -119,6 +124,54 @@ var Scene = scene.Scene{
 				stayInMenu = false
 				return 0
 			}))
+
+		selector.New(
+			selector.MouseBindings(true),
+			selector.JoystickVertDpadControl(),
+			selector.VertArrowControl(),
+			selector.Spaces(
+				fpsBtn.GetSpace(),
+				sfxVolume.Space,
+				musicVolume.Space,
+				masterVolume.Space,
+				returnBtn.GetSpace(),
+			),
+
+			selector.SelectTrigger(key.Down+key.Spacebar),
+			selector.SelectTrigger("A"+joystick.ButtonUp),
+
+			selector.InteractTrigger(key.Down+key.LeftArrow, -10.0),
+			selector.InteractTrigger("Left"+joystick.ButtonUp, -10.0),
+			selector.InteractTrigger(key.Down+key.RightArrow, 10.0),
+			selector.InteractTrigger("Right"+joystick.ButtonUp, 10.0),
+
+			selector.Callback(func(i int, inc ...interface{}) {
+				if len(inc) == 0 {
+					if i == 0 {
+						fpsBtn.Trigger("MouseClickOn", nil)
+					}
+					if i == 4 {
+						stayInMenu = false
+					}
+					return
+				}
+				change, ok := inc[0].(float64)
+				if !ok {
+					dlog.Error("Expected a float increment")
+					return
+				}
+				switch i{
+				case 1:
+					sfxVolume.Slide(change)
+				case 2:
+					musicVolume.Slide(change)
+				case 3:
+					masterVolume.Slide(change)
+				}
+			}),
+			selector.Layers(2,20),
+		)
+	
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
 	End: func() (string, *scene.Result) {

@@ -321,11 +321,15 @@ func (s *Selector) MoveTo(i int) error {
 }
 
 func (s *Selector) Interact(data ...interface{}) {
-	s.Callback(s.Pos, data...)
+	if s.Callback != nil {
+		s.Callback(s.Pos, data...)
+	}
 }
 
 func (s *Selector) Select() {
-	s.Callback(s.Pos)
+	if s.Callback != nil {
+		s.Callback(s.Pos)
+	}
 	if s.Cleanup != nil {
 		s.Cleanup(s.Pos)
 	}

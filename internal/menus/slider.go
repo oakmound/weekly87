@@ -6,6 +6,7 @@ package menus
 import (
 	"image/color"
 	"time"
+	"fmt"
 
 	"github.com/oakmound/oak/entities/x/btn"
 
@@ -78,6 +79,27 @@ func NewSlider(cid event.CID, x, y, w, h, txtX, txtY float64,
 
 	sl.SetPos(x, y)
 	return sl
+}
+
+func (sl *Slider) Slide(xDelta float64) {
+	w, _ := sl.knub.GetDims()
+	sl.val += xDelta
+	fmt.Println("Slider value", sl.val, xDelta)
+	if sl.val <= sl.min {
+		if sl.val == sl.min {
+			return
+		}
+		sl.val = sl.min
+	} else if sl.val >= sl.max {
+		if sl.val == sl.max {
+			return
+		}
+		sl.val = sl.max
+	} 
+	sl.knub.SetPos(sl.X()+sl.val+float64(w), sl.knub.Y())
+	if sl.Callback != nil {
+		sl.Callback(sl.val)
+	}
 }
 
 func (sl *Slider) SetPos(x float64, y float64) {
