@@ -33,9 +33,11 @@ func Init() {
 var (
 	err                                              error
 	blastIcon, shieldAuraIcon, shieldIcon, slashIcon *render.Sprite
-)
+	iconW                                            = 64
+	iconH                                            = 64
 
-var BuffIconSize = 16
+	BuffIconSize = 16
+)
 
 // User is something that can use abilities
 type User interface {
@@ -125,9 +127,9 @@ func NewAbility(r render.Modifiable, c time.Duration, t func(User) []characters.
 
 	inactive := r.Copy()
 	inactive.Filter(mod.ConformToPallete(color.GrayModel))
-	w, h := r.GetDims()
-	//inactive := render.NewColorBox(w, h, color.RGBA{10, 10, 10, 255})
-	cool := NewCooldown(w, h, c)
+	// iconW, iconH := r.GetDims()
+
+	cool := NewCooldown(iconW, iconH, c)
 	composite := render.NewCompositeM(r, cool)
 	swith := render.NewSwitch("active", map[string]render.Modifiable{
 		"active":   composite,
