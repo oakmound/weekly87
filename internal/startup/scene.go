@@ -57,7 +57,7 @@ var Scene = scene.Scene{
 
 			dlog.Info("Starting game")
 		}
-
+		
 		// Todo: joystick mouse
 
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))

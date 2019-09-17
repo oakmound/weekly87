@@ -2,9 +2,12 @@ package enemies
 
 import (
 	"image"
-	"path/filepath"
+	"image/color"
+	"path/filepath" 
 
 	"github.com/solovev/gopsd"
+
+	"github.com/oakmound/weekly87/internal/recolor"
 
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
@@ -63,11 +66,16 @@ func initTree() {
 	}
 
 	for size := 0; size < lastSize; size++ {
-		for color := 0; color < lastColor; color++ {
+		for col := 0; col < lastColor; col++ {
 			cons := baseConstructor.Copy()
 			sizeVariants[size](cons)
-			colorVariants[color](cons)
-			setConstructor(int(Tree), size, color, cons)
+			colorVariants[col](cons)
+			if size == 0 && col == 0 {
+				for _, md := range cons.AnimationMap {
+					md.Filter(recolor.WithStrategy(recolor.ColorMix(color.RGBA{140, 200, 140, 100})))
+				}
+			}
+			setConstructor(int(Tree), size, col, cons)
 		}
 	}
 }
