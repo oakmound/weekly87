@@ -4,12 +4,14 @@ import (
 	"image/color"
 	"strconv"
 	"strings"
+	"fmt"
 	"sync"
 	"time"
 
 	"github.com/oakmound/oak/key"
 
 	"github.com/oakmound/oak/mouse"
+	"github.com/oakmound/oak/joystick"
 
 	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/restrictor"
@@ -108,6 +110,13 @@ var Scene = scene.Scene{
 				btn.Text(""),
 			)
 
+			joyBtns := [4]string{
+				"A",
+				"X",
+				"B",
+				"Y",
+			}
+
 			// Set up abilities
 			if p.Special1 != nil {
 
@@ -119,13 +128,25 @@ var Scene = scene.Scene{
 						trg()
 						return 0
 					}))
-				keyToBind := key.Down + strconv.Itoa(i)
+				keyToBind := key.Down + strconv.Itoa(i+1)
 				if i < 10 {
 					// Todo joystick triggers
-					btnOpts = btn.And(btn.Binding(keyToBind, func(int, interface{}) int {
+					btnOpts = btn.And(btnOpts, btn.Binding(keyToBind, func(int, interface{}) int {
 						trg()
 						return 0
-					}), btnOpts)
+					}))
+				}
+				
+				if i < 4 {
+					btnOpts = btn.And(btnOpts, btn.Binding(joyBtns[i]+joystick.ButtonUp, func(_ int, state interface{}) int {
+						jState := state.(*joystick.State)
+						fmt.Println("Joystick TriggerR", jState.TriggerR)
+						if jState.TriggerR < 100 {
+							fmt.Println("Triggering ability 1")
+							trg()
+						}
+						return 0
+					}))
 				}
 				newBtn := btn.New(btnOpts)
 				p.Special1.SetButton(newBtn)
@@ -142,10 +163,23 @@ var Scene = scene.Scene{
 						return 0
 					}))
 
-				btnOpts = btn.And(btn.Binding(key.Down+abilityKeys[i], func(int, interface{}) int {
-					trg()
-					return 0
-				}), btnOpts)
+				if i < 10 {
+					btnOpts = btn.And(btnOpts, btn.Binding(key.Down+abilityKeys[i], func(int, interface{}) int {
+						trg()
+						return 0
+					}))
+				}
+				if i < 4 {
+					btnOpts = btn.And(btnOpts, btn.Binding(joyBtns[i]+joystick.ButtonUp, func(_ int, state interface{}) int {
+						jState := state.(*joystick.State)
+						fmt.Println("Joystick TriggerR", jState.TriggerR)
+						if jState.TriggerR > 100 {
+							fmt.Println("Triggering ability 1")
+							trg()
+						}
+						return 0
+					}))
+				}
 
 				newBtn := btn.New(btnOpts)
 				p.Special2.SetButton(newBtn)
