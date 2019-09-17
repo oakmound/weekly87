@@ -41,7 +41,7 @@ var (
 		baseColor: func(*Constructor) {},
 		blueColor: func(c *Constructor) {
 			for _, md := range c.AnimationMap {
-				md.Filter(recolor.WithStrategy(recolor.ColorMix(color.RGBA{100, 255, 100, 150})))
+				md.Filter(recolor.WithStrategy(recolor.ColorMix(color.RGBA{100, 100, 255, 150})))
 			}
 			c.Speed = c.Speed.MulConst(.5)
 		},
