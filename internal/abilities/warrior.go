@@ -72,8 +72,7 @@ func WarriorInit() {
 	)
 
 	SwordSwipe = NewAbility(
-		// render.NewColorBox(64, 64, color.RGBA{200, 90, 0, 255}),
-		slashIcon,
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 90, 0, 255}), slashIcon),
 		time.Second*4,
 		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 10),
 	)
@@ -85,8 +84,7 @@ func WarriorInit() {
 	)
 
 	Rage = NewAbility(
-		// render.NewColorBox(64, 64, color.RGBA{230, 5, 0, 255}),
-		slashIcon,
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{230, 5, 0, 255}), slashIcon),
 		time.Second*5,
 		func(u User) []characters.Character {
 			var down render.Modifiable
@@ -165,8 +163,7 @@ func WarriorInit() {
 	)
 
 	PartyShield = NewAbility(
-		// render.NewColorBox(64, 64, color.RGBA{40, 200, 90, 255}),
-		shieldAuraIcon,
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{40, 200, 90, 255}), shieldAuraIcon),
 		time.Second*10,
 		func(u User) []characters.Character {
 			pos := u.Vec()
@@ -210,7 +207,7 @@ func WarriorInit() {
 	)
 
 	SelfShield = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{110, 200, 110, 255}),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{110, 200, 110, 255}), shieldIcon),
 		time.Second*5,
 		func(u User) []characters.Character {
 			pos := u.Vec()

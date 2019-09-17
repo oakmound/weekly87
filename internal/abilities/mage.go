@@ -169,8 +169,8 @@ func MageInit() {
 
 	// FrostBolt is a simple projectile with slowing
 	FrostBolt = NewAbility(
-		blastIcon,
-		// render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 255}),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 255}), blastIcon),
+
 		time.Second*3,
 		bolt(filepath.Join("16x16", "icebolt.png"),
 			200,
@@ -192,8 +192,7 @@ func MageInit() {
 
 	//Fireball tries to cast a magical fire ball in front of the mage
 	Fireball = NewAbility(
-		blastIcon,
-		// render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 200}),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 200}), blastIcon),
 		time.Second*10,
 		bolt(filepath.Join("16x16", "fireball.png"),
 			200,
@@ -294,8 +293,8 @@ func MageInit() {
 	)
 	// Invulnerability gives a temp buff of near invuln to the entire living party
 	Invulnerability = NewAbility(
-		shieldIcon,
-		// render.NewColorBox(64, 64, color.RGBA{90, 240, 90, 255}),
+
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{90, 240, 90, 255}), shieldIcon),
 		time.Second*10,
 		func(u User) []characters.Character {
 			pos := u.Vec()
