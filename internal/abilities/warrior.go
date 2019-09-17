@@ -10,8 +10,8 @@ import (
 	"github.com/200sc/go-dist/intrange"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
-	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/event"
+	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/mod"
 	"github.com/oakmound/oak/render/particle"
@@ -57,6 +57,10 @@ func thwack(image string, xOffset, yDelta float64, mods ...mod.Mod) func(User) [
 }
 
 var (
+	SpearStab, SwordSwipe, HammerSmack, Rage, SpearThrow, PartyShield, SelfShield *ability
+)
+
+func WarriorInit() {
 	//SpearStab tries to stab in front of the warrior
 	SpearStab = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{200, 200, 0, 255}),
@@ -68,7 +72,8 @@ var (
 	)
 
 	SwordSwipe = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{200, 90, 0, 255}),
+		// render.NewColorBox(64, 64, color.RGBA{200, 90, 0, 255}),
+		slashIcon,
 		time.Second*4,
 		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 10),
 	)
@@ -80,7 +85,8 @@ var (
 	)
 
 	Rage = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{230, 5, 0, 255}),
+		// render.NewColorBox(64, 64, color.RGBA{230, 5, 0, 255}),
+		slashIcon,
 		time.Second*5,
 		func(u User) []characters.Character {
 			var down render.Modifiable
@@ -105,11 +111,11 @@ var (
 			start := floatgeom.Point2{pos.X(), pos.Y() - yDelta}
 
 			dlog.ErrorCheck(err)
-			
+
 			delta := u.GetDelta()
 
 			hit4 := And(
-				StartAt(floatgeom.Point2{0, -yDelta*6}),
+				StartAt(floatgeom.Point2{0, -yDelta * 6}),
 				FrameLength(16),
 				FollowSpeed(delta.Xp(), delta.Yp()),
 				WithLabel(labels.EffectsEnemy),
@@ -126,7 +132,7 @@ var (
 			)(Producer{})
 
 			hit2 := And(
-				StartAt(floatgeom.Point2{0, yDelta*5}),
+				StartAt(floatgeom.Point2{0, yDelta * 5}),
 				FrameLength(16),
 				FollowSpeed(delta.Xp(), delta.Yp()),
 				WithLabel(labels.EffectsEnemy),
@@ -159,7 +165,8 @@ var (
 	)
 
 	PartyShield = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{40, 200, 90, 255}),
+		// render.NewColorBox(64, 64, color.RGBA{40, 200, 90, 255}),
+		shieldAuraIcon,
 		time.Second*10,
 		func(u User) []characters.Character {
 			pos := u.Vec()
@@ -244,4 +251,4 @@ var (
 			return chrs
 		},
 	)
-)
+}
