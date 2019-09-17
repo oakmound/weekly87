@@ -60,6 +60,7 @@ var (
 	SpearStab, SwordSwipe, HammerSmack, Rage, SpearThrow, PartyShield, SelfShield *ability
 )
 
+// WarriorInit run by abilities to set up the ability attributes
 func WarriorInit() {
 	//SpearStab tries to stab in front of the warrior
 	SpearStab = NewAbility(
@@ -72,7 +73,7 @@ func WarriorInit() {
 	)
 
 	SwordSwipe = NewAbility(
-		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 90, 0, 255}), slashIcon),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 150, 0, 200}), slashIcon),
 		time.Second*4,
 		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 10),
 	)
@@ -84,7 +85,7 @@ func WarriorInit() {
 	)
 
 	Rage = NewAbility(
-		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{230, 5, 0, 255}), slashIcon),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 5, 0, 200}), downSlashIcon),
 		time.Second*5,
 		func(u User) []characters.Character {
 			var down render.Modifiable

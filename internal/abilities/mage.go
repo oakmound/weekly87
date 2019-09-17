@@ -169,7 +169,7 @@ func MageInit() {
 
 	// FrostBolt is a simple projectile with slowing
 	FrostBolt = NewAbility(
-		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 255}), blastIcon),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 200}), blueBlastIcon),
 
 		time.Second*3,
 		bolt(filepath.Join("16x16", "icebolt.png"),
@@ -192,7 +192,7 @@ func MageInit() {
 
 	//Fireball tries to cast a magical fire ball in front of the mage
 	Fireball = NewAbility(
-		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 200}), blastIcon),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 160, 160, 200}), redBlastIcon),
 		time.Second*10,
 		bolt(filepath.Join("16x16", "fireball.png"),
 			200,
@@ -225,21 +225,21 @@ func MageInit() {
 
 	// Blizzard creates a large slowing icestorm
 	Blizzard = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{10, 10, 250, 255}),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 200}), blueBlastDIcon),
 		time.Second*10,
 		shower(floatrange.NewLinear(3, 8), color.RGBA{10, 10, 255, 255}, color.RGBA{125, 125, 125, 125}, 1.5, particle.And(), map[string]float64{"frost": 1.2}),
 	)
 
 	// FireWall is a short lived long cooldown vertical destructive force
 	FireWall = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 255}),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 200}), redBlastDIcon),
 		time.Second*20,
 		shower(floatrange.NewLinear(3, 8), color.RGBA{255, 10, 10, 255}, color.RGBA{125, 125, 125, 125}, 1, particle.And(particle.NewPerFrame(floatrange.NewLinear(2, 4)), particle.Size(intrange.NewConstant(20))), map[string]float64{"damage": 1}),
 	)
 
 	// FireStorm is a short lived long cooldown vertical destructive force
 	FireStorm = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 255}),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 200}), redBlastDIcon),
 		time.Second*20,
 		storm(filepath.Join("16x16", "fireball.png"),
 			floatrange.NewLinear(3, 8), color.RGBA{255, 10, 10, 255}, color.RGBA{125, 125, 125, 125}, 2,

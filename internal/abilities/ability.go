@@ -11,6 +11,7 @@ import (
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/weekly87/internal/characters"
+	"github.com/oakmound/weekly87/internal/recolor"
 
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/mod"
@@ -26,15 +27,41 @@ func Init() {
 	slashIcon, err = render.LoadSprite("", filepath.Join("64x64", "SlashIcon.png"))
 	dlog.ErrorCheck(err)
 
+	red := color.RGBA{200, 100, 100, 255}
+	blue := color.RGBA{100, 100, 200, 255}
+
+	redBlastIcon = blastIcon.Copy().(*render.Sprite)
+	redBlastIcon.Filter(recolor.WithStrategy(recolor.ColorMix(red)))
+	blueBlastIcon = blastIcon.Copy().(*render.Sprite)
+	blueBlastIcon.Filter(recolor.WithStrategy(recolor.ColorMix(blue)))
+
+	redBlastDIcon = redBlastIcon.Copy().(*render.Sprite)
+	redBlastDIcon.Modify(mod.Rotate(270))
+
+	blueBlastDIcon = blueBlastIcon.Copy().(*render.Sprite)
+	blueBlastDIcon.Modify(mod.Rotate(270))
+
+	blueBlastDIcon = blueBlastIcon.Copy().(*render.Sprite)
+	blueBlastDIcon.Modify(mod.Rotate(270))
+
+	upSlashIcon = slashIcon.Copy().(*render.Sprite)
+	upSlashIcon.Modify(mod.Rotate(90))
+
+	downSlashIcon = slashIcon.Copy().(*render.Sprite)
+	downSlashIcon.Modify(mod.Transpose, mod.Rotate(90))
+	// downSLash.Modify()
+
 	MageInit()
 	WarriorInit()
 }
 
 var (
-	err                                              error
-	blastIcon, shieldAuraIcon, shieldIcon, slashIcon *render.Sprite
-	iconW                                            = 64
-	iconH                                            = 64
+	err                                                        error
+	blastIcon, shieldAuraIcon, shieldIcon, slashIcon           *render.Sprite
+	redBlastIcon, blueBlastIcon, redBlastDIcon, blueBlastDIcon *render.Sprite
+	upSlashIcon, downSlashIcon                                 *render.Sprite
+	iconW                                                      = 64
+	iconH                                                      = 64
 
 	BuffIconSize = 16
 )
