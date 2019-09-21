@@ -59,7 +59,7 @@ func bolt(image string, frames int, endDelta float64, opts func(particle.Generat
 	}
 }
 
-func storm(image string, speed floatrange.Range, sc, ec color.Color, xSpreadFactor float64, opts func(particle.Generator),
+func storm(image string, dur time.Duration, speed floatrange.Range, sc, ec color.Color, xSpreadFactor float64, opts func(particle.Generator),
 	hitEffects map[string]float64) func(u User) []characters.Character {
 	// Spell Display
 
@@ -99,13 +99,14 @@ func storm(image string, speed floatrange.Range, sc, ec color.Color, xSpreadFact
 			WithParticles(cpg),
 			WithLabel(labels.EffectsEnemy),
 			FollowSpeed(delta.Xp(), nil),
+			Duration(dur),
 		)
 		dlog.ErrorCheck(err)
 		return chrs
 	}
 }
 
-func shower(speed floatrange.Range, sc, ec color.Color, xSpreadFactor float64, opts func(particle.Generator),
+func shower(speed floatrange.Range, dur time.Duration, sc, ec color.Color, xSpreadFactor float64, opts func(particle.Generator),
 	hitEffects map[string]float64) func(u User) []characters.Character {
 	return func(u User) []characters.Character {
 		delta := u.GetDelta()
@@ -143,6 +144,7 @@ func shower(speed floatrange.Range, sc, ec color.Color, xSpreadFactor float64, o
 			WithParticles(cpg),
 			WithLabel(labels.EffectsEnemy),
 			FollowSpeed(delta.Xp(), nil),
+			Duration(dur),
 		)
 		dlog.ErrorCheck(err)
 		return chrs
@@ -227,14 +229,14 @@ func MageInit() {
 	Blizzard = NewAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 200}), blueBlastDIcon),
 		time.Second*10,
-		shower(floatrange.NewLinear(3, 8), color.RGBA{10, 10, 255, 255}, color.RGBA{125, 125, 125, 125}, 1.5, particle.And(), map[string]float64{"frost": 1.2}),
+		shower(floatrange.NewLinear(3, 8), time.Second*3, color.RGBA{10, 10, 255, 255}, color.RGBA{125, 125, 125, 125}, 1.5, particle.And(), map[string]float64{"frost": 1.2}),
 	)
 
 	// FireWall is a short lived long cooldown vertical destructive force
 	FireWall = NewAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 200}), redBlastDIcon),
 		time.Second*20,
-		shower(floatrange.NewLinear(3, 8), color.RGBA{255, 10, 10, 255}, color.RGBA{125, 125, 125, 125}, 1, particle.And(particle.NewPerFrame(floatrange.NewLinear(2, 4)), particle.Size(intrange.NewConstant(20))), map[string]float64{"damage": 1}),
+		shower(floatrange.NewLinear(3, 8), time.Second*2, color.RGBA{255, 10, 10, 255}, color.RGBA{125, 125, 125, 125}, 1, particle.And(particle.NewPerFrame(floatrange.NewLinear(2, 4)), particle.Size(intrange.NewConstant(20))), map[string]float64{"damage": 1}),
 	)
 
 	// FireStorm is a short lived long cooldown vertical destructive force
@@ -242,6 +244,7 @@ func MageInit() {
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 200}), redBlastDIcon),
 		time.Second*20,
 		storm(filepath.Join("16x16", "fireball.png"),
+			time.Second*2,
 			floatrange.NewLinear(3, 8), color.RGBA{255, 10, 10, 255}, color.RGBA{125, 125, 125, 125}, 2,
 			particle.And(particle.NewPerFrame(floatrange.NewLinear(0, 2)), particle.Size(intrange.NewConstant(20))), map[string]float64{"damage": 1}),
 	)

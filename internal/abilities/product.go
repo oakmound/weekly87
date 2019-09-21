@@ -35,9 +35,10 @@ type Producer struct {
 	Label collision.Label
 	R     render.Renderable
 
-	ThenFn   DoOption
-	WhileFn  DoOption
-	Interval time.Duration
+	ThenFn    DoOption
+	WhileFn   DoOption
+	Interval  time.Duration
+	TotalLife time.Duration
 
 	Arc bool
 
@@ -83,6 +84,13 @@ func ArcTo(pts ...floatgeom.Point2) Option {
 func LineTo(pt floatgeom.Point2) Option {
 	return func(p Producer) Producer {
 		p.End = pt
+		return p
+	}
+}
+
+func Duration(dur time.Duration) Option {
+	return func(p Producer) Producer {
+		p.TotalLife = dur
 		return p
 	}
 }
@@ -311,6 +319,17 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 			return 0
 		}, "EnterFrame")
 	}
+	if p.TotalLife != 0 {
+		endTime := time.Now().Add(p.TotalLife)
+		prd.Bind(func(id int, _ interface{}) int {
+			if time.Now().After(endTime) {
+				prd.Destroy()
+				return event.UnbindSingle
+			}
+
+			return 0
+		}, "EnterFrame")
+	}
 
 	// This might expand later on if things have time limits
 	if p.ThenFn == nil {
@@ -335,11 +354,13 @@ type Product struct {
 	*entities.Interactive
 	shouldPersist bool
 	position      int
+	TotalLife     time.Duration
 	FollowX       *float64
 	FollowY       *float64
-	source        *particle.Source
-	next          func(floatgeom.Point2)
-	buffs         []buff.Buff
+
+	source *particle.Source
+	next   func(floatgeom.Point2)
+	buffs  []buff.Buff
 }
 
 func (p *Product) MoveParticles(nextDelta floatgeom.Point2) {
