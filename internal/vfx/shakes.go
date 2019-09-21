@@ -17,10 +17,10 @@ func init() {
 	SmallShaker = Shaker{
 		mu: &sync.Mutex{},
 		shaker: oak.ScreenShaker{
-			Random: false,
+			Random: true,
 			Magnitude: floatgeom.Point2{
-				3,
-				3,
+				8,
+				12,
 			},
 		},
 		shakingEnd: time.Now(),
@@ -36,13 +36,13 @@ type Shaker struct {
 }
 
 func (s *Shaker) Shake(shaking time.Duration) {
-	s.mu.Lock()
-	if time.Now().Before(s.shakingEnd) {
-		s.mu.Unlock()
-		return
-	}
-	s.shakingEnd = time.Now().Add(shaking)
-	s.mu.Unlock()
+	// s.mu.Lock()
+	// if time.Now().Before(s.shakingEnd) {
+	// 	s.mu.Unlock()
+	// 	return
+	// }
+	// s.shakingEnd = time.Now().Add(shaking).Add(time.Second)
+	// s.mu.Unlock()
 
 	s.shaker.Shake(shaking)
 }

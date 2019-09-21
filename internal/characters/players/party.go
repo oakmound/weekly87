@@ -455,7 +455,7 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 
 		}
 
-		oak.SetScreen(oak.ViewPos.X+int(pty.RunSpeed()), oak.ViewPos.Y)
+		oak.ShiftScreen(int(pty.RunSpeed()), 0)
 
 		return 0
 	}, "EnterFrame")

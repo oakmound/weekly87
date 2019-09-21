@@ -1,17 +1,17 @@
 package run
 
 import (
+	"fmt"
 	"image/color"
 	"strconv"
 	"strings"
-	"fmt"
 	"sync"
 	"time"
 
 	"github.com/oakmound/oak/key"
 
-	"github.com/oakmound/oak/mouse"
 	"github.com/oakmound/oak/joystick"
+	"github.com/oakmound/oak/mouse"
 
 	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/restrictor"
@@ -136,7 +136,7 @@ var Scene = scene.Scene{
 						return 0
 					}))
 				}
-				
+
 				if i < 4 {
 					btnOpts = btn.And(btnOpts, btn.Binding(joyBtns[i]+joystick.ButtonUp, func(_ int, state interface{}) int {
 						jState := state.(*joystick.State)
@@ -256,7 +256,7 @@ var Scene = scene.Scene{
 
 						pty.ShiftX(-sec1.W() * 2)
 						sec3.ShiftEntities(-sec1.W() * 2)
-						oak.ViewPos.X -= int(sec1.W()) * 2
+						oak.ShiftScreen(-int(sec1.W())*2, 0)
 
 						go func() {
 							sec2.Destroy()
@@ -289,6 +289,7 @@ var Scene = scene.Scene{
 
 							if tracker.AtStart() {
 								oak.SetViewportBounds(0, 0, 8000, 8000)
+
 							}
 							runInfo.SectionsCleared++
 						}()
@@ -310,7 +311,9 @@ var Scene = scene.Scene{
 
 						pty.ShiftX(sec1.W() * 2)
 						sec1.ShiftEntities(sec1.W() * 2)
-						oak.ViewPos.X += int(sec1.W()) * 2
+
+						oak.ShiftScreen(int(sec1.W())*2, 0)
+
 					}
 				}
 			}
@@ -449,6 +452,20 @@ var Scene = scene.Scene{
 			}
 			event.Trigger("PlayerDeath", nil)
 		})
+
+		oak.AddCommand("shake", func(args []string) {
+			//TODO: determine if default shaker is even noticable
+
+			ss := oak.ScreenShaker{
+				Random: true,
+				Magnitude: floatgeom.Point2{
+					3,
+					10,
+				},
+			}
+			ss.Shake(time.Duration(1000) * time.Millisecond)
+		})
+
 		oak.AddCommand("grantchest", func(args []string) {
 			dlog.Warn("Cheating to grant a chest to a player")
 
