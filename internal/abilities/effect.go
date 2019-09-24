@@ -4,7 +4,6 @@ import (
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/render/particle"
-	"github.com/oakmound/weekly87/internal/characters/enemies"
 
 	"time"
 )
@@ -15,7 +14,6 @@ var (
 
 type Effect interface {
 	Create() (cancel func())
-	OnEnemy(*enemies.BasicEnemy)
 	OnPlayer(User)
 	GetPos() (float64, float64)
 }
@@ -27,7 +25,6 @@ type ParticleEffect struct {
 	Generator   particle.Generator
 	BaseLayer   int
 	OnPlayerHit func(User)
-	OnEnemyHit  func(*enemies.BasicEnemy)
 }
 
 func (pe *ParticleEffect) Create() func() {
@@ -58,10 +55,6 @@ func (pe *ParticleEffect) Create() func() {
 	return func() {
 		close(quit)
 	}
-}
-
-func (pe *ParticleEffect) OnEnemy(e *enemies.BasicEnemy) {
-	pe.OnEnemyHit(e)
 }
 
 func (pe *ParticleEffect) OnPlayer(u User) {
