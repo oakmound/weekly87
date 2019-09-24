@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/oakmound/weekly87/internal/characters/labels"
+	"github.com/oakmound/weekly87/internal/abilities"
 	"github.com/oakmound/weekly87/internal/restrictor"
 	"github.com/oakmound/weekly87/internal/vfx"
 
@@ -102,16 +103,25 @@ func (be *BasicEnemy) Destroy() {
 func (be *BasicEnemy) DeathEffect(secid, idx int64) {
 	be.RSpace.Label = 0
 	be.PushBack.Add(physics.NewVector(100, 0))
+	abilities.Produce(
+		abilities.StartAt(floatgeom.Point2{be.X()+8, be.Y()+10}),
+		abilities.LineTo(floatgeom.Point2{be.X()+30, be.Y()+30}),
+		//abilities.FollowSpeed(ply.Delta.Xp(), ply.Delta.Yp()),
+		abilities.WithParticles(vfx.WhiteSlash()),
+		abilities.FrameLength(20),
+	)
 	be.CheckedBind(func(be *BasicEnemy, data interface{}) int {
 		if be.PushBack.Magnitude() > 0.15 {
 			return 0
 		}
 		event.Trigger("EnemyDeath", []int64{secid, idx})
 
+		w, h := be.R.GetDims()
+
 		// Create a visual effect, overwrite?
-		source := vfx.Death1().Generate(2)
-		source.SetPos(be.X(), be.Y())
-		endSource := time.Now().Add(time.Millisecond * 700)
+		source := vfx.RedRing().Generate(2)
+		source.SetPos(be.X()+float64(w/2), be.Y()+float64(h/2))
+		endSource := time.Now().Add(time.Millisecond * 30)
 		source.CID.Bind(func(id int, data interface{}) int {
 			eff, ok := event.GetEntity(id).(*particle.Source)
 			if ok {
@@ -231,7 +241,6 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		fmt.Println("Consider moving this effect to trigger vie the attacked event", be)
 
 		be.DeathEffect(secid, idx)
-
 	})
 	be.CheckedBind(func(be *BasicEnemy, data interface{}) int {
 
