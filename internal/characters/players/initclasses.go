@@ -13,8 +13,10 @@ func Init() {
 	WarriorsInit()
 	MageInit()
 	EmptyInit()
+	InnKeeperInit()
 	classmapping = map[int]*Constructor{
 		Empty:     EmptyConstructor,
+		InnKeeper: InnKeeperConstructor,
 		Spearman:  WarriorConstructors["Spearman"],
 		Swordsman: WarriorConstructors["Swordsman"],
 		Berserker: WarriorConstructors["Berserker"],
@@ -49,6 +51,7 @@ const (
 	WhiteMage
 	BlueMage
 	TimeMage
+	InnKeeper
 )
 
 var classmapping map[int]*Constructor

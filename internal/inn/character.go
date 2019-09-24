@@ -271,5 +271,48 @@ func (n NPC) Activate() {
 
 func (n NPC) Destroy() {
 	n.Tree.Remove(n.RSpace.Space)
+}
 
+
+func NewInnkeeper(scale, x, y float64) NPC {
+	keeper := NewInnNPC(players.InnKeeper, scale, x, y)
+	keeper.Bind(func(id int, frame interface{}) int {
+		
+		keeper, ok := event.GetEntity(id).(*NPC)
+		if !ok {
+			dlog.Error("Got non NPC in Innkeeper bindings")
+			return 1
+		}
+
+		f, ok := frame.(int)
+		if !ok {
+			dlog.Error("Got non int for frame count")
+			return 1
+		}
+		// Fancy logic here
+		if f == 0 {
+			keeper.Delta.Add(physics.NewVector(0, 1))
+		} else if  f % 200 == 0 {
+			keeper.Delta.Add(physics.NewVector(0, 2))
+		} else if f % 100 == 0 {
+			keeper.Delta.Add(physics.NewVector(0, -2))
+		}
+
+
+		keeper.ShiftPos(keeper.Delta.X(), keeper.Delta.Y())
+		if keeper.Delta.X() != 0 || keeper.Delta.Y() != 0 {
+			if keeper.Delta.X() < 0 {
+				keeper.Swtch.Set("walkLT")
+			} else {
+				keeper.Swtch.Set("walkRT")
+			}
+		} else {
+			cur := keeper.Swtch.Get()
+			err := keeper.Swtch.Set("stand" + string(cur[len(cur)-2:]))
+			dlog.ErrorCheck(err)
+		}
+	
+		return 0
+	}, "EnterFrame")
+	return keeper
 }
