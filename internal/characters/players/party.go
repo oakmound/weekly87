@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/oakmound/weekly87/internal/abilities/buff"
+	"github.com/oakmound/weekly87/internal/sfx"
 
 	"github.com/oakmound/oak/key"
 
@@ -221,7 +222,7 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 				dlog.Warn("We thought we had shield but we could not find a buff with such a name")
 				return
 			}
-
+			sfx.Play("playerHit1")
 			ply.Kill()
 			event.Trigger("PlayerDeath", nil)
 		})

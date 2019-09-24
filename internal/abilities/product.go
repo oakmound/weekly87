@@ -17,6 +17,7 @@ import (
 	"github.com/oakmound/weekly87/internal/abilities/buff"
 	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/layer"
+	"github.com/oakmound/weekly87/internal/sfx"
 )
 
 type Producer struct {
@@ -34,6 +35,8 @@ type Producer struct {
 
 	Label collision.Label
 	R     render.Renderable
+
+	ToPlay string
 
 	ThenFn    DoOption
 	WhileFn   DoOption
@@ -146,6 +149,19 @@ func Perform(p Producer) DoOption {
 	}
 }
 
+func DoPlay(s string) DoOption {
+	return func(_ floatgeom.Point2) {
+		sfx.Play(s)
+	}
+}
+
+func PlaySFX(s string) Option {
+	return func(p Producer) Producer {
+		p.ToPlay = s
+		return p
+	}
+}
+
 // Perform from where you left off
 func Chain(p Producer) DoOption {
 	return func(pt floatgeom.Point2) {
@@ -159,6 +175,15 @@ func Chain(p Producer) DoOption {
 		}
 
 		event.Trigger("AbilityFired", chrs)
+	}
+}
+
+func AndDo(dos ...DoOption) DoOption {
+	return func(pt floatgeom.Point2) {
+
+		for _, o := range dos {
+			o(pt)
+		}
 	}
 }
 
@@ -341,6 +366,10 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 
 	chrs := make([]characters.Character, 1)
 	chrs[0] = prd
+
+	if p.ToPlay != "" {
+		sfx.Play(p.ToPlay)
+	}
 
 	return chrs, nil
 }

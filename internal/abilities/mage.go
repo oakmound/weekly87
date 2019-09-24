@@ -7,6 +7,7 @@ import (
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/weekly87/internal/abilities/buff"
+	"github.com/oakmound/weekly87/internal/sfx"
 
 	"github.com/200sc/go-dist/floatrange"
 	"github.com/200sc/go-dist/intrange"
@@ -102,6 +103,7 @@ func storm(image string, dur time.Duration, speed floatrange.Range, sc, ec color
 			Duration(dur),
 		)
 		dlog.ErrorCheck(err)
+		sfx.Play("stormEffect")
 		return chrs
 	}
 }
@@ -335,7 +337,9 @@ func MageInit() {
 				//ArcTo(end),
 				LineTo(end),
 				WithParticles(pg),
-				Then(Drop(banner)),
+				Then(
+					AndDo(Drop(banner), DoPlay("bannerPlace1")),
+				),
 			)
 			dlog.ErrorCheck(err)
 			return chrs

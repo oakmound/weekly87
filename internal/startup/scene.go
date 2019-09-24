@@ -12,6 +12,7 @@ import (
 	"github.com/oakmound/weekly87/internal/joys"
 	"github.com/oakmound/weekly87/internal/menus/selector"
 	"github.com/oakmound/weekly87/internal/run"
+	"github.com/oakmound/weekly87/internal/sfx"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/dlog"
@@ -51,6 +52,7 @@ var Scene = scene.Scene{
 			section.Init()
 			enemies.Init()
 			settings.Load()
+			sfx.Init()
 
 			// The game has just started, maybe do some
 			// intro visual stuff

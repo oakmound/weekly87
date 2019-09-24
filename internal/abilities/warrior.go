@@ -19,6 +19,7 @@ import (
 	"github.com/oakmound/weekly87/internal/abilities/buff"
 	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/characters/labels"
+	"github.com/oakmound/weekly87/internal/sfx"
 )
 
 func thwack(image string, xOffset, yDelta float64, mods ...mod.Mod) func(User) []characters.Character {
@@ -52,6 +53,7 @@ func thwack(image string, xOffset, yDelta float64, mods ...mod.Mod) func(User) [
 			WithRenderable(md),
 		)
 		dlog.ErrorCheck(err)
+		sfx.Play("slashHeavy")
 		return chrs
 	}
 }
