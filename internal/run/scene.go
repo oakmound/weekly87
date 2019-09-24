@@ -19,6 +19,7 @@ import (
 	klg "github.com/200sc/klangsynthese/audio"
 
 	"github.com/oakmound/weekly87/internal/characters/doodads"
+	"github.com/oakmound/weekly87/internal/characters/enemies"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/records"
@@ -52,6 +53,7 @@ var facing = 1
 // Scene  to display the run
 var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
+
 		// Reset to start of run if not first run
 		stayInGame = true
 		nextscene = "endGame"
@@ -447,10 +449,13 @@ var Scene = scene.Scene{
 			dlog.Warn("Cheating to toggle speedup party by ", up)
 		})
 		oak.AddCommand("killme", func(args []string) {
-			for _, p := range pty.Players {
-				p.Alive = false
+			be := &enemies.BasicEnemy{
+				Active: true,
 			}
-			event.Trigger("PlayerDeath", nil)
+			cid := be.Init()
+			sp := collision.NewFullSpace(float64(oak.ViewPos.X), float64(oak.ViewPos.Y),
+				1000, 500, labels.Enemy, event.CID(cid))
+			collision.Add(sp)
 		})
 
 		oak.AddCommand("shake", func(args []string) {
