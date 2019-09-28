@@ -20,6 +20,12 @@ func ButtonSelectorA(selectors grid.Grid) s.Option {
 			spcs = append(spcs, button.GetSpace())
 		}
 	}
+	return ButtonSelectorSpacesA(spcs, btnList)
+}
+
+// ButtonSelectorSpacesA sets up a standard button selector for menus given a set of spaces and btns
+// For times when the menu is not in a grid.Grid
+func ButtonSelectorSpacesA(spcs []*collision.Space, btnList []btn.Btn) s.Option {
 	return s.And(
 		s.Layers(2, 3),
 		s.VertArrowControl(),
@@ -32,5 +38,6 @@ func ButtonSelectorA(selectors grid.Grid) s.Option {
 		s.SelectTrigger("A"+joystick.ButtonUp),
 		s.SelectTrigger("Start"+joystick.ButtonUp),
 		s.DestroyTrigger(key.Down+key.Escape),
+		s.Wraps(true),
 	)
 }

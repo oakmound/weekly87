@@ -107,6 +107,13 @@ func Display(display func(floatgeom.Point2) render.Renderable) Option {
 	}
 }
 
+// Wraps sets whether selection should wrap around
+func Wraps(shouldWrap bool) Option {
+	return func(sc *Constructor) {
+		sc.Wraps = true
+	}
+}
+
 // SelectTrigger sets the input/event to trigger selection with
 func SelectTrigger(trigger string) Option {
 	return func(sc *Constructor) {
@@ -210,6 +217,7 @@ type Constructor struct {
 	MouseLeft  func(*Selector, int) int
 	MouseRight func(*Selector, int) int
 	Bindings   map[string]func(*Selector)
+	Wraps      bool
 }
 
 type Selector struct {
@@ -300,7 +308,14 @@ func (s *Selector) Init() event.CID {
 
 func (s *Selector) MoveTo(i int) error {
 	if i < 0 || i >= len(s.Spots) {
-		return errors.New("Index to move to exceeds limit")
+		if !s.Wraps {
+			return errors.New("Index to move to exceeds limit")
+		}
+		if i < 0 {
+			i = len(s.Spots) - 1
+		} else {
+			i = 0
+		}
 	}
 	spot := s.Spots[i]
 	draw := false

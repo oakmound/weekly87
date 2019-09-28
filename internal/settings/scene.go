@@ -8,9 +8,9 @@ import (
 	"github.com/oakmound/oak/mouse"
 
 	"github.com/oakmound/oak"
-	"github.com/oakmound/oak/key"
-	"github.com/oakmound/oak/joystick"
 	"github.com/oakmound/oak/entities/x/btn"
+	"github.com/oakmound/oak/joystick"
+	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/mod"
 	"github.com/oakmound/oak/scene"
@@ -69,8 +69,16 @@ var Scene = scene.Scene{
 		checkMark.Fill(color.RGBA{100, 255, 100, 255})
 		checkMark.ShiftX(110)
 
-		x := 200.0
-		y := 120.0
+		x := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 6
+		y := float64(oak.ScreenHeight) / 2.7
+
+		fnt := render.DefFontGenerator.Copy()
+		fnt.Color = render.FontColor("Green")
+		fnt.Size = 60
+		titleFnt := fnt.Generate()
+
+		title := titleFnt.NewStrText("Settings", x-20, y-40)
+		render.Draw(title, 2, 12)
 
 		infR1 := render.NewVerticalGradientBox(150, 32, color.RGBA{0, 120, 255, 255}, color.RGBA{0, 80, 230, 255})
 		infR2 := render.NewCompositeM(infR1, checkMark).ToSprite()
@@ -86,7 +94,9 @@ var Scene = scene.Scene{
 		)
 		fpsBtn := btn.New(showFps)
 
-		sfxVolume := menus.NewSlider(0, x, y+50, sliderWidth, sliderHeight, 10, 20, nil,
+		y += 50
+
+		sfxVolume := menus.NewSlider(0, x, y, sliderWidth, sliderHeight, 10, 20, nil,
 			volBackground.Copy(), 0, 100, 100*(*sfxLevel),
 			render.NewColorBox(5, 15, color.RGBA{255, 0, 0, 255}), 1, 1)
 
@@ -95,7 +105,8 @@ var Scene = scene.Scene{
 			*sfxLevel = val * 0.01
 		}
 
-		musicVolume := menus.NewSlider(0, x, y+100, sliderWidth, sliderHeight, 10, 20, nil,
+		y += 50
+		musicVolume := menus.NewSlider(0, x, y, sliderWidth, sliderHeight, 10, 20, nil,
 			volBackground.Copy(), 0, 100, 100*(*musicLevel),
 			render.NewColorBox(5, 15, color.RGBA{255, 0, 0, 255}), 1, 1)
 
@@ -103,8 +114,8 @@ var Scene = scene.Scene{
 		musicVolume.Callback = func(val float64) {
 			*musicLevel = val * 0.01
 		}
-
-		masterVolume := menus.NewSlider(0, x, y+150, sliderWidth, sliderHeight, 10, 20, nil,
+		y += 50
+		masterVolume := menus.NewSlider(0, x, y, sliderWidth, sliderHeight, 10, 20, nil,
 			volBackground.Copy(), 0, 100, 100*(*masterLevel),
 			render.NewColorBox(5, 15, color.RGBA{255, 0, 0, 255}), 1, 1)
 
@@ -112,13 +123,10 @@ var Scene = scene.Scene{
 		masterVolume.Callback = func(val float64) {
 			*masterLevel = val * 0.01
 		}
-
-		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
-		menuY := float64(oak.ScreenHeight) * 3 / 4
-
+		y += 100
 		returnBtn := btn.New(menus.BtnCfgB,
 			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
-			btn.Pos(menuX, menuY),
+			btn.Pos(x+10, y),
 			btn.Text("Return To Menu"),
 			btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 				stayInMenu = false
@@ -160,7 +168,7 @@ var Scene = scene.Scene{
 					dlog.Error("Expected a float increment")
 					return
 				}
-				switch i{
+				switch i {
 				case 1:
 					sfxVolume.Slide(change)
 				case 2:
@@ -169,9 +177,9 @@ var Scene = scene.Scene{
 					masterVolume.Slide(change)
 				}
 			}),
-			selector.Layers(2,20),
+			selector.Layers(2, 20),
 		)
-	
+
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
 	End: func() (string, *scene.Result) {

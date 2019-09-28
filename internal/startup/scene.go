@@ -65,6 +65,9 @@ var Scene = scene.Scene{
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
 		render.Draw(menuBackground, 0)
 
+		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 6
+		menuY := float64(oak.ScreenHeight) / 2.7
+
 		// Render menu buttons
 		// 1. Start game
 		// 2. Select save file? <- don't worry about saving progress for first build
@@ -74,15 +77,12 @@ var Scene = scene.Scene{
 		//get the title
 		fnt := render.DefFontGenerator.Copy()
 		fnt.Color = render.FontColor("Blue")
-		fnt.Size = 40
+		fnt.Size = 60
 		blueFnt := fnt.Generate()
 
-		title := blueFnt.NewStrText("Chest Stacker", float64(oak.ScreenWidth)/2-120, 80)
+		title := blueFnt.NewStrText("Chest Stacker", menuX-120, menuY-40)
 
 		render.Draw(title, 2, 12)
-
-		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
-		menuY := float64(oak.ScreenHeight) / 4
 
 		selectors := grid.New(
 			grid.Defaults(btn.And(menus.BtnCfgB, btn.Pos(menuX, menuY))),
