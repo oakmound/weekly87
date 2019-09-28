@@ -98,7 +98,7 @@ func storm(image string, dur time.Duration, speed floatrange.Range, sc, ec color
 		chrs, err := Produce(
 			StartAt(floatgeom.Point2{float64(oak.ViewPos.X), 0}),
 			WithParticles(cpg),
-			WithLabel(labels.EffectsEnemy),
+
 			FollowSpeed(delta.Xp(), nil),
 			Duration(dur),
 		)
@@ -144,7 +144,6 @@ func shower(speed floatrange.Range, dur time.Duration, sc, ec color.Color, xSpre
 		chrs, err := Produce(
 			StartAt(floatgeom.Point2{float64(oak.ViewPos.X), 0}),
 			WithParticles(cpg),
-			WithLabel(labels.EffectsEnemy),
 			FollowSpeed(delta.Xp(), nil),
 			Duration(dur),
 		)
@@ -155,12 +154,6 @@ func shower(speed floatrange.Range, dur time.Duration, sc, ec color.Color, xSpre
 
 var (
 	FrostBolt, Fireball, Blizzard, FireWall, FireStorm, Rez, Invulnerability, Slow, CooldownRework, GameBreakerFireBall *ability
-
-	baseHit = map[collision.Label]collision.OnHit{
-		labels.Enemy: func(a, b *collision.Space) {
-			b.CID.Trigger("Attacked", map[string]float64{"damage": 1.0})
-		},
-	}
 
 	frostHit = map[collision.Label]collision.OnHit{
 		labels.Enemy: func(a, b *collision.Space) {
@@ -438,39 +431,4 @@ func MageInit() {
 		},
 	)
 
-	// GameBreakerFireBall is debug murder ability
-	GameBreakerFireBall = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 255}),
-		time.Millisecond*1,
-		func(u User) []characters.Character {
-			dlog.Info("Firing a fireball")
-			pos := u.Vec()
-
-			// Spell Display
-			pg := particle.NewColorGenerator(
-				particle.Color(color.RGBA{255, 10, 10, 255}, color.RGBA{0, 0, 0, 0},
-					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
-				particle.Shape(shape.Diamond),
-				particle.Size(intrange.NewConstant(50)),
-				particle.EndSize(intrange.NewConstant(50)),
-				particle.Speed(floatrange.NewConstant(3)),
-				particle.LifeSpan(floatrange.NewConstant(1)),
-			)
-			// endDelta := 1200.0
-			endDelta := float64(oak.ScreenWidth * 1)
-			if u.Direction() == "LT" {
-				endDelta *= -1
-			}
-			end := floatgeom.Point2{pos.X() + endDelta, pos.Y()}
-			chrs, err := Produce(
-				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
-				FrameLength(400),
-				LineTo(end),
-				WithParticles(pg),
-				WithLabel(labels.EffectsEnemy),
-			)
-			dlog.ErrorCheck(err)
-			return chrs
-		},
-	)
 }

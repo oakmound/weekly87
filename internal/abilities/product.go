@@ -33,8 +33,9 @@ type Producer struct {
 	FollowY   *float64
 	Generator particle.Generator
 
-	Label collision.Label
-	R     render.Renderable
+	HitEffects map[collision.Label]collision.OnHit
+	Label      collision.Label
+	R          render.Renderable
 
 	ToPlay string
 
@@ -108,6 +109,13 @@ func WithParticles(pg particle.Generator) Option {
 func WithLabel(l collision.Label) Option {
 	return func(p Producer) Producer {
 		p.Label = l
+		return p
+	}
+}
+
+func WithHitEffects(he map[collision.Label]collision.OnHit) Option {
+	return func(p Producer) Producer {
+		p.HitEffects = he
 		return p
 	}
 }
@@ -269,6 +277,9 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 		prd.CID, 0,
 	)
 	prd.RSpace.Space.Label = p.Label
+	for l, ef := range p.HitEffects {
+		prd.RSpace.Add(l, ef)
+	}
 
 	if prd.R != nil {
 		prd.R.SetPos(p.Start.X(), p.Start.Y())

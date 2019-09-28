@@ -6,11 +6,13 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/weekly87/internal/characters"
+	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/recolor"
 
 	"github.com/oakmound/oak/render"
@@ -64,6 +66,12 @@ var (
 	iconH                                                      = 64
 
 	BuffIconSize = 16
+
+	baseHit = map[collision.Label]collision.OnHit{
+		labels.Enemy: func(a, b *collision.Space) {
+			b.CID.Trigger("Attacked", map[string]float64{"damage": 1.0})
+		},
+	}
 )
 
 // User is something that can use abilities

@@ -49,7 +49,7 @@ func thwack(image string, xOffset, yDelta float64, mods ...mod.Mod) func(User) [
 			LineTo(start),
 			FrameLength(16),
 			FollowSpeed(u.GetDelta().Xp(), u.GetDelta().Yp()),
-			WithLabel(labels.EffectsEnemy),
+			WithHitEffects(baseHit),
 			WithRenderable(md),
 		)
 		dlog.ErrorCheck(err)
@@ -119,7 +119,7 @@ func WarriorInit() {
 				StartAt(floatgeom.Point2{0, -yDelta * 6}),
 				FrameLength(16),
 				FollowSpeed(delta.Xp(), delta.Yp()),
-				WithLabel(labels.EffectsEnemy),
+				WithHitEffects(baseHit),
 				WithRenderable(down.Copy()),
 			)(Producer{})
 
@@ -127,7 +127,7 @@ func WarriorInit() {
 				StartAt(floatgeom.Point2{xOffset / 2, 0}),
 				FrameLength(16),
 				FollowSpeed(delta.Xp(), delta.Yp()),
-				WithLabel(labels.EffectsEnemy),
+				WithHitEffects(baseHit),
 				WithRenderable(up.Copy()),
 				Then(Chain(hit4)),
 			)(Producer{})
@@ -136,7 +136,7 @@ func WarriorInit() {
 				StartAt(floatgeom.Point2{0, yDelta * 5}),
 				FrameLength(16),
 				FollowSpeed(delta.Xp(), delta.Yp()),
-				WithLabel(labels.EffectsEnemy),
+				WithHitEffects(baseHit),
 				WithRenderable(up.Copy()),
 				Then(Chain(hit3)),
 			)(Producer{})
@@ -146,7 +146,7 @@ func WarriorInit() {
 				LineTo(start),
 				FrameLength(16),
 				FollowSpeed(delta.Xp(), delta.Yp()),
-				WithLabel(labels.EffectsEnemy),
+				WithHitEffects(baseHit),
 				WithRenderable(down),
 				Then(Chain(hit2)),
 			)
