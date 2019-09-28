@@ -178,6 +178,7 @@ var Scene = scene.Scene{
 				}
 			}),
 			selector.Layers(2, 20),
+			selector.Wraps(true),
 		)
 
 	},

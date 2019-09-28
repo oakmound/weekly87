@@ -92,8 +92,8 @@ var Scene = scene.Scene{
 					{
 						btn.And(btn.Color(colornames.Green), btn.Text("Start Game"), bindNewScene("inn")),
 						// btn.And(btn.Color(colornames.Blueviolet), btn.Text("Load Game"), bindNewScene("load")),
-						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Game History"), bindNewScene("history")),
-						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Settings"), bindNewScene("settings")),
+						btn.And(btn.Color(colornames.Gold), btn.Text("Game History"), bindNewScene("history")),
+						btn.And(btn.Color(colornames.Blue), btn.Text("Settings"), bindNewScene("settings")),
 						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Credits"), bindNewScene("credits")),
 						btn.And(btn.Text("Exit Game"), btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 							os.Exit(3)

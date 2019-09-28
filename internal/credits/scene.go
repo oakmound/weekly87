@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"path/filepath"
 
+	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/mouse"
 
 	"github.com/oakmound/oak"
@@ -11,6 +12,7 @@ import (
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/menus"
+	"github.com/oakmound/weekly87/internal/menus/selector"
 )
 
 var stayInMenu bool
@@ -30,10 +32,21 @@ var Scene = scene.Scene{
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
 		render.Draw(menuBackground, 0)
 
-		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
-		menuY := float64(oak.ScreenHeight) * 1 / 4
+		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 6
+		menuY := float64(oak.ScreenHeight) / 2.7
 
-		btn.New(
+		fnt := render.DefFontGenerator.Copy()
+		fnt.Color = render.FontColor("Black")
+		fnt.Size = 60
+		titleFnt := fnt.Generate()
+
+		title := titleFnt.NewStrText("Credits", menuX-20, menuY-40)
+		render.Draw(title, 2, 12)
+
+		construction := titleFnt.NewStrText("!Under Construction!", float64(oak.ScreenWidth)/3, menuY+70)
+		render.Draw(construction, 2, 12)
+
+		creditFenrir := btn.New(
 			menus.BtnCfgC,
 			btn.Text("Art - LightningFenrir"),
 			btn.Pos(menuX, menuY),
@@ -42,7 +55,7 @@ var Scene = scene.Scene{
 
 		menuY += menus.BtnHeightB * 1.5
 
-		btn.New(
+		creditPlaus := btn.New(
 			menus.BtnCfgC,
 			btn.Text("Code - PlausiblyFun"),
 			btn.Pos(menuX, menuY),
@@ -51,7 +64,7 @@ var Scene = scene.Scene{
 
 		menuY += menus.BtnHeightB * 1.5
 
-		btn.New(
+		credit200sc := btn.New(
 			menus.BtnCfgC,
 			btn.Text("Code/Music - 200sc"),
 			btn.Pos(menuX, menuY),
@@ -60,7 +73,7 @@ var Scene = scene.Scene{
 
 		menuY += menus.BtnHeightB * 1.5
 
-		btn.New(menus.BtnCfgB,
+		returnBtn := btn.New(menus.BtnCfgB,
 			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
 			btn.Pos(menuX, menuY),
 			btn.Text("Return To Menu"),
@@ -71,8 +84,15 @@ var Scene = scene.Scene{
 					return 0
 				}))
 
-		text := render.DefFont().NewStrText("The Credits are under construction", float64(oak.ScreenWidth)/2-100, float64(oak.ScreenHeight)/4)
-		render.Draw(text, 0, 1)
+		spcs := []*collision.Space{}
+		btnList := []btn.Btn{returnBtn, credit200sc, creditPlaus, creditFenrir}
+		for _, b := range btnList {
+			spcs = append(spcs, b.GetSpace())
+		}
+		selector.New(
+			menus.ButtonSelectorSpacesA(spcs, btnList),
+			selector.MouseBindings(true),
+		)
 
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),
