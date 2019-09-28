@@ -2,8 +2,10 @@ package records
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/rand"
 	"os"
+	"time"
 
 	"github.com/oakmound/weekly87/internal/characters/players"
 
@@ -11,6 +13,7 @@ import (
 )
 
 const recordsFile = "save.json"
+const archPath = "save_arch_"
 
 // Records serves as our save file and all variables we track across
 // multiple runs
@@ -59,4 +62,11 @@ func Load() *Records {
 	}
 
 	return r
+}
+
+// Archive the current save file
+func Archive() (string, error) {
+	newName := fmt.Sprintf("%s%s.json", archPath, time.Now().Format("MonJan2150405"))
+	err := os.Rename(recordsFile, newName)
+	return newName, err
 }

@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/oakmound/oak/collision"
+	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/mouse"
 
 	"github.com/oakmound/oak"
@@ -13,6 +15,7 @@ import (
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/menus"
+	"github.com/oakmound/weekly87/internal/menus/selector"
 	"github.com/oakmound/weekly87/internal/records"
 )
 
@@ -51,7 +54,7 @@ var Scene = scene.Scene{
 		render.Draw(textBacking, 1)
 
 		r := records.Load()
-		fmt.Println(r)
+		dlog.Info("Records loaded:", r)
 		textY := 60.0
 
 		historyTitle := titleFnt.NewStrText("Your Past Game Stats!", float64(oak.ScreenWidth)/2, textY)
@@ -71,7 +74,24 @@ var Scene = scene.Scene{
 		render.Draw(farthestText, 2, 2)
 		textY += 40
 
-		btn.New(menus.BtnCfgA,
+		nStartBtn := btn.New(menus.BtnCfgA,
+			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
+			btn.Pos(menuX, textY),
+			btn.Text("New Save File"), btn.Binding(mouse.ClickOn, func(int, interface{}) int {
+				fmt.Println("HAI THERE")
+				newPath, err := records.Archive()
+				nextscene = "history"
+				stayInMenu = false
+				if err != nil {
+					dlog.Error("Failed to move save file to", newPath, "due to", err)
+					return 0
+				}
+				dlog.Info("Moved the current save file to ", newPath)
+
+				return 0
+			}))
+
+		returnBtn := btn.New(menus.BtnCfgA,
 			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
 			btn.Pos(menuX, menuY),
 			btn.Text("Return To Menu"), btn.Binding(mouse.ClickOn, func(int, interface{}) int {
@@ -79,6 +99,16 @@ var Scene = scene.Scene{
 				stayInMenu = false
 				return 0
 			}))
+
+		spcs := []*collision.Space{}
+		btnList := []btn.Btn{returnBtn, nStartBtn}
+		for _, b := range btnList {
+			spcs = append(spcs, b.GetSpace())
+		}
+		selector.New(
+			menus.ButtonSelectorSpacesA(spcs, btnList),
+			selector.MouseBindings(true),
+		)
 
 	},
 	Loop: scene.BooleanLoop(&stayInMenu),

@@ -1,5 +1,6 @@
 logs/*
-save.json
+save*.json
 settings.json
 *.exe
 screenshot*
+*-workspace
