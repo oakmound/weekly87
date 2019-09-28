@@ -16,8 +16,10 @@ type Settings struct {
 	MusicVolume   float64 `json:"musicVolume"`
 	MasterVolume  float64 `json:"masterVolume"`
 	ShowFpsToggle bool    `json:"showFpsToggle"`
+	Debug         bool    `json:"debugOn,omitempty"`
 }
 
+// Store the settings into a file
 func (s *Settings) Store() {
 	f, err := os.Create(settingsFile)
 	data, err := json.Marshal(s)
@@ -26,6 +28,8 @@ func (s *Settings) Store() {
 	dlog.ErrorCheck(err)
 	dlog.ErrorCheck(f.Close())
 }
+
+// Load the settings from the filesystem
 func Load() {
 	s := &Settings{}
 
