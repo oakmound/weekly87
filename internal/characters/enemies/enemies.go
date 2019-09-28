@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/abilities"
+	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/restrictor"
 	"github.com/oakmound/weekly87/internal/vfx"
 
@@ -104,13 +104,15 @@ func (be *BasicEnemy) DeathEffect(secid, idx int64) {
 	be.RSpace.Label = 0
 	be.PushBack.Add(physics.NewVector(100, 0))
 	abilities.Produce(
-		abilities.StartAt(floatgeom.Point2{be.X()+8, be.Y()+10}),
-		abilities.LineTo(floatgeom.Point2{be.X()+30, be.Y()+30}),
+		abilities.StartAt(floatgeom.Point2{be.X() + 8, be.Y() + 10}),
+		abilities.LineTo(floatgeom.Point2{be.X() + 30, be.Y() + 30}),
 		//abilities.FollowSpeed(ply.Delta.Xp(), ply.Delta.Yp()),
 		abilities.WithParticles(vfx.WhiteSlash()),
 		abilities.FrameLength(20),
 	)
 	be.CheckedBind(func(be *BasicEnemy, data interface{}) int {
+
+		// wait for pushback to complete
 		if be.PushBack.Magnitude() > 0.15 {
 			return 0
 		}
@@ -202,7 +204,7 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		// Enemies should only do anything if they are on screen
 		// Todo: other things could effect delta temporarily
 
-		push := be.PushBack
+		push := be.PushBack.Copy()
 
 		if be.facing == "RT" {
 			push.Scale(-1)

@@ -182,19 +182,24 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			}
 
 			if ply.Shield > 0 {
-				dlog.Info("Enemy hit us be we were shielded")
+
+				facingRight := (p.facing == "RT")
+				direction := 1.0
+				if facingRight {
+					direction = -1.0
+				}
+				pushD := -1 * direction * p.RunSpeed * 20
+				dlog.Info("Enemy hit us be we were shielded so we pushed them back by", pushD)
 
 				vfx.VerySmallShaker.Shake(time.Duration(400) * time.Millisecond)
 				sfx.Play("bounced1")
 				// Affect the enemy
-				en.PushBack.Add(physics.NewVector(100, 0))
+				en.PushBack.Add(physics.NewVector(pushD, 0))
 
 				source := vfx.PushBack1().Generate(2)
-				plyX := ply.X()
-				if ply.facing == "LT" {
-					plyX -= 5
-				} else {
-					plyX += 21
+				plyX := ply.X() - 5
+				if facingRight {
+					plyX += 26
 				}
 				source.SetPos(plyX, ply.Y()+16)
 				endSource := time.Now().Add(time.Millisecond * 300)

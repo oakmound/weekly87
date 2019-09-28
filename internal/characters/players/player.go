@@ -1,7 +1,6 @@
 package players
 
 import (
-	"fmt"
 	"sort"
 	"sync"
 	"time"
@@ -151,7 +150,6 @@ func (p *Player) ReorderBuffs() {
 
 	for i, b := range p.Buffs {
 		b.R.SetPos(x, float64(yOffset*i+16))
-		fmt.Println("Drawing at ", x, float64(yOffset*i+16), p.PartyIndex)
 	}
 }
 
