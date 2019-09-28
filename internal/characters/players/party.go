@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/oakmound/weekly87/internal/abilities/buff"
 	"github.com/oakmound/weekly87/internal/abilities"
+	"github.com/oakmound/weekly87/internal/abilities/buff"
 	"github.com/oakmound/weekly87/internal/sfx"
 
 	"github.com/oakmound/oak/key"
@@ -185,18 +185,18 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 				dlog.Info("Enemy hit us be we were shielded")
 
 				vfx.VerySmallShaker.Shake(time.Duration(400) * time.Millisecond)
-
+				sfx.Play("bounced1")
 				// Affect the enemy
 				en.PushBack.Add(physics.NewVector(100, 0))
 
 				source := vfx.PushBack1().Generate(2)
-				plyX := ply.X() 
+				plyX := ply.X()
 				if ply.facing == "LT" {
 					plyX -= 5
 				} else {
 					plyX += 21
 				}
-				source.SetPos(plyX,ply.Y()+16)
+				source.SetPos(plyX, ply.Y()+16)
 				endSource := time.Now().Add(time.Millisecond * 300)
 				source.CID.Bind(func(id int, data interface{}) int {
 					eff, ok := event.GetEntity(id).(*particle.Source)
@@ -231,10 +231,10 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			}
 
 			abilities.Produce(
-				abilities.StartAt(floatgeom.Point2{ply.X()+8, ply.Y()+10}),
+				abilities.StartAt(floatgeom.Point2{ply.X() + 8, ply.Y() + 10}),
 				//abilities.FollowSpeed(ply.Delta.Xp(), ply.Delta.Yp()),
 				abilities.WithParticles(vfx.WhiteRing()),
-				abilities.Duration(time.Millisecond * 20),
+				abilities.Duration(time.Millisecond*20),
 			)
 			vfx.SmallShaker.Shake(time.Duration(1000) * time.Millisecond)
 			sfx.Play("playerHit1")

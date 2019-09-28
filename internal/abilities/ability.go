@@ -28,6 +28,8 @@ func Init() {
 	dlog.ErrorCheck(err)
 	slashIcon, err = render.LoadSprite("", filepath.Join("64x64", "SlashIcon.png"))
 	dlog.ErrorCheck(err)
+	hammerIcon, err = render.LoadSprite("", filepath.Join("64x64", "HammerIcon.png"))
+	dlog.ErrorCheck(err)
 
 	red := color.RGBA{200, 100, 100, 255}
 	blue := color.RGBA{100, 100, 200, 255}
@@ -58,12 +60,12 @@ func Init() {
 }
 
 var (
-	err                                                        error
-	blastIcon, shieldAuraIcon, shieldIcon, slashIcon           *render.Sprite
-	redBlastIcon, blueBlastIcon, redBlastDIcon, blueBlastDIcon *render.Sprite
-	upSlashIcon, downSlashIcon                                 *render.Sprite
-	iconW                                                      = 64
-	iconH                                                      = 64
+	err                                                          error
+	blastIcon, shieldAuraIcon, shieldIcon, slashIcon, hammerIcon *render.Sprite
+	redBlastIcon, blueBlastIcon, redBlastDIcon, blueBlastDIcon   *render.Sprite
+	upSlashIcon, downSlashIcon                                   *render.Sprite
+	iconW                                                        = 64
+	iconH                                                        = 64
 
 	BuffIconSize = 16
 

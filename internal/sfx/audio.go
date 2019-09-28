@@ -24,11 +24,13 @@ func Init() {
 
 	files := map[string]*font.Font{
 
-		"playerHit1":   LoudSFX,
-		"stormEffect":  LoudSFX,
-		"bannerPlace1": LoudSFX,
-		"slashHeavy":   SoftSFX,
-		"slashLight":   SoftSFX,
+		"playerHit1":    LoudSFX,
+		"stormEffect":   LoudSFX,
+		"bannerPlaced1": SoftSFX,
+		"slashHeavy":    SoftSFX,
+		"slashLight":    SoftSFX,
+		"bounced1":      LoudSFX,
+		"warriorCast1":  LoudSFX,
 	}
 	for s, f := range files {
 		a, err := audio.Get(s + ".wav")

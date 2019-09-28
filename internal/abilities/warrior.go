@@ -81,7 +81,8 @@ func WarriorInit() {
 	)
 
 	HammerSmack = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{200, 80, 80, 255}),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 80, 120, 255}), hammerIcon),
+
 		time.Second*8,
 		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 26, mod.Scale(2, 2)),
 	)
@@ -121,6 +122,7 @@ func WarriorInit() {
 				FollowSpeed(delta.Xp(), delta.Yp()),
 				WithHitEffects(baseHit),
 				WithRenderable(down.Copy()),
+				PlaySFX("slashHeavy"),
 			)(Producer{})
 
 			hit3 := And(
@@ -130,6 +132,7 @@ func WarriorInit() {
 				WithHitEffects(baseHit),
 				WithRenderable(up.Copy()),
 				Then(Chain(hit4)),
+				PlaySFX("slashLight"),
 			)(Producer{})
 
 			hit2 := And(
@@ -139,6 +142,7 @@ func WarriorInit() {
 				WithHitEffects(baseHit),
 				WithRenderable(up.Copy()),
 				Then(Chain(hit3)),
+				PlaySFX("slashHeavy"),
 			)(Producer{})
 
 			chrs, err := Produce(
@@ -149,6 +153,7 @@ func WarriorInit() {
 				WithHitEffects(baseHit),
 				WithRenderable(down),
 				Then(Chain(hit2)),
+				PlaySFX("slashLight"),
 			)
 			dlog.ErrorCheck(err)
 			event.Trigger("RageStart", nil)
@@ -165,6 +170,7 @@ func WarriorInit() {
 		},
 	)
 
+	// Party Shield is a slower moving buff that protects the whole party
 	PartyShield = NewAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{40, 200, 90, 255}), shieldAuraIcon),
 		time.Second*10,
@@ -192,7 +198,7 @@ func WarriorInit() {
 				particle.LifeSpan(floatrange.NewConstant(15)),
 			)
 
-			endDelta := 600.0
+			endDelta := 280.0
 			if u.Direction() == "LT" {
 				endDelta *= -1
 			}
@@ -202,13 +208,16 @@ func WarriorInit() {
 				//ArcTo(end),
 				LineTo(end),
 				WithParticles(pg),
-				Then(Drop(banner)),
+				Then(AndDo(Drop(banner), DoPlay("bannerPlaced1"))),
+				FollowSpeed(u.GetDelta().Xp(), nil),
+				PlaySFX("warriorCast1"),
 			)
 			dlog.ErrorCheck(err)
 			return chrs
 		},
 	)
 
+	// SelfShield is a fast flying single person shield
 	SelfShield = NewAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{110, 200, 110, 255}), shieldIcon),
 		time.Second*5,
@@ -236,16 +245,19 @@ func WarriorInit() {
 				particle.LifeSpan(floatrange.NewConstant(15)),
 			)
 
-			endDelta := 400.0
+			endDelta := 220.0
 			if u.Direction() == "LT" {
 				endDelta *= -1
 			}
 			chrs, err := Produce(
 				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
-				//ArcTo(end),
+
 				LineTo(floatgeom.Point2{pos.X() + endDelta, pos.Y()}),
+				FollowSpeed(u.GetDelta().Xp(), nil),
 				WithParticles(pg),
-				Then(Drop(banner)),
+				Then(AndDo(Drop(banner), DoPlay("bannerPlaced1"))),
+				FrameLength(30),
+				PlaySFX("warriorCast1"),
 			)
 			dlog.ErrorCheck(err)
 			return chrs

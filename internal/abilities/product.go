@@ -51,6 +51,7 @@ type Producer struct {
 
 type Option func(Producer) Producer
 
+// FrameLength overwrites the default of 100 for frame length with the provided int
 func FrameLength(frames int) Option {
 	return func(p Producer) Producer {
 		p.Frames = frames

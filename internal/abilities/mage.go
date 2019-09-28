@@ -331,7 +331,7 @@ func MageInit() {
 				LineTo(end),
 				WithParticles(pg),
 				Then(
-					AndDo(Drop(banner), DoPlay("bannerPlace1")),
+					AndDo(Drop(banner), DoPlay("bannerPlaced1")),
 				),
 			)
 			dlog.ErrorCheck(err)
