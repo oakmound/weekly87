@@ -1,7 +1,6 @@
 package history
 
 import (
-	"fmt"
 	"image/color"
 	"path/filepath"
 	"strconv"
@@ -33,7 +32,7 @@ var Scene = scene.Scene{
 		fnt.Size = 14
 		blueFnt := fnt.Generate()
 
-		fmt.Println("Starting history scene")
+		dlog.Verb("Entering ther History Scene")
 		stayInMenu = true
 		nextscene = "history"
 		render.SetDrawStack(
@@ -41,8 +40,6 @@ var Scene = scene.Scene{
 			render.NewHeap(false),
 			render.NewHeap(true),
 		)
-		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
-		menuY := float64(oak.ScreenHeight) * 3 / 4
 
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
 		render.Draw(menuBackground, 0)
@@ -50,35 +47,38 @@ var Scene = scene.Scene{
 		textBackingX := oak.ScreenWidth / 3
 
 		textBacking := render.NewColorBox(textBackingX, oak.ScreenHeight*2/3, color.RGBA{120, 120, 120, 210})
-		textBacking.SetPos(float64(oak.ScreenWidth)*0.33, 40)
+		textBacking.SetPos(float64(oak.ScreenWidth)/18, 80)
 		render.Draw(textBacking, 1)
 
-		r := records.Load()
-		dlog.Info("Records loaded:", r)
-		textY := 60.0
+		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 6
+		menuY := float64(textBacking.Bounds().Max.Y) + 40
 
-		historyTitle := titleFnt.NewStrText("Your Past Game Stats!", float64(oak.ScreenWidth)/2, textY)
+		r := records.Load()
+		dlog.Verb("Records loaded:", r)
+		textY := 120.0
+		textX := float64(oak.ScreenWidth) / 5
+
+		historyTitle := titleFnt.NewStrText("Your Past Game Stats!", textX, textY)
 		historyTitle.Center()
 		render.Draw(historyTitle, 2, 2)
 		textY += 40
 
 		cleared := strconv.FormatInt(r.SectionsCleared, 10)
-		sectionText := blueFnt.NewStrText("Total Sections Cleared: "+cleared, float64(oak.ScreenWidth)/2, textY)
+		sectionText := blueFnt.NewStrText("Total Sections Cleared: "+cleared, textX, textY)
 		sectionText.Center()
 		render.Draw(sectionText, 2, 2)
 		textY += 40
 
 		farthest := strconv.FormatInt(r.FarthestGoneInSections, 10)
-		farthestText := blueFnt.NewStrText("Farthest Section Reached: "+farthest, float64(oak.ScreenWidth)/2, textY)
+		farthestText := blueFnt.NewStrText("Farthest Section Reached: "+farthest, textX, textY)
 		farthestText.Center()
 		render.Draw(farthestText, 2, 2)
 		textY += 40
 
 		nStartBtn := btn.New(menus.BtnCfgA,
 			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
-			btn.Pos(menuX, textY),
+			btn.Pos(menuX, menuY),
 			btn.Text("New Save File"), btn.Binding(mouse.ClickOn, func(int, interface{}) int {
-				fmt.Println("HAI THERE")
 				newPath, err := records.Archive()
 				nextscene = "history"
 				stayInMenu = false
@@ -90,7 +90,7 @@ var Scene = scene.Scene{
 
 				return 0
 			}))
-
+		menuY += 40
 		returnBtn := btn.New(menus.BtnCfgA,
 			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
 			btn.Pos(menuX, menuY),
