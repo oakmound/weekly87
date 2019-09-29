@@ -399,7 +399,8 @@ var Scene = scene.Scene{
 			return 0
 		}, "AbilityFired")
 
-		bkgMusic, err = music.Start(true, "runIntro.wav", "runLoop.wav")
+		bkgMusic, err = music.Start(true, "run2.wav")
+		dlog.ErrorCheck(err)
 
 		// Enemy types:
 		// 1. Stands Still or walks in a basic path

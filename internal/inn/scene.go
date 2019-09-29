@@ -363,7 +363,7 @@ var Scene = scene.Scene{
 		event.GlobalBind(partySelectStart, key.Down+key.ReturnEnter)
 		event.GlobalBind(partySelectStart, "A"+joystick.ButtonUp)
 
-		bkgMusic, err = music.Start(true, "inn1.wav")
+		bkgMusic, err = music.Start(true, "inn3.wav")
 		dlog.ErrorCheck(err)
 
 		// Clear, set and report on the debug commands available
