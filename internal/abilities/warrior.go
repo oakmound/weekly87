@@ -58,6 +58,7 @@ func thwack(image string, xOffset, yDelta float64, mods ...mod.Mod) func(User) [
 	}
 }
 
+// Warrior abilities
 var (
 	SpearStab, SwordSwipe, HammerSmack, Rage, SpearThrow, PartyShield, SelfShield *ability
 )
@@ -74,12 +75,14 @@ func WarriorInit() {
 		},
 	)
 
+	// SwordSwipe is a basic thwack
 	SwordSwipe = NewAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 150, 0, 200}), slashIcon),
 		time.Second*4,
 		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 10),
 	)
 
+	// HammerSmack is currently a huge thwack TODO: have new animation with hammer
 	HammerSmack = NewAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 80, 120, 255}), hammerIcon),
 
@@ -87,6 +90,7 @@ func WarriorInit() {
 		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 26, mod.Scale(2, 2)),
 	)
 
+	// Rage is a multistrike attack that impacts party movement
 	Rage = NewAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 5, 0, 200}), downSlashIcon),
 		time.Second*5,
@@ -236,7 +240,7 @@ func WarriorInit() {
 				WithBuff(buff.Shield(buffIcon, 20*time.Second, 5, true)))(Producer{})
 
 			pg := particle.NewColorGenerator(
-				particle.Color(color.RGBA{255, 255, 0, 255}, color.RGBA{0, 0, 0, 0},
+				particle.Color(color.RGBA{120, 255, 0, 255}, color.RGBA{0, 0, 0, 0},
 					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
 				particle.Shape(shape.Diamond),
 				particle.Size(intrange.NewConstant(10)),

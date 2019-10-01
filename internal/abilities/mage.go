@@ -54,6 +54,7 @@ func bolt(image string, frames int, endDelta float64, opts func(particle.Generat
 			WithParticles(pg),
 			WithRenderable(r),
 			FollowSpeed(delta.Xp(), nil),
+			PlaySFX("fireball1"),
 		)
 		dlog.ErrorCheck(err)
 		return chrs
@@ -213,7 +214,7 @@ func MageInit() {
 				// ),
 				particle.Size(intrange.NewSpread(10, 5)),
 				particle.Shape(shape.Circle),
-				//particle.Progress(render.CircularProgress),
+
 				particle.Pos(8, 8),
 			),
 			map[string]float64{"damage": 1.0},
@@ -283,7 +284,8 @@ func MageInit() {
 				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
 				LineTo(end),
 				WithParticles(pg),
-				Then(Drop(banner)),
+				Then(AndDo(Drop(banner), DoPlay("bannerPlaced1"))),
+				PlaySFX("mageCast1"),
 			)
 			dlog.ErrorCheck(err)
 			return chrs
@@ -333,13 +335,14 @@ func MageInit() {
 				Then(
 					AndDo(Drop(banner), DoPlay("bannerPlaced1")),
 				),
+				PlaySFX("mageCast1"),
 			)
 			dlog.ErrorCheck(err)
 			return chrs
 		},
 	)
 
-	// Slow
+	// Slow TODO: Implement
 	Slow = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{120, 120, 120, 255}),
 		time.Second*10,
@@ -385,7 +388,7 @@ func MageInit() {
 			return chrs
 		},
 	)
-	// CooldownRework
+	// CooldownRework TODO: Implement
 	CooldownRework = NewAbility(
 		render.NewColorBox(64, 64, color.RGBA{120, 120, 120, 255}),
 		time.Second*10,
