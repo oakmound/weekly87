@@ -65,6 +65,9 @@ var Scene = scene.Scene{
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
 		render.Draw(menuBackground, 0)
 
+		looters, _ := render.LoadSprite("", filepath.Join("raw", "title_card.png"))
+		render.Draw(looters, 0)
+
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 6
 		menuY := float64(oak.ScreenHeight) / 2.7
 
@@ -75,14 +78,6 @@ var Scene = scene.Scene{
 		// 4. Credits
 		// 5. Exit game
 		//get the title
-		fnt := render.DefFontGenerator.Copy()
-		fnt.Color = render.FontColor("Blue")
-		fnt.Size = 60
-		blueFnt := fnt.Generate()
-
-		title := blueFnt.NewStrText("Chest Stacker", menuX-120, menuY-40)
-
-		render.Draw(title, 2, 12)
 
 		selectors := grid.New(
 			grid.Defaults(btn.And(menus.BtnCfgB, btn.Pos(menuX, menuY))),

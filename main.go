@@ -18,7 +18,7 @@ func main() {
 			Width:  1024,
 			Height: 576,
 		},
-		Title:     "Chest Stacker",
+		Title:     "Hiring Now: Looters",
 		BatchLoad: true,
 		Debug: oak.Debug{
 
