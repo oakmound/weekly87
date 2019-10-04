@@ -29,6 +29,7 @@ import (
 	"github.com/oakmound/weekly87/internal/menus"
 	"github.com/oakmound/weekly87/internal/records"
 	"github.com/oakmound/weekly87/internal/run"
+	"github.com/oakmound/weekly87/internal/sfx"
 )
 
 func Init() {
@@ -269,10 +270,12 @@ func presentSpoils(party *players.Party, graveCount *int, index int) {
 		if ply.R.X() < presentationX {
 
 			if p.Alive {
-
+				p.Swtch.Set("standRT")
 				if len(p.ChestValues) > 0 {
 					hop(p)
 
+				} else {
+					sfx.Play("ohWell")
 				}
 
 				t := time.Now().Add(time.Second)
@@ -299,14 +302,14 @@ func presentSpoils(party *players.Party, graveCount *int, index int) {
 }
 
 func hop(p *players.Player) {
-	p.Swtch.Set("standRT")
+	sfx.Play("chestHop1")
 	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
 		if ply.Y() < presentationY-hopDistance {
 			tossChests(ply)
 			ply.CheckedBind(func(plyz *players.Player, _ interface{}) int {
 
 				if plyz.Y() > presentationY {
-					plyz.Swtch.Set("walkLT")
+
 					return event.UnbindSingle
 				}
 				plyz.ShiftPos(0, 4)
@@ -346,6 +349,7 @@ func tossChests(p *players.Player) {
 	}, "EnterFrame")
 }
 func liviningExit(p *players.Player) {
+	p.Swtch.Set("walkLT")
 	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
 
 		ply.ShiftPos(0, 2)
@@ -407,7 +411,9 @@ func explodeChest(x, y float64) {
 		dlog.Error(err)
 		return
 	}
+	sfx.Play("chestExplode")
 	explodeSprite(x, y, sp)
+
 }
 func explodeSprite(x, y float64, sprite *render.Sprite) {
 	layerFn := func(v physics.Vector) int {
