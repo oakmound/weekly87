@@ -371,6 +371,7 @@ func deadMovement(p *players.Player) {
 		ply.ShiftPos(-2, 0)
 		if ply.R.X() < graveX {
 			deathSprites(ply.R.X(), ply.R.Y())
+			sfx.Play("dissappear1")
 			ply.R.Undraw()
 			return event.UnbindSingle
 		}

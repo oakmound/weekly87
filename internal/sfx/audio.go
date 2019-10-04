@@ -36,6 +36,7 @@ func Init() {
 		"chestHop1":     LoudSFX,
 		"ohWell":        LoudSFX,
 		"chestExplode":  SoftSFX,
+		"dissappear1":   SoftSFX,
 	}
 	for s, f := range files {
 		a, err := audio.Get(s + ".wav")
