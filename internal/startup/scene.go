@@ -66,6 +66,7 @@ var Scene = scene.Scene{
 		render.Draw(menuBackground, 0)
 
 		looters, _ := render.LoadSprite("", filepath.Join("raw", "title_card.png"))
+		looters.SetPos(30, 60)
 		render.Draw(looters, 0)
 
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 6
