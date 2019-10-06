@@ -14,6 +14,7 @@ import (
 	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/recolor"
+	"github.com/oakmound/weekly87/internal/sfx"
 
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/mod"
@@ -115,12 +116,19 @@ func (a *ability) Renderable() render.Modifiable {
 
 // Trigger checks if the user is ready and if the ability is off cooldown and then performs the ability if so
 func (a *ability) Trigger() {
-
-	if !a.disabled && a.cooldown.Trigger() {
-		artifacts := a.trigger(a.user)
-		dlog.Verb("Trigger ability firing")
-		event.Trigger("AbilityFired", artifacts)
+	if a.disabled {
+		sfx.Play("nope1")
+		return
 	}
+	if !a.cooldown.Trigger() {
+		sfx.Play("cooldown")
+		return
+	}
+
+	artifacts := a.trigger(a.user)
+	dlog.Verb("Trigger ability firing")
+	event.Trigger("AbilityFired", artifacts)
+
 }
 
 // Cooldown gets the total cooldown time  for the ability
