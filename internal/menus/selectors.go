@@ -8,6 +8,7 @@ import (
 	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/mouse"
 	s "github.com/oakmound/weekly87/internal/menus/selector"
+	"github.com/oakmound/weekly87/internal/sfx"
 )
 
 // ButtonSelectorA sets up a standard button selector for menus
@@ -32,6 +33,7 @@ func ButtonSelectorSpacesA(spcs []*collision.Space, btnList []btn.Btn) s.Option 
 		s.JoystickVertDpadControl(),
 		s.Spaces(spcs...),
 		s.Callback(func(i int, _ ...interface{}) {
+			sfx.Play("selected")
 			btnList[i].Trigger(mouse.ClickOn, nil)
 		}),
 		s.SelectTrigger(key.Down+key.Spacebar),
