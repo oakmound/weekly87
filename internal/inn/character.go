@@ -23,24 +23,34 @@ import (
 const frameLag = 10
 const maxPartySize = 4
 
-type InnWalker struct {
+const (
+	prePlay = iota
+
+	inMenu
+	playing
+)
+
+type innWalker struct {
 	front     *entities.Interactive
 	followers []*entities.Interactive
 	scale     float64
 	lagDeltas [frameLag * maxPartySize]floatgeom.Point2
 	lagIdx    int
-	inMenu    bool
+	gameState int
 }
 
-func (iw *InnWalker) SetParty(plys []*players.Player) {
+// setParty for the innWalker. Create any nessecary players and update if not
+// Is responsible for inital location!
+func (iw *innWalker) setParty(plys []*players.Player) {
 	if len(plys) == 0 {
 		dlog.Error("Need at least one party member")
 		return
 	}
+
 	if iw.front == nil {
 		iw.front = entities.NewInteractive(
 			float64(oak.ScreenWidth/2),
-			float64(oak.ScreenHeight/2)+40,
+			float64(170),
 			16*iw.scale,
 			32*iw.scale,
 			plys[0].Swtch.Copy().Modify(mod.Scale(iw.scale, iw.scale)),
@@ -84,18 +94,18 @@ func (iw *InnWalker) SetParty(plys []*players.Player) {
 	}
 }
 
-// NewInnWalker creates a special character for the inn
-func NewInnWalker(scale float64, plys []*players.Player) *InnWalker {
+// newInnWalker creates a special character for the inn
+func newInnWalker(scale float64, plys []*players.Player) *innWalker {
 
-	iw := &InnWalker{
+	iw := &innWalker{
 		scale: scale,
 	}
-	iw.SetParty(plys)
+	iw.setParty(plys)
 
 	return iw
 }
 
-func (iw *InnWalker) bindFront() {
+func (iw *innWalker) bindFront() {
 	lowestID := joys.LowestID()
 	iw.front.Bind(func(id int, _ interface{}) int {
 		p, ok := event.GetEntity(id).(*entities.Interactive)
@@ -103,28 +113,28 @@ func (iw *InnWalker) bindFront() {
 			dlog.Error("Non-player sent to player binding")
 		}
 
-		p.Delta.Zero()
-
-		if iw.inMenu {
+		switch iw.gameState {
+		case inMenu:
+			p.Delta.Zero()
 			return 0
-		}
+		case playing:
+			p.Delta.Zero()
+			js := joys.StickState(lowestID)
+			// Todo: support full analog control
 
-		js := joys.StickState(lowestID)
-		// Todo: support full analog control
-
-		if oak.IsDown(key.UpArrow) || js.StickLY > 8000 {
-			p.Delta.Add(physics.NewVector(0, -p.Speed.Y()))
+			if oak.IsDown(key.UpArrow) || js.StickLY > 8000 {
+				p.Delta.Add(physics.NewVector(0, -p.Speed.Y()))
+			}
+			if oak.IsDown(key.DownArrow) || js.StickLY < -8000 {
+				p.Delta.Add(physics.NewVector(0, p.Speed.Y()))
+			}
+			if oak.IsDown(key.LeftArrow) || js.StickLX < -8000 {
+				p.Delta.Add(physics.NewVector(-p.Speed.X(), 0))
+			}
+			if oak.IsDown(key.RightArrow) || js.StickLX > 8000 {
+				p.Delta.Add(physics.NewVector(p.Speed.X(), 0))
+			}
 		}
-		if oak.IsDown(key.DownArrow) || js.StickLY < -8000 {
-			p.Delta.Add(physics.NewVector(0, p.Speed.Y()))
-		}
-		if oak.IsDown(key.LeftArrow) || js.StickLX < -8000 {
-			p.Delta.Add(physics.NewVector(-p.Speed.X(), 0))
-		}
-		if oak.IsDown(key.RightArrow) || js.StickLX > 8000 {
-			p.Delta.Add(physics.NewVector(p.Speed.X(), 0))
-		}
-
 		p.Vector.Add(p.Delta)
 
 		_, h := p.R.GetDims()
@@ -269,15 +279,16 @@ func (n NPC) Activate() {
 	render.Draw(n.R, layer.Play, 1)
 }
 
+// Destroy removes the npc from the collision tree
 func (n NPC) Destroy() {
 	n.Tree.Remove(n.RSpace.Space)
 }
 
-
+// NewInnkeeper creates the innkeeper who moves around behind the bar
 func NewInnkeeper(scale, x, y float64) NPC {
 	keeper := NewInnNPC(players.InnKeeper, scale, x, y)
 	keeper.Bind(func(id int, frame interface{}) int {
-		
+
 		keeper, ok := event.GetEntity(id).(*NPC)
 		if !ok {
 			dlog.Error("Got non NPC in Innkeeper bindings")
@@ -292,12 +303,11 @@ func NewInnkeeper(scale, x, y float64) NPC {
 		// Fancy logic here
 		if f == 0 {
 			keeper.Delta.Add(physics.NewVector(0, 1))
-		} else if  f % 200 == 0 {
+		} else if f%200 == 0 {
 			keeper.Delta.Add(physics.NewVector(0, 2))
-		} else if f % 100 == 0 {
+		} else if f%100 == 0 {
 			keeper.Delta.Add(physics.NewVector(0, -2))
 		}
-
 
 		keeper.ShiftPos(keeper.Delta.X(), keeper.Delta.Y())
 		if keeper.Delta.X() != 0 || keeper.Delta.Y() != 0 {
@@ -311,7 +321,7 @@ func NewInnkeeper(scale, x, y float64) NPC {
 			err := keeper.Swtch.Set("stand" + string(cur[len(cur)-2:]))
 			dlog.ErrorCheck(err)
 		}
-	
+
 		return 0
 	}, "EnterFrame")
 	return keeper
