@@ -13,10 +13,12 @@ import (
 
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
+	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/joystick"
 	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/mouse"
+	"github.com/oakmound/oak/physics"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -71,8 +73,11 @@ var Scene = scene.Scene{
 		doodads.NewFurniture(0, 0, float64(oak.ScreenWidth), 140) // top of inn
 
 		// Additional inn such as tables
-		leftT := doodads.NewFurniture(130, 130, 100, float64(oak.ScreenHeight)-130)
-		leftT.SetOrnaments(prettyMugs, 3+rand.Intn(7))
+		doodads.NewFurniture(130, 130, 100, float64(oak.ScreenHeight)-130)
+		// leftT.PlaceConsumablesa(prettyMugs, 3+rand.Intn(7))
+
+		// TODO: update placement strats for consumables
+		doodads.NewConsumable(150, 150, prettyMugs[0])
 
 		topT := doodads.NewFurniture(480, 230, 190, 60)
 		topT.SetOrnaments(prettyMugs, rand.Intn(6))
@@ -81,7 +86,7 @@ var Scene = scene.Scene{
 		botT.SetOrnaments(prettyMugs, rand.Intn(6))
 
 		// Create the notes on the notice board
-		noteSpace := floatgeom.NewRect2WH(240, 60, 85, 65)
+		noteSpace := floatgeom.NewRect2WH(240, 60, 105, 65)
 		noteHeight := 3
 		for i := 0; i < 8+rand.Intn(5)*3; i++ {
 			noteHeight = doodads.NewNote(noteSpace, noteHeight)
@@ -161,7 +166,7 @@ var Scene = scene.Scene{
 			Players:    players.ClassConstructor(curRecord.PartyComp),
 			MaxPlayers: partySize,
 		}
-		// Draw the party in top left
+
 		partyBackground, _ := render.LoadSprite("", filepath.Join("raw", "selector_background.png"))
 
 		partyBackground.SetPos(30, 20)
@@ -174,11 +179,40 @@ var Scene = scene.Scene{
 			return
 		}
 
-		//interactDelay := time.Second
-		//pcLastInteract := time.Now()
+		pc := newInnWalker(npcScale, pty.Players)
 
-		//Create an example person to navigate the space
-		pc := NewInnWalker(npcScale, pty.Players)
+		// Lazy impl for start game walking
+		pc.front.Delta = physics.NewVector(4, 0)
+		pc.front.Bind(func(id int, _ interface{}) int {
+			p, ok := event.GetEntity(id).(*entities.Interactive)
+			if !ok {
+				dlog.Error("Non-player sent to player binding")
+			}
+			x, _ := p.GetPos()
+			if x > float64(oak.ScreenWidth)/3*2 {
+				pc.front.Delta = physics.NewVector(0, 4)
+				pc.front.Bind(func(id int, _ interface{}) int {
+					p, ok := event.GetEntity(id).(*entities.Interactive)
+					if !ok {
+						dlog.Error("Non-player sent to player binding")
+					}
+					x, y := p.GetPos()
+
+					if y > float64(oak.ScreenHeight/2)+38 {
+						if x < float64(oak.ScreenWidth)/2 {
+							pc.gameState = playing
+							return event.UnbindSingle
+						}
+						pc.front.Delta = physics.NewVector(-4, 0)
+					}
+
+					return 0
+				}, "EnterFrame")
+				return event.UnbindSingle
+			}
+
+			return 0
+		}, "EnterFrame")
 
 		var lastInteractedNPC *NPC
 		// Interact with NPCs
@@ -248,7 +282,7 @@ var Scene = scene.Scene{
 			npcW, _ := npc.R.GetDims()
 			bkgW, bkgH := partyBackground.GetDims()
 			// Disable all controls
-			pc.inMenu = true
+			pc.gameState = inMenu
 			// Spawn a box with the party above the npc being selected
 			partyBackground.SetPos(npc.X()+float64(npcW-bkgW)/2, npc.Y()-10-float64(bkgH))
 			ptycon.Players[0].Position = floatgeom.Point2{partyBackground.X() + 20, partyBackground.Y() + 10}
@@ -338,10 +372,10 @@ var Scene = scene.Scene{
 						dlog.Error(err)
 						return
 					}
-					pc.SetParty(pty.Players)
+					pc.setParty(pty.Players)
 
 					// end selection
-					pc.inMenu = false
+					pc.gameState = playing
 					event.Trigger("EndPartySelect", nil)
 				}),
 				selector.SelectTrigger(key.Down+key.Spacebar),
