@@ -9,16 +9,6 @@ import (
 
 const settingsFile = "settings.json"
 
-// Settings serves as our safe file and all variables we track across
-// multiple runs
-type Settings struct {
-	SFXVolume     float64 `json:"sfxVolume"`
-	MusicVolume   float64 `json:"musicVolume"`
-	MasterVolume  float64 `json:"masterVolume"`
-	ShowFpsToggle bool    `json:"showFpsToggle"`
-	Debug         bool    `json:"debugOn,omitempty"`
-}
-
 // Store the settings into a file
 func (s *Settings) Store() {
 	f, err := os.Create(settingsFile)
@@ -53,8 +43,5 @@ func Load() {
 	}
 
 	Active = *s
-	*musicLevel = Active.MusicVolume
-	*sfxLevel = Active.SFXVolume
-	*masterLevel = Active.MasterVolume
 
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/oakmound/weekly87/internal/inn"
 	"github.com/oakmound/weekly87/internal/run"
 	"github.com/oakmound/weekly87/internal/savemanagement"
-	"github.com/oakmound/weekly87/internal/settings"
+	"github.com/oakmound/weekly87/internal/settingsmanagement"
 	"github.com/oakmound/weekly87/internal/startup"
 )
 
@@ -33,7 +33,7 @@ func main() {
 	// Add scenes
 	oak.AddScene("startup", startup.Scene)
 	oak.AddScene("inn", inn.Scene)
-	oak.AddScene("settings", settings.Scene)
+	oak.AddScene("settings", settingsmanagement.Scene)
 	oak.AddScene("credits", credits.Scene)
 	oak.AddScene("load", savemanagement.Scene)
 	oak.AddScene("history", history.Scene)
