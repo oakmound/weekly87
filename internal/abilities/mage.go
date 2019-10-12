@@ -247,7 +247,7 @@ func MageInit() {
 
 	// Rez the first person who is dead in the party on pickup
 	Rez = NewAbility(
-		render.NewColorBox(64, 64, color.RGBA{200, 200, 200, 255}),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 150, 150, 200}), rezIcon),
 		time.Second*10,
 		func(u User) []characters.Character {
 			pos := u.Vec()
