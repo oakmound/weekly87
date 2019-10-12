@@ -3,6 +3,7 @@ package inn
 import (
 	"fmt"
 	"image/color"
+	"image"
 	"math/rand"
 	"path/filepath"
 	"strings"
@@ -19,7 +20,6 @@ import (
 	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/mouse"
 	"github.com/oakmound/oak/physics"
-
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/render"
@@ -32,6 +32,8 @@ import (
 	"github.com/oakmound/weekly87/internal/menus/selector"
 	"github.com/oakmound/weekly87/internal/music"
 	"github.com/oakmound/weekly87/internal/records"
+	"github.com/oakmound/weekly87/internal/keyviz"
+
 )
 
 var stayInMenu bool
@@ -178,6 +180,9 @@ var Scene = scene.Scene{
 			dlog.Error(err)
 			return
 		}
+		for _, p := range pty.Players {
+			collision.Remove(p.GetSpace())
+		}
 
 		pc := newInnWalker(npcScale, pty.Players)
 
@@ -234,7 +239,7 @@ var Scene = scene.Scene{
 
 			// Make a pop up above the NPC being touched
 			// as a command prompt
-			interactBtn := getConfirmBtn()
+			interactBtn := getInteractBtn()
 			w, h := interactBtn.GetDims()
 			npcW, _ := npc.R.GetDims()
 
@@ -373,6 +378,9 @@ var Scene = scene.Scene{
 						return
 					}
 					pc.setParty(pty.Players)
+					for _, p := range pty.Players {
+						collision.Remove(p.GetSpace())
+					}
 
 					// end selection
 					pc.gameState = playing
@@ -461,17 +469,46 @@ var Scene = scene.Scene{
 	},
 }
 
-func getConfirmBtn() render.Renderable {
+func getInteractBtn() render.Renderable {
+	keyImg := keyviz.Generator{
+		Text: "Enter",
+		TextSize: 12,
+		Color: color.RGBA{100, 100, 255, 255},
+	}.Generate()
 	// todo: joystick
-	return render.NewColorBox(50, 20, color.RGBA{100, 100, 255, 255})
+	// todo: composite with icon
+	return render.NewSprite(0,0, keyImg.(*image.RGBA))
+}
+ 
+func getConfirmBtn() render.Renderable {
+	keyImg := keyviz.Generator{
+		Text: "Space",
+		TextSize: 12,
+		Color: color.RGBA{100, 100, 255, 255},
+	}.Generate()
+	// todo: joystick
+	// todo: composite with icon
+	return render.NewSprite(0,0, keyImg.(*image.RGBA))
 }
 
 func getCancelBtn() render.Renderable {
+	keyImg := keyviz.Generator{
+		Text: "ESC",
+		TextSize: 12,
+		Color: color.RGBA{255, 100, 100, 255},
+	}.Generate()
 	// todo: joystick
-	return render.NewColorBox(50, 20, color.RGBA{255, 100, 100, 255})
+	// todo: composite with icon
+	return render.NewSprite(0,0, keyImg.(*image.RGBA))
 }
 
 func getBootButton() render.Renderable {
+	keyImg := keyviz.Generator{
+		Text: "B",
+		TextSize: 12,
+		Color: color.RGBA{50, 150, 50, 255},
+	}.Generate()
 	// todo: joystick
-	return render.NewColorBox(50, 20, color.RGBA{100, 255, 100, 255})
+	// todo: composite with icon
+	return render.NewSprite(0,0, keyImg.(*image.RGBA))
 }
