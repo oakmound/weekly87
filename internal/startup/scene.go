@@ -25,7 +25,7 @@ import (
 	"github.com/oakmound/weekly87/internal/menus"
 	"github.com/oakmound/weekly87/internal/records"
 	"github.com/oakmound/weekly87/internal/run/section"
-	"github.com/oakmound/weekly87/internal/settings"
+	"github.com/oakmound/weekly87/internal/settingsmanagement/settings"
 )
 
 var stayInMenu bool
@@ -59,7 +59,9 @@ var Scene = scene.Scene{
 
 			dlog.Info("Starting game")
 		}
-
+		if prevScene == "settings" {
+			sfx.UpdateLevels()
+		}
 		// Todo: joystick mouse
 
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))

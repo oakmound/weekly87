@@ -5,42 +5,55 @@ import (
 	"github.com/200sc/klangsynthese/font"
 	"github.com/oakmound/oak/audio"
 	"github.com/oakmound/oak/dlog"
+	"github.com/oakmound/weekly87/internal/settingsmanagement/settings"
 )
 
 // Sfx and audio fonts
 var (
-	LoudSFX = font.New()
-	SoftSFX = font.New()
-	Music   = font.New()
-	Audios  = map[string]*audio.Audio{}
-	inited  bool
+	loudSFX, softSFX *font.Font
+	Audios           = map[string]*audio.Audio{}
+
+	inited bool
 )
 
 // Init the sfx files
 func Init() {
-	LoudSFX.Filter(filter.Volume(.5))
-	SoftSFX.Filter(filter.Volume(.25))
-	Music.Filter(filter.Volume(.4), filter.LoopOn())
+	loadAudio()
+	dlog.Info("SFX load completed")
+}
+
+// UpdateLevels to play sfx at
+// TODO: (currently re loads from files shouldnt)
+func UpdateLevels() {
+	loadAudio()
+	dlog.Info("SFX volume adjusting completed")
+}
+
+func loadAudio() {
+	loudSFX = font.New()
+	softSFX = font.New()
+	loudSFX.Filter(filter.Volume(.5 * settings.Active.SFXVolume * settings.Active.MasterVolume))
+	softSFX.Filter(filter.Volume(.25 * settings.Active.SFXVolume * settings.Active.MasterVolume))
 
 	files := map[string]*font.Font{
 
-		"playerHit1":    LoudSFX,
-		"stormEffect":   LoudSFX,
-		"bannerPlaced1": SoftSFX,
-		"slashHeavy":    SoftSFX,
-		"slashLight":    SoftSFX,
-		"bounced1":      LoudSFX,
-		"warriorCast1":  LoudSFX,
-		"mageCast1":     LoudSFX,
-		"fireball1":     LoudSFX,
-		"chestHop1":     LoudSFX,
-		"ohWell":        LoudSFX,
-		"chestExplode":  SoftSFX,
-		"dissappear1":   SoftSFX,
-		"selected":      LoudSFX,
-		"cooldown":      LoudSFX,
-		"nope1":         LoudSFX,
-		"abilityReady1": SoftSFX,
+		"playerHit1":    loudSFX,
+		"stormEffect":   loudSFX,
+		"bannerPlaced1": softSFX,
+		"slashHeavy":    softSFX,
+		"slashLight":    softSFX,
+		"bounced1":      loudSFX,
+		"warriorCast1":  loudSFX,
+		"mageCast1":     loudSFX,
+		"fireball1":     loudSFX,
+		"chestHop1":     loudSFX,
+		"ohWell":        loudSFX,
+		"chestExplode":  softSFX,
+		"dissappear1":   softSFX,
+		"selected":      loudSFX,
+		"cooldown":      loudSFX,
+		"nope1":         loudSFX,
+		"abilityReady1": softSFX,
 	}
 	for s, f := range files {
 		a, err := audio.Get(s + ".wav")
@@ -51,7 +64,6 @@ func Init() {
 		}
 		Audios[s] = audio.New(f, a)
 	}
-	dlog.Info("SFX load completed")
 }
 
 // Play a copy of the sfx requested

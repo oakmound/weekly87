@@ -63,7 +63,7 @@ var Scene = scene.Scene{
 		// A way to enter the run
 		doodads.NewInnDoor("run")
 		// A way to go back to menu screen
-		doodads.NewCustomInnDoor("startup", 490, 40, 100, 102)
+		doodads.NewCustomInnDoor("endGame", 490, 40, 100, 102)
 
 		// Create doodads for tables
 		uglymugger, _ := render.LoadSprites("", filepath.Join("16x16", "ugly_mugger.png"), 16, 16, 0)

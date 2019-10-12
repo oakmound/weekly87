@@ -11,7 +11,7 @@ import (
 	klg "github.com/200sc/klangsynthese/audio"
 	"github.com/200sc/klangsynthese/audio/filter"
 
-	"github.com/oakmound/weekly87/internal/settings"
+	"github.com/oakmound/weekly87/internal/settingsmanagement/settings"
 )
 
 // Start plays the audio tracks in order, optionally looping the final track

@@ -2,7 +2,7 @@ package layer
 
 import (
 	"github.com/oakmound/oak/render"
-	"github.com/oakmound/weekly87/internal/settings"
+	"github.com/oakmound/weekly87/internal/settingsmanagement/settings"
 )
 
 // Layer constants

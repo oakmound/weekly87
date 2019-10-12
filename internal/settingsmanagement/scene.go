@@ -1,4 +1,4 @@
-package settings
+package settingsmanagement
 
 import (
 	"fmt"
@@ -20,11 +20,11 @@ import (
 	"github.com/oakmound/oak/entities/x/mods"
 	"github.com/oakmound/weekly87/internal/menus"
 	"github.com/oakmound/weekly87/internal/menus/selector"
+	"github.com/oakmound/weekly87/internal/settingsmanagement/settings"
 )
 
 var (
 	stayInMenu bool
-	Active     Settings
 )
 
 var (
@@ -41,6 +41,9 @@ var Scene = scene.Scene{
 			render.NewHeap(false),
 			render.NewHeap(true),
 		)
+		*musicLevel = settings.Active.MusicVolume
+		*sfxLevel = settings.Active.SFXVolume
+		*masterLevel = settings.Active.MasterVolume
 
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
 		render.Draw(menuBackground, 0)
@@ -88,7 +91,7 @@ var Scene = scene.Scene{
 			btn.Width(150),
 			btn.Height(32),
 			btn.Toggle(infR2, infR1,
-				&Active.ShowFpsToggle),
+				&settings.Active.ShowFpsToggle),
 			btn.Pos(x, y),
 			btn.Text("Show FPS"),
 		)
@@ -185,13 +188,12 @@ var Scene = scene.Scene{
 	Loop: scene.BooleanLoop(&stayInMenu),
 	End: func() (string, *scene.Result) {
 
-		Active.SFXVolume = *sfxLevel
-		Active.MusicVolume = *musicLevel
-		Active.MasterVolume = *masterLevel
+		settings.Active.SFXVolume = *sfxLevel
+		settings.Active.MusicVolume = *musicLevel
+		settings.Active.MasterVolume = *masterLevel
 
-		fmt.Println(Active)
-
-		Active.Store()
+		fmt.Println(settings.Active)
+		settings.Active.Store()
 
 		return "startup", nil
 	},
