@@ -31,6 +31,8 @@ func Init() {
 	dlog.ErrorCheck(err)
 	hammerIcon, err = render.LoadSprite("", filepath.Join("64x64", "HammerIcon.png"))
 	dlog.ErrorCheck(err)
+	rezIcon, err = render.LoadSprite("", filepath.Join("64x64", "RezIcon.png"))
+	dlog.ErrorCheck(err)
 
 	red := color.RGBA{200, 100, 100, 255}
 	blue := color.RGBA{100, 100, 200, 255}
@@ -56,6 +58,7 @@ func Init() {
 	downSlashIcon.Modify(mod.Transpose, mod.Rotate(90))
 	// downSLash.Modify()
 
+
 	MageInit()
 	WarriorInit()
 }
@@ -64,7 +67,7 @@ var (
 	err                                                          error
 	blastIcon, shieldAuraIcon, shieldIcon, slashIcon, hammerIcon *render.Sprite
 	redBlastIcon, blueBlastIcon, redBlastDIcon, blueBlastDIcon   *render.Sprite
-	upSlashIcon, downSlashIcon                                   *render.Sprite
+	upSlashIcon, downSlashIcon, rezIcon                          *render.Sprite
 	iconW                                                        = 64
 	iconH                                                        = 64
 
