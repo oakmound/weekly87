@@ -73,8 +73,11 @@ var Scene = scene.Scene{
 		doodads.NewFurniture(0, 0, float64(oak.ScreenWidth), 140) // top of inn
 
 		// Additional inn such as tables
-		leftT := doodads.NewFurniture(130, 130, 100, float64(oak.ScreenHeight)-130)
-		leftT.SetOrnaments(prettyMugs, 3+rand.Intn(7))
+		doodads.NewFurniture(130, 130, 100, float64(oak.ScreenHeight)-130)
+		// leftT.PlaceConsumablesa(prettyMugs, 3+rand.Intn(7))
+
+		// TODO: update placement strats for consumables
+		doodads.NewConsumable(150, 150, prettyMugs[0])
 
 		topT := doodads.NewFurniture(480, 230, 190, 60)
 		topT.SetOrnaments(prettyMugs, rand.Intn(6))

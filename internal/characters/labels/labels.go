@@ -14,6 +14,7 @@ const (
 	Enemy
 	NPC
 	Blocking
+	Drinkable
 	Ornament
 	EffectsPlayer
 	EffectsEnemy
