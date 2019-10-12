@@ -3,7 +3,10 @@ package inn
 import (
 	"time"
 
+	"github.com/200sc/go-dist/floatrange"
+	"github.com/200sc/go-dist/intrange"
 	"github.com/oakmound/oak"
+	"github.com/oakmound/oak/alg"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
@@ -224,6 +227,7 @@ type NPC struct {
 	Class          int
 	Button         render.Renderable
 	UndrawButtonAt time.Time
+	*AI
 }
 
 // Init the npc so it has a CID!
@@ -233,7 +237,7 @@ func (n *NPC) Init() event.CID {
 
 // FaceLeft take wether the npc should face left
 // Set the facing renderable appropriately
-func (n NPC) FaceLeft(shouldFaceLeft bool) NPC {
+func (n *NPC) FaceLeft(shouldFaceLeft bool) *NPC {
 	if shouldFaceLeft {
 		n.R.(*render.Switch).Set("standLT")
 	} else {
@@ -243,9 +247,9 @@ func (n NPC) FaceLeft(shouldFaceLeft bool) NPC {
 }
 
 // NewInnNPC creates a npc to interact with for setting up party
-func NewInnNPC(class int, scale, x, y float64) NPC {
+func NewInnNPC(class int, scale, x, y float64) *NPC {
 	pcon := players.ClassConstructor([]players.PartyMember{{class, 0, "NPC How did you find me"}})[0]
-	n := NPC{}
+	n := &NPC{}
 	n.Class = class
 	n.Swtch = render.NewSwitch("standRT", pcon.AnimationMap).Copy().(*render.Switch)
 	n.Swtch.Modify(mod.Scale(scale, scale))
@@ -271,48 +275,132 @@ func (n NPC) Activate() {
 
 func (n NPC) Destroy() {
 	n.Tree.Remove(n.RSpace.Space)
+	n.Interactive.Destroy()
 }
 
-
-func NewInnkeeper(scale, x, y float64) NPC {
+func NewInnkeeper(scale, x, y float64) *NPC {
 	keeper := NewInnNPC(players.InnKeeper, scale, x, y)
+	keeper.AI = NewAI(
+		[]aiAction{
+			aiWalkUpDownBar{
+				top:      300,
+				bottom:   700,
+				speed:    floatrange.NewConstant(1),
+				duration: intrange.NewConstant(2000),
+			},
+		},
+		[]float64{
+			1,
+		},
+	)
 	keeper.Bind(func(id int, frame interface{}) int {
-		
-		keeper, ok := event.GetEntity(id).(*NPC)
+
+		kpr, ok := event.GetEntity(id).(*NPC)
 		if !ok {
 			dlog.Error("Got non NPC in Innkeeper bindings")
 			return 1
 		}
 
-		f, ok := frame.(int)
-		if !ok {
-			dlog.Error("Got non int for frame count")
-			return 1
-		}
-		// Fancy logic here
-		if f == 0 {
-			keeper.Delta.Add(physics.NewVector(0, 1))
-		} else if  f % 200 == 0 {
-			keeper.Delta.Add(physics.NewVector(0, 2))
-		} else if f % 100 == 0 {
-			keeper.Delta.Add(physics.NewVector(0, -2))
-		}
-
-
-		keeper.ShiftPos(keeper.Delta.X(), keeper.Delta.Y())
-		if keeper.Delta.X() != 0 || keeper.Delta.Y() != 0 {
-			if keeper.Delta.X() < 0 {
-				keeper.Swtch.Set("walkLT")
-			} else {
-				keeper.Swtch.Set("walkRT")
+		if kpr.inAction {
+			status := kpr.curAction(id)
+			if status == aiComplete {
+				kpr.curCancel(id)
+				kpr.inAction = false
 			}
-		} else {
-			cur := keeper.Swtch.Get()
-			err := keeper.Swtch.Set("stand" + string(cur[len(cur)-2:]))
-			dlog.ErrorCheck(err)
+			return 0
 		}
-	
+
+		action := keeper.AI.Choose()
+		kpr.curAction, kpr.curCancel = action.start()
+		kpr.inAction = true
+
 		return 0
 	}, "EnterFrame")
 	return keeper
+}
+
+type aiWalkUpDownBar struct {
+	top, bottom float64
+	speed       floatrange.Range
+	// in milliseconds
+	duration intrange.Range
+}
+
+func (a aiWalkUpDownBar) start() (func(int) aiStatus, func(int)) {
+	start := time.Now()
+	end := start.Add(time.Duration(a.duration.Poll()) * time.Millisecond)
+	downSpeed := physics.NewVector(0, a.speed.Poll())
+	upSpeed := downSpeed.Copy().Scale(-1)
+	speed := upSpeed
+	return func(id int) aiStatus {
+			keeper, ok := event.GetEntity(id).(*NPC)
+			if !ok {
+				dlog.Error("Got non NPC in Innkeeper bindings")
+				return 1
+			}
+			if time.Now().After(end) {
+				return aiComplete
+			}
+			if keeper.Y() > a.bottom {
+				speed = upSpeed
+			} else if keeper.Y() < a.top {
+				speed = downSpeed
+			}
+			keeper.Delta.SetPos(speed.X(), speed.Y())
+
+			// Todo: pull out into "move"?
+			keeper.ShiftPos(keeper.Delta.X(), keeper.Delta.Y())
+			if keeper.Delta.X() != 0 || keeper.Delta.Y() != 0 {
+				if keeper.Delta.X() < 0 {
+					keeper.Swtch.Set("walkLT")
+				} else {
+					keeper.Swtch.Set("walkRT")
+				}
+			} else {
+				cur := keeper.Swtch.Get()
+				err := keeper.Swtch.Set("stand" + string(cur[len(cur)-2:]))
+				dlog.ErrorCheck(err)
+			}
+
+			return aiContinue
+		}, func(id int) {
+			keeper, ok := event.GetEntity(id).(*NPC)
+			if !ok {
+				dlog.Error("Got non NPC in Innkeeper bindings")
+				return
+			}
+			keeper.Delta.SetPos(0, 0)
+		}
+}
+
+type aiStatus int
+
+const (
+	aiContinue aiStatus = iota
+	aiComplete aiStatus = iota
+)
+
+type AI struct {
+	inAction      bool
+	curAction     func(int) aiStatus
+	curCancel     func(int)
+	actions       []aiAction
+	actionWeights []float64
+}
+
+func NewAI(actions []aiAction, weights []float64) *AI {
+	remainingWeights := alg.RemainingWeights(weights)
+	return &AI{
+		actions:       actions,
+		actionWeights: remainingWeights,
+	}
+}
+
+type aiAction interface {
+	start() (func(int) aiStatus, func(int))
+}
+
+func (ai *AI) Choose() aiAction {
+	i := alg.WeightedChooseOne(ai.actionWeights)
+	return ai.actions[i]
 }

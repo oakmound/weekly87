@@ -89,7 +89,7 @@ var Scene = scene.Scene{
 
 		// Create all possible NPCs
 		npcScale := 1.6
-		npcs := []NPC{
+		npcs := []*NPC{
 			NewInnNPC(players.Swordsman, npcScale, 243, 400).FaceLeft(true),
 			NewInnNPC(players.Mage, npcScale, 440, 210),
 			NewInnNPC(players.WhiteMage, npcScale, 670, 423).FaceLeft(true),
