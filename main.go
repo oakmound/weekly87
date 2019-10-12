@@ -24,6 +24,7 @@ func main() {
 
 			Level: "INFO",
 		},
+		TrackInputChanges: true,
 	}
 	//oak.SetBinaryPayload(assets.Asset, assets.AssetDir)
 

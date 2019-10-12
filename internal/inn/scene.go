@@ -470,19 +470,28 @@ var Scene = scene.Scene{
 }
 
 func getInteractBtn() render.Renderable {
+	// Todo: change to space?
+	txt := "Enter"
+	if oak.MostRecentInput == oak.Joystick {
+		txt = "A"
+	}
 	keyImg := keyviz.Generator{
-		Text: "Enter",
+		Text: txt,
 		TextSize: 12,
 		Color: color.RGBA{100, 100, 255, 255},
 	}.Generate()
-	// todo: joystick
+	// todo: joystick has different style!
 	// todo: composite with icon
 	return render.NewSprite(0,0, keyImg.(*image.RGBA))
 }
  
 func getConfirmBtn() render.Renderable {
+	txt := "Space"
+	if oak.MostRecentInput == oak.Joystick {
+		txt = "A"
+	}
 	keyImg := keyviz.Generator{
-		Text: "Space",
+		Text: txt,
 		TextSize: 12,
 		Color: color.RGBA{100, 100, 255, 255},
 	}.Generate()
@@ -492,8 +501,12 @@ func getConfirmBtn() render.Renderable {
 }
 
 func getCancelBtn() render.Renderable {
+	txt := "ESC"
+	if oak.MostRecentInput == oak.Joystick {
+		txt = "B"
+	}
 	keyImg := keyviz.Generator{
-		Text: "ESC",
+		Text: txt,
 		TextSize: 12,
 		Color: color.RGBA{255, 100, 100, 255},
 	}.Generate()
@@ -503,8 +516,12 @@ func getCancelBtn() render.Renderable {
 }
 
 func getBootButton() render.Renderable {
+	txt := "B"
+	if oak.MostRecentInput == oak.Joystick {
+		txt = "X"
+	}
 	keyImg := keyviz.Generator{
-		Text: "B",
+		Text: txt,
 		TextSize: 12,
 		Color: color.RGBA{50, 150, 50, 255},
 	}.Generate()
