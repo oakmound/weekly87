@@ -2,8 +2,8 @@ package inn
 
 import (
 	"fmt"
-	"image/color"
 	"image"
+	"image/color"
 	"math/rand"
 	"path/filepath"
 	"strings"
@@ -12,6 +12,8 @@ import (
 
 	klg "github.com/200sc/klangsynthese/audio"
 
+	"github.com/oakmound/oak"
+	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities"
@@ -20,20 +22,17 @@ import (
 	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/mouse"
 	"github.com/oakmound/oak/physics"
-	"github.com/oakmound/oak"
-	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
 	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/dtools"
+	"github.com/oakmound/weekly87/internal/keyviz"
 	"github.com/oakmound/weekly87/internal/layer"
 	"github.com/oakmound/weekly87/internal/menus/selector"
 	"github.com/oakmound/weekly87/internal/music"
 	"github.com/oakmound/weekly87/internal/records"
-	"github.com/oakmound/weekly87/internal/keyviz"
-
 )
 
 var stayInMenu bool
@@ -65,7 +64,7 @@ var Scene = scene.Scene{
 		// A way to enter the run
 		doodads.NewInnDoor("run")
 		// A way to go back to menu screen
-		doodads.NewCustomInnDoor("endGame", 490, 40, 100, 102)
+		doodads.NewCustomInnDoor("endGame", 509, 40, 100, 102)
 
 		// Create doodads for tables
 		uglymugger, _ := render.LoadSprites("", filepath.Join("16x16", "ugly_mugger.png"), 16, 16, 0)
@@ -189,6 +188,9 @@ var Scene = scene.Scene{
 		// Lazy impl for start game walking
 		pc.front.Delta = physics.NewVector(4, 0)
 		pc.front.Bind(func(id int, _ interface{}) int {
+			if pc.gameState == playing {
+				return 1
+			}
 			p, ok := event.GetEntity(id).(*entities.Interactive)
 			if !ok {
 				dlog.Error("Non-player sent to player binding")
@@ -197,6 +199,9 @@ var Scene = scene.Scene{
 			if x > float64(oak.ScreenWidth)/3*2 {
 				pc.front.Delta = physics.NewVector(0, 4)
 				pc.front.Bind(func(id int, _ interface{}) int {
+					if pc.gameState == playing {
+						return 1
+					}
 					p, ok := event.GetEntity(id).(*entities.Interactive)
 					if !ok {
 						dlog.Error("Non-player sent to player binding")
@@ -476,28 +481,28 @@ func getInteractBtn() render.Renderable {
 		txt = "A"
 	}
 	keyImg := keyviz.Generator{
-		Text: txt,
+		Text:     txt,
 		TextSize: 12,
-		Color: color.RGBA{100, 100, 255, 255},
+		Color:    color.RGBA{100, 100, 255, 255},
 	}.Generate()
 	// todo: joystick has different style!
 	// todo: composite with icon
-	return render.NewSprite(0,0, keyImg.(*image.RGBA))
+	return render.NewSprite(0, 0, keyImg.(*image.RGBA))
 }
- 
+
 func getConfirmBtn() render.Renderable {
 	txt := "Space"
 	if oak.MostRecentInput == oak.Joystick {
 		txt = "A"
 	}
 	keyImg := keyviz.Generator{
-		Text: txt,
+		Text:     txt,
 		TextSize: 12,
-		Color: color.RGBA{100, 100, 255, 255},
+		Color:    color.RGBA{100, 100, 255, 255},
 	}.Generate()
 	// todo: joystick
 	// todo: composite with icon
-	return render.NewSprite(0,0, keyImg.(*image.RGBA))
+	return render.NewSprite(0, 0, keyImg.(*image.RGBA))
 }
 
 func getCancelBtn() render.Renderable {
@@ -506,13 +511,13 @@ func getCancelBtn() render.Renderable {
 		txt = "B"
 	}
 	keyImg := keyviz.Generator{
-		Text: txt,
+		Text:     txt,
 		TextSize: 12,
-		Color: color.RGBA{255, 100, 100, 255},
+		Color:    color.RGBA{255, 100, 100, 255},
 	}.Generate()
 	// todo: joystick
 	// todo: composite with icon
-	return render.NewSprite(0,0, keyImg.(*image.RGBA))
+	return render.NewSprite(0, 0, keyImg.(*image.RGBA))
 }
 
 func getBootButton() render.Renderable {
@@ -521,11 +526,11 @@ func getBootButton() render.Renderable {
 		txt = "X"
 	}
 	keyImg := keyviz.Generator{
-		Text: txt,
+		Text:     txt,
 		TextSize: 12,
-		Color: color.RGBA{50, 150, 50, 255},
+		Color:    color.RGBA{50, 150, 50, 255},
 	}.Generate()
 	// todo: joystick
 	// todo: composite with icon
-	return render.NewSprite(0,0, keyImg.(*image.RGBA))
+	return render.NewSprite(0, 0, keyImg.(*image.RGBA))
 }

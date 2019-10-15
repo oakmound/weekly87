@@ -69,7 +69,7 @@ var Scene = scene.Scene{
 			justVisiting = true
 			outcome = run.Outcome{R: r.LastRun}
 		}
-		fmt.Println("Visting end game:", justVisiting)
+		dlog.Info("Just visting end game:", justVisiting)
 
 		// STANDARD SETUP STUFF
 		runInfo := outcome.R

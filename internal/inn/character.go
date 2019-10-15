@@ -137,6 +137,16 @@ func (iw *innWalker) bindFront() {
 			if oak.IsDown(key.RightArrow) || js.StickLX > 8000 {
 				p.Delta.Add(physics.NewVector(p.Speed.X(), 0))
 			}
+		default:
+			js := joys.StickState(lowestID)
+			if oak.IsDown(key.UpArrow) || js.StickLY > 8000 ||
+				oak.IsDown(key.DownArrow) || js.StickLY < -8000 ||
+				oak.IsDown(key.LeftArrow) || js.StickLX < -8000 ||
+				oak.IsDown(key.RightArrow) || js.StickLX > 8000 {
+				iw.gameState = playing
+
+			}
+
 		}
 		p.Vector.Add(p.Delta)
 
