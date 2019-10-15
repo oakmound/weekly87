@@ -61,9 +61,17 @@ var (
 //If there is time at the e nd we can look at what vbariables this touches and get them exported or passed onwards so this can have its own package
 var Scene = scene.Scene{
 	Start: func(prevScene string, data interface{}) {
+		r := records.Load()
+		justVisiting := false
 
-		outcome := data.(run.Outcome)
-		fmt.Println(outcome.R)
+		outcome, ok := data.(run.Outcome)
+		if !ok {
+			justVisiting = true
+			outcome = run.Outcome{R: r.LastRun}
+		}
+		fmt.Println("Visting end game:", justVisiting)
+
+		// STANDARD SETUP STUFF
 		runInfo := outcome.R
 		stayInEndScene = true
 		endSceneNextScene = "inn"
@@ -78,11 +86,10 @@ var Scene = scene.Scene{
 		pitY = float64(oak.ScreenHeight) - 100.0
 
 		hopDistance = 100.0
-		// partyJson, _ := json.Marshal(runInfo.Party)
 
 		// Update info in the records with info from the most recent run
 		// TODO: debate moving this to the run scene's end function
-		r := records.Load()
+
 		sc := int64(runInfo.SectionsCleared)
 		r.SectionsCleared += sc
 		if sc > r.FarthestGoneInSections {
@@ -94,22 +101,22 @@ var Scene = scene.Scene{
 
 		chestTotal := 0
 		deadChests := 0
-		for _, pl := range runInfo.Party.Players {
-
-			playerChestValue := 0
-			for _, j := range pl.ChestValues {
-				playerChestValue += int(j)
+		if !justVisiting {
+			for _, pl := range runInfo.Party.Players {
+				playerChestValue := 0
+				for _, j := range pl.ChestValues {
+					playerChestValue += int(j)
+				}
+				if !pl.Alive {
+					r.Deaths++
+					deadChests += playerChestValue
+				} else {
+					chestTotal += playerChestValue
+				}
 			}
-			if !pl.Alive {
-				r.Deaths++
-				deadChests += playerChestValue
-			} else {
-				chestTotal += playerChestValue
-			}
-
 		}
 
-		// For the next run
+		// For the next run TODO: move to run
 		r.BaseSeed = int64(runInfo.SectionsCleared) + 1
 		r.Store()
 
@@ -122,18 +129,13 @@ var Scene = scene.Scene{
 		fnt.Size = 28
 		graves := fnt.Generate()
 
-		// nextscene = "inn"
 		render.SetDrawStack(layer.Get()...)
 		debugTree := dtools.NewThickColoredRTree(collision.DefTree, 4, labels.ColorMap)
 		render.Draw(debugTree, layer.Play, 1000)
 
-		// Make the Inn backing
-		innBackground, _ := render.LoadSprite("", filepath.Join("raw", "end_scene.png"))
-		render.Draw(innBackground, layer.Ground)
-
-		// textBacking := render.NewColorBox(textBackingX, oak.ScreenHeight*2/3, color.RGBA{120, 120, 120, 190})
-		// textBacking.SetPos(float64(oak.ScreenWidth)*0.33, 40)
-		// render.Draw(textBacking, 1)
+		// Make the graveyard backing
+		endBackground, _ := render.LoadSprite("", filepath.Join("raw", "end_scene.png"))
+		render.Draw(endBackground, layer.Ground)
 
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := 16.0
@@ -187,6 +189,10 @@ var Scene = scene.Scene{
 			render.Draw(r, layer.Debug, 18)
 		}
 
+		if justVisiting == true {
+			return
+		}
+
 		oak.AddCommand("debug", func(args []string) {
 			dlog.Warn("Cheating to toggle debug mode")
 			if debugTree.DrawDisabled {
@@ -219,8 +225,14 @@ var Scene = scene.Scene{
 	End: scene.GoToPtr(&endSceneNextScene),
 }
 
+// investigate allows us to investigate and poke around the end game with our living characters
+func investigate(party *players.Party) {
+	fmt.Println("Ending actions can be taken here")
+}
+
 func presentSpoils(party *players.Party, graveCount *int, index int) {
 	if index > len(party.Players)-1 {
+		investigate(party)
 		return
 	}
 	p := party.Players[index]
@@ -282,7 +294,7 @@ func presentSpoils(party *players.Party, graveCount *int, index int) {
 				p.CheckedBind(func(ply *players.Player, _ interface{}) int {
 
 					if time.Now().After(t) {
-						liviningExit(p)
+						livingExit(p)
 						return event.UnbindSingle
 					}
 					return 0
@@ -348,7 +360,7 @@ func tossChests(p *players.Player) {
 		return 0
 	}, "EnterFrame")
 }
-func liviningExit(p *players.Player) {
+func livingExit(p *players.Player) {
 	p.Swtch.Set("walkLT")
 	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
 

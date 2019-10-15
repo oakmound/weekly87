@@ -6,6 +6,6 @@ import "github.com/oakmound/weekly87/internal/characters/players"
 //
 type RunInfo struct {
 	Party           *players.Party
-	SectionsCleared int
-	EnemiesDefeated int64
+	SectionsCleared int   `json:"SectionsCleared"`
+	EnemiesDefeated int64 `json:"enemiesDefeated"`
 }

@@ -24,6 +24,7 @@ type Records struct {
 	FarthestGoneInSections int64                 `json:"farthestGoneInSections"`
 	PartyComp              []players.PartyMember `json:"partyComp"`
 	Deaths                 int                   `json:"deaths"`
+	LastRun                RunInfo               `json:"lastRun"`
 }
 
 // Store a record to a file
@@ -45,7 +46,8 @@ func Load() *Records {
 		f, err := os.Create(recordsFile)
 		dlog.ErrorCheck(err)
 		r.BaseSeed = rand.Int63()
-		r.PartyComp = []players.PartyMember{{players.Swordsman, 0, "Dan the Default"}}
+		r.PartyComp = []players.PartyMember{{PlayerClass: players.Swordsman, AccruedValue: 0, Name: "Dan the Default"}}
+		r.LastRun = RunInfo{EnemiesDefeated: 0, SectionsCleared: 0}
 		data, err := json.Marshal(r)
 		dlog.ErrorCheck(err)
 		_, err = f.Write(data)
@@ -54,7 +56,7 @@ func Load() *Records {
 		dc := json.NewDecoder(f)
 		dlog.ErrorCheck(dc.Decode(r))
 		if r.PartyComp == nil {
-			r.PartyComp = []players.PartyMember{{players.Swordsman, 0, "Dan the Default"}}
+			r.PartyComp = []players.PartyMember{{PlayerClass: players.Swordsman, AccruedValue: 0, Name: "Dan the Default"}}
 		}
 	}
 	if f != nil {

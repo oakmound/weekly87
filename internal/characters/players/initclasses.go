@@ -76,6 +76,6 @@ type ClassDefinition struct {
 // PartyMember information for storage
 type PartyMember struct {
 	PlayerClass  int
-	AccuredValue int
+	AccruedValue int
 	Name         string
 }
