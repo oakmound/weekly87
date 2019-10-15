@@ -21,11 +21,12 @@ const (
 )
 
 var ColorMap = map[collision.Label]color.RGBA{
-	Chest:    color.RGBA{255, 255, 0, 255},
-	Door:     color.RGBA{125, 125, 125, 255},
-	Enemy:    color.RGBA{0, 0, 255, 255},
-	PC:       color.RGBA{125, 0, 255, 255},
-	Blocking: color.RGBA{200, 200, 10, 255},
-	Ornament: color.RGBA{250, 200, 40, 255},
-	NPC:      color.RGBA{125, 200, 10, 255},
+	Chest:     color.RGBA{255, 255, 0, 255},
+	Door:      color.RGBA{125, 125, 125, 255},
+	Enemy:     color.RGBA{0, 0, 255, 255},
+	PC:        color.RGBA{125, 0, 255, 255},
+	Blocking:  color.RGBA{200, 200, 10, 255},
+	Drinkable: color.RGBA{180, 70, 70, 200},
+	Ornament:  color.RGBA{250, 200, 40, 255},
+	NPC:       color.RGBA{125, 200, 10, 255},
 }

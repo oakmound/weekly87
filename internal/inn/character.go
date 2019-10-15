@@ -6,7 +6,6 @@ import (
 	"github.com/200sc/go-dist/floatrange"
 	"github.com/200sc/go-dist/intrange"
 	"github.com/oakmound/oak"
-	"github.com/oakmound/oak/alg"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
@@ -283,6 +282,41 @@ func NewInnNPC(class int, scale, x, y float64) *NPC {
 		n.Init(),
 		0,
 	)
+	n.AI = NewAI(
+		[]aiAction{
+			aiDrinker{
+				duration: intrange.NewLinear(2000, 4000),
+				solid:    n.Interactive,
+			},
+		},
+		[]float64{
+			1,
+		},
+	)
+
+	n.Bind(func(id int, frame interface{}) int {
+
+		drinkr, ok := event.GetEntity(id).(*NPC)
+		if !ok {
+			dlog.Error("Got non NPC in Drinker bindings")
+			return 1
+		}
+
+		if drinkr.inAction {
+			status := drinkr.curAction(id)
+			if status == aiComplete {
+				drinkr.curCancel(id)
+				drinkr.inAction = false
+			}
+			return 0
+		}
+
+		action := drinkr.AI.Choose()
+		drinkr.curAction, drinkr.curCancel = action.start()
+		drinkr.inAction = true
+
+		return 0
+	}, "EnterFrame")
 
 	return n
 }
@@ -339,90 +373,4 @@ func NewInnkeeper(scale, x, y float64) *NPC {
 		return 0
 	}, "EnterFrame")
 	return keeper
-}
-
-type aiWalkUpDownBar struct {
-	top, bottom float64
-	speed       floatrange.Range
-	// in milliseconds
-	duration intrange.Range
-}
-
-func (a aiWalkUpDownBar) start() (func(int) aiStatus, func(int)) {
-	start := time.Now()
-	end := start.Add(time.Duration(a.duration.Poll()) * time.Millisecond)
-	downSpeed := physics.NewVector(0, a.speed.Poll())
-	upSpeed := downSpeed.Copy().Scale(-1)
-	speed := upSpeed
-	return func(id int) aiStatus {
-			keeper, ok := event.GetEntity(id).(*NPC)
-			if !ok {
-				dlog.Error("Got non NPC in Innkeeper bindings")
-				return 1
-			}
-			if time.Now().After(end) {
-				return aiComplete
-			}
-			if keeper.Y() > a.bottom {
-				speed = upSpeed
-			} else if keeper.Y() < a.top {
-				speed = downSpeed
-			}
-			keeper.Delta.SetPos(speed.X(), speed.Y())
-
-			// Todo: pull out into "move"?
-			keeper.ShiftPos(keeper.Delta.X(), keeper.Delta.Y())
-			if keeper.Delta.X() != 0 || keeper.Delta.Y() != 0 {
-				if keeper.Delta.X() < 0 {
-					keeper.Swtch.Set("walkLT")
-				} else {
-					keeper.Swtch.Set("walkRT")
-				}
-			} else {
-				cur := keeper.Swtch.Get()
-				err := keeper.Swtch.Set("stand" + string(cur[len(cur)-2:]))
-				dlog.ErrorCheck(err)
-			}
-
-			return aiContinue
-		}, func(id int) {
-			keeper, ok := event.GetEntity(id).(*NPC)
-			if !ok {
-				dlog.Error("Got non NPC in Innkeeper bindings")
-				return
-			}
-			keeper.Delta.SetPos(0, 0)
-		}
-}
-
-type aiStatus int
-
-const (
-	aiContinue aiStatus = iota
-	aiComplete aiStatus = iota
-)
-
-type AI struct {
-	inAction      bool
-	curAction     func(int) aiStatus
-	curCancel     func(int)
-	actions       []aiAction
-	actionWeights []float64
-}
-
-func NewAI(actions []aiAction, weights []float64) *AI {
-	remainingWeights := alg.RemainingWeights(weights)
-	return &AI{
-		actions:       actions,
-		actionWeights: remainingWeights,
-	}
-}
-
-type aiAction interface {
-	start() (func(int) aiStatus, func(int))
-}
-
-func (ai *AI) Choose() aiAction {
-	i := alg.WeightedChooseOne(ai.actionWeights)
-	return ai.actions[i]
 }

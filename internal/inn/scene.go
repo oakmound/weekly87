@@ -63,10 +63,10 @@ var Scene = scene.Scene{
 
 		// A way to enter the run
 		doodads.NewInnDoor("run")
-		// A way to go back to menu screen
+		// A way to checkout the endgame scene
 		doodads.NewCustomInnDoor("endGame", 509, 40, 100, 102)
 
-		// Create doodads for tables
+		// Load mug sprites
 		uglymugger, _ := render.LoadSprites("", filepath.Join("16x16", "ugly_mugger.png"), 16, 16, 0)
 		prettyMugs := []*render.Sprite{uglymugger[0][0], uglymugger[0][1], uglymugger[1][0]}
 
@@ -78,7 +78,7 @@ var Scene = scene.Scene{
 		// leftT.PlaceConsumablesa(prettyMugs, 3+rand.Intn(7))
 
 		// TODO: update placement strats for consumables
-		doodads.NewConsumable(150, 150, prettyMugs[0])
+		doodads.NewDrinkable(200, 290, prettyMugs[0])
 
 		topT := doodads.NewFurniture(480, 230, 190, 60)
 		topT.SetOrnaments(prettyMugs, rand.Intn(6))

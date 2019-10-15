@@ -2,6 +2,7 @@ package doodads
 
 import (
 	"github.com/oakmound/oak/collision"
+	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/render"
@@ -29,10 +30,22 @@ func NewConsumable(x, y float64, img *render.Sprite) *Consumable {
 	c.R = img.Copy()
 	width, height := img.GetDims()
 	c.Solid = entities.NewSolid(x, y, float64(width), float64(height), nil, nil, c.Init())
-	c.UpdateLabel(collision.Label(labels.Drinkable))
+	c.Bind(func(id int, space interface{}) int {
+		s := space.(*collision.Space)
+		c.Consume(s.X(), s.Y())
+		return 1
+	}, "Consume")
+
 	c.SetPos(x, y)
 	render.Draw(c.R, layer.Play, 2)
 
+	return c
+}
+
+// NewDrinkable creates a drinkable consumable
+func NewDrinkable(x, y float64, img *render.Sprite) *Consumable {
+	c := NewConsumable(x, y, img)
+	c.UpdateLabel(collision.Label(labels.Drinkable))
 	return c
 }
 
@@ -42,6 +55,9 @@ func (c *Consumable) SetPos(x, y float64) {
 	c.R.SetPos(x, y)
 }
 
-func (c *Consumable) Consume() {
-
+// Consume in what is for now a boiler plate fashion
+func (c *Consumable) Consume(x, y float64) {
+	dlog.Info("pretending to be consumed")
+	c.R.Undraw()
+	c.Destroy()
 }
