@@ -5,6 +5,7 @@ import (
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
+	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/layer"
@@ -32,7 +33,7 @@ func NewConsumable(x, y float64, img *render.Sprite) *Consumable {
 	c.Solid = entities.NewSolid(x, y, float64(width), float64(height), nil, nil, c.Init())
 	c.Bind(func(id int, space interface{}) int {
 		s := space.(*collision.Space)
-		c.Consume(s.X(), s.Y())
+		c.Consume(s.X(), s.Y()-20)
 		return 1
 	}, "Consume")
 
@@ -55,9 +56,37 @@ func (c *Consumable) SetPos(x, y float64) {
 	c.R.SetPos(x, y)
 }
 
+// ShiftPos of the solid and the renderable
+func (c *Consumable) ShiftPos(x, y float64) {
+	c.Solid.ShiftPos(x, y)
+	c.R.ShiftX(x)
+	c.R.ShiftY(y)
+}
+
 // Consume in what is for now a boiler plate fashion
 func (c *Consumable) Consume(x, y float64) {
 	dlog.Info("pretending to be consumed")
-	c.R.Undraw()
-	c.Destroy()
+	c.Tree.Remove(c.Space)
+
+	delta := physics.NewVector(x-c.X(), y-c.Y()).Normalize()
+	//Vector{x - c.X(), y - c.Y()}
+
+	c.Bind(func(id int, _ interface{}) int {
+
+		con, ok := event.GetEntity(id).(*Consumable)
+		if !ok {
+			dlog.Error("Non Consumer in consume enter")
+		}
+
+		con.ShiftPos(delta.X(), delta.Y())
+
+		if curX, curY := con.GetPos(); curX > x && curY < y {
+			c.R.Undraw()
+			c.Destroy()
+
+			return event.UnbindSingle
+		}
+		return 0
+	}, "EnterFrame")
+
 }

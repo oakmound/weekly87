@@ -334,7 +334,7 @@ func (n NPC) Destroy() {
 }
 
 // NewInnkeeper creates the innkeeper who moves around behind the bar
-func NewInnkeeper(scale, x, y float64) *NPC {
+func NewInnkeeper(img *render.Sprite, scale, x, y float64) *NPC {
 	keeper := NewInnNPC(players.InnKeeper, scale, x, y)
 	keeper.AI = NewAI(
 		[]aiAction{
@@ -344,9 +344,13 @@ func NewInnkeeper(scale, x, y float64) *NPC {
 				speed:    floatrange.NewConstant(1),
 				duration: intrange.NewConstant(2000),
 			},
+			aiServeDrinkLocation{
+				rect:     floatgeom.NewRect2(180, 130, 50, float64(oak.ScreenHeight)),
+				drinkImg: img,
+			},
 		},
 		[]float64{
-			1,
+			.5, .5,
 		},
 	)
 	keeper.Bind(func(id int, frame interface{}) int {

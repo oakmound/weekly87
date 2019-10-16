@@ -99,7 +99,7 @@ var Scene = scene.Scene{
 			NewInnNPC(players.Swordsman, npcScale, 243, 400).FaceLeft(true),
 			NewInnNPC(players.Mage, npcScale, 440, 210),
 			NewInnNPC(players.WhiteMage, npcScale, 670, 423).FaceLeft(true),
-			NewInnkeeper(npcScale, 90, 200),
+			NewInnkeeper(prettyMugs[0], npcScale, 90, 200),
 			NewInnNPC(players.Berserker, npcScale, 445, 460),
 			NewInnNPC(players.BlueMage, npcScale, 241, 210).FaceLeft(true),
 			NewInnNPC(players.Paladin, npcScale, 240, 280).FaceLeft(true),

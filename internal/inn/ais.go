@@ -6,11 +6,14 @@ import (
 	"github.com/200sc/go-dist/floatrange"
 	"github.com/200sc/go-dist/intrange"
 	"github.com/oakmound/oak/alg"
+	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/physics"
+	"github.com/oakmound/oak/render"
+	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 )
 
@@ -102,6 +105,46 @@ func (a aiWalkUpDownBar) start() (func(int) aiStatus, func(int)) {
 		}
 }
 
+type aiServeDrinkLocation struct {
+	rect     floatgeom.Rect2
+	drinkImg *render.Sprite
+}
+
+func (a aiServeDrinkLocation) start() (func(int) aiStatus, func(int)) {
+	barX := (a.rect.Min.X() + a.rect.Max.X()) / 2
+	barY := (a.rect.Min.Y() + a.rect.Max.Y()) / 2
+	var end time.Time
+	reached := false
+	return func(id int) aiStatus {
+		keeper, ok := event.GetEntity(id).(*NPC)
+		if !ok {
+			dlog.Error("Got non NPC in Innkeeper bindings")
+			return 1
+		}
+
+		dy := 1.0
+		if keeper.Y() > barY {
+			dy = -1.0
+		}
+
+		if reached {
+			if time.Now().After(end) {
+				return aiComplete
+			}
+			return aiContinue
+		}
+
+		keeper.ShiftPos(0, dy)
+		if keeper.Y() > a.rect.Min.Y() && keeper.Y() < a.rect.Max.Y() {
+			end = time.Now().Add(time.Duration(1000 * time.Millisecond))
+			reached = true
+			doodads.NewDrinkable(barX, barY, a.drinkImg)
+		}
+
+		return aiContinue
+	}, func(id int) {}
+}
+
 type aiDrinker struct {
 	duration intrange.Range
 	solid    *entities.Interactive
@@ -114,7 +157,7 @@ func (a aiDrinker) start() (func(int) aiStatus, func(int)) {
 	pSpace := a.solid.GetReactiveSpace()
 	// x, y := pSpace.GetPos()
 	drinkSpace := collision.NewEmptyReactiveSpace(
-		collision.NewUnassignedSpace(pSpace.X()-50, pSpace.Y(), pSpace.GetW()+100, pSpace.GetH()))
+		collision.NewUnassignedSpace(pSpace.X()-50, pSpace.Y(), pSpace.GetW()+50, pSpace.GetH()))
 
 	drinkSpace.Add(labels.Drinkable, func(_, d *collision.Space) {
 		d.CID.Trigger("Consume", pSpace.Space)
