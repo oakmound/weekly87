@@ -345,7 +345,7 @@ func NewInnkeeper(img *render.Sprite, scale, x, y float64) *NPC {
 				duration: intrange.NewConstant(2000),
 			},
 			aiServeDrinkLocation{
-				rect:     floatgeom.NewRect2(180, 130, 50, float64(oak.ScreenHeight)),
+				rect:     floatgeom.NewRect2WH(180, 150, 25, float64(oak.ScreenHeight)/2),
 				drinkImg: img,
 			},
 		},

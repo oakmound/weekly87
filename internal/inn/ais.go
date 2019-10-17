@@ -1,6 +1,7 @@
 package inn
 
 import (
+	"math/rand"
 	"time"
 
 	"github.com/200sc/go-dist/floatrange"
@@ -111,8 +112,10 @@ type aiServeDrinkLocation struct {
 }
 
 func (a aiServeDrinkLocation) start() (func(int) aiStatus, func(int)) {
-	barX := (a.rect.Min.X() + a.rect.Max.X()) / 2
-	barY := (a.rect.Min.Y() + a.rect.Max.Y()) / 2
+	barX := (rand.Float64() * (a.rect.Max.X() - a.rect.Min.X())) + a.rect.Min.X()
+	barY := (rand.Float64() * (a.rect.Max.Y() - a.rect.Min.Y())) + a.rect.Min.Y()
+	// keeper.Tree
+
 	var end time.Time
 	reached := false
 	return func(id int) aiStatus {
@@ -135,8 +138,8 @@ func (a aiServeDrinkLocation) start() (func(int) aiStatus, func(int)) {
 		}
 
 		keeper.ShiftPos(0, dy)
-		if keeper.Y() > a.rect.Min.Y() && keeper.Y() < a.rect.Max.Y() {
-			end = time.Now().Add(time.Duration(1000 * time.Millisecond))
+		if keeper.Y() > barY-1 && keeper.Y() < barY+1 {
+			end = time.Now().Add(time.Duration(4000 * time.Millisecond))
 			reached = true
 			doodads.NewDrinkable(barX, barY, a.drinkImg)
 		}
