@@ -22,9 +22,12 @@ type Records struct {
 	BaseSeed        int64 `json:"baseSeed"`
 	// Todo: more
 	FarthestGoneInSections int64                 `json:"farthestGoneInSections"`
+	EnemiesDefeated        int64                 `json:"enemiesDefeated"`
 	PartyComp              []players.PartyMember `json:"partyComp"`
 	Deaths                 int                   `json:"deaths"`
-	LastRun                RunInfo               `json:"lastRun"`
+	Wealth                 int                   `json:"wealth"`
+
+	LastRun RunInfo `json:"lastRun"`
 }
 
 // Store a record to a file

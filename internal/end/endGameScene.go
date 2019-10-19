@@ -123,6 +123,10 @@ var Scene = scene.Scene{
 
 		// For the next run TODO: move to run
 		r.BaseSeed = int64(runInfo.SectionsCleared) + 1
+
+		r.Wealth += chestTotal
+		r.EnemiesDefeated += runInfo.EnemiesDefeated
+
 		r.Store()
 
 		fnt := render.DefFontGenerator.Copy()
@@ -153,21 +157,21 @@ var Scene = scene.Scene{
 				return 0
 			}))
 
-		totalChestValue := 100000
 		// totalChestValue := 20
 		goldPit := floatgeom.NewRect2WH(670, float64(oak.ScreenHeight)-100, 330, 100)
-		makeGoldParticles(totalChestValue, goldPit)
+		makeGoldParticles(r.Wealth, goldPit)
 
 		//TODO: 2 layers: first current run
 		// Second layer totals
 		// Each layer has: sections_completed, enemies_defeated, chestvalue
 		textY := 80.0
 		textX := float64(oak.ScreenWidth) / 6
-		titling := blueFnt.NewStrText("Overall Stats:", textX, textY)
+
+		titling := blueFnt.NewStrText("Last Run Info:", textX, textY)
 		textX += 120
 		render.Draw(titling, 2, 2)
 
-		sectionText := blueFnt.NewStrText("Sections Cleared: "+strconv.Itoa(int(r.SectionsCleared)), textX, textY)
+		sectionText := blueFnt.NewStrText("Sections Cleared: "+strconv.Itoa(runInfo.SectionsCleared), textX, textY)
 		textX += 200
 		render.Draw(sectionText, 2, 2)
 
@@ -183,19 +187,19 @@ var Scene = scene.Scene{
 		textX = float64(oak.ScreenWidth) / 6
 		textY += 30
 
-		titling = blueFnt.NewStrText("Last Run Info:", textX, textY)
+		titling = blueFnt.NewStrText("Overall Stats:", textX, textY)
 		textX += 120
 		render.Draw(titling, 2, 2)
 
-		sectionText = blueFnt.NewStrText("Sections Cleared: "+strconv.Itoa(runInfo.SectionsCleared), textX, textY)
+		sectionText = blueFnt.NewStrText("Sections Cleared: "+strconv.Itoa(int(r.SectionsCleared)), textX, textY)
 		textX += 200
 		render.Draw(sectionText, 2, 2)
 
-		enemy = blueFnt.NewStrText("Enemies Defeated: "+strconv.FormatInt(runInfo.EnemiesDefeated, 10), textX, textY)
+		enemy = blueFnt.NewStrText("Enemies Defeated: "+strconv.FormatInt(r.EnemiesDefeated, 10), textX, textY)
 		textX += 200
 		render.Draw(enemy, 2, 2)
 
-		chestValues = blueFnt.NewStrText("Chest Value: "+strconv.Itoa(chestTotal), textX, textY)
+		chestValues = blueFnt.NewStrText("Chest Value: "+strconv.Itoa(r.Wealth), textX, textY)
 		textX += 200
 		render.Draw(chestValues, 2, 2)
 
@@ -221,7 +225,7 @@ var Scene = scene.Scene{
 		doodads.NewCustomInnDoor("inn", (float64(oak.ScreenWidth)-dWidth)/2, float64(oak.ScreenHeight)-20, dWidth, 20)
 		// Block off the top of the inn from being walkable
 		doodads.NewFurniture(0, 0, float64(oak.ScreenWidth), 187) // top of inn
-
+		oak.ResetCommands()
 		oak.AddCommand("debug", func(args []string) {
 			dlog.Warn("Cheating to toggle debug mode")
 			if debugTree.DrawDisabled {
@@ -305,7 +309,7 @@ func visitEnter(pComp []players.PartyMember) {
 			pc.Front.Bind(func(id int, _ interface{}) int {
 				if pc.State == playing {
 					investigate(pty)
-					return 1
+					return event.UnbindSingle
 				}
 				p, ok := event.GetEntity(id).(*entities.Interactive)
 				if !ok {
