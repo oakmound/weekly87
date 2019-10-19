@@ -10,6 +10,7 @@ import (
 
 	"github.com/200sc/go-dist/floatrange"
 	"github.com/200sc/go-dist/intrange"
+	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities"
@@ -87,7 +88,7 @@ var Scene = scene.Scene{
 		startY = float64(oak.ScreenHeight/2) + 20
 
 		pitX = float64(oak.ScreenWidth) - 180.0
-		pitY = float64(oak.ScreenHeight) - 100.0
+		pitY = float64(oak.ScreenHeight) - 75.0
 
 		hopDistance = 100.0
 
@@ -151,6 +152,11 @@ var Scene = scene.Scene{
 				stayInEndScene = false
 				return 0
 			}))
+
+		totalChestValue := 100000
+		// totalChestValue := 20
+		goldPit := floatgeom.NewRect2WH(670, float64(oak.ScreenHeight)-100, 330, 100)
+		makeGoldParticles(totalChestValue, goldPit)
 
 		//TODO: 2 layers: first current run
 		// Second layer totals
@@ -541,4 +547,50 @@ func explodeSprite(x, y float64, sprite *render.Sprite) {
 		particle.SpriteRotation(floatrange.Constant(10)),
 	)
 	sg.Generate(layer.Effect)
+}
+
+// makeGoldParticles creates the appropriate amount of collision particles within the given location
+func makeGoldParticles(goldCount int, location floatgeom.Rect2) {
+	debug := collision.NewRect2Space(location, 0)
+	debug.UpdateLabel(collision.Label(labels.Ornament))
+	collision.Add(debug)
+
+	center := location.Center()
+
+	//TODO: make this an actual fxn probably making it a log of goldCount
+	particleCount := goldCount
+
+	colorOpts := particle.And(
+		particle.NewPerFrame(floatrange.NewConstant(float64(particleCount))),
+		particle.Limit(particleCount),
+		particle.InfiniteLifeSpan(),
+		particle.Spread(location.W()/2, location.H()/2),
+		particle.Shape(shape.Diamond),
+		particle.Size(intrange.NewConstant(4)),
+		particle.Speed(floatrange.NewConstant(0)),
+		particle.Pos(center.X(), center.Y()),
+		particle.Color(color.RGBA{200, 200, 0, 255}, color.RGBA{0, 0, 0, 0},
+			color.RGBA{200, 200, 0, 255}, color.RGBA{0, 0, 0, 0}),
+	)
+	shiftFactor := floatrange.NewLinear(0, 6)
+	pg := particle.NewCollisionGenerator(
+		particle.NewColorGenerator(colorOpts),
+		particle.Fragile(false),
+		particle.HitMap(map[collision.Label]collision.OnHit{
+			labels.PC: func(a, b *collision.Space) {
+				// b.CID.Trigger("Attacked", hitEffects)
+				p, ok := event.GetEntity(int(b.CID)).(*entities.Interactive)
+				if !ok {
+					dlog.Error("A non player is colliding with gold?")
+					return
+				}
+				goldPiece := particle.Lookup(int(a.CID))
+				d := p.Delta.Copy().Scale(shiftFactor.Poll())
+				goldPiece.ShiftX(d.X())
+				goldPiece.ShiftY(d.Y())
+			},
+		}),
+	)
+	pg.Generate(layer.Play)
+
 }

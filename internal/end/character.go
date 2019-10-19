@@ -53,6 +53,7 @@ func (iw *endWalker) setParty(plys []*players.Player) {
 			0,
 		)
 		iw.bindFront()
+
 	} else {
 		old := iw.Front.R
 		old.Undraw()
@@ -60,6 +61,7 @@ func (iw *endWalker) setParty(plys []*players.Player) {
 		iw.Front.R.SetPos(old.X(), old.Y())
 		iw.Front.R.(*render.Switch).Set(old.(*render.Switch).Get())
 	}
+	iw.Front.RSpace.UpdateLabel(labels.PC)
 	render.Draw(iw.Front.R, layer.Play, players.MaxPartySize)
 
 	for i := 1; i < len(plys); i++ {
