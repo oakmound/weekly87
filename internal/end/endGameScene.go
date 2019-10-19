@@ -152,19 +152,16 @@ var Scene = scene.Scene{
 				return 0
 			}))
 
-		textY := 120.0
-
 		//TODO: 2 layers: first current run
 		// Second layer totals
 		// Each layer has: sections_completed, enemies_defeated, chestvalue
-
-		textX := float64(oak.ScreenWidth) / 8
-
-		titling := blueFnt.NewStrText("Last Run Info:", textX, textY)
+		textY := 80.0
+		textX := float64(oak.ScreenWidth) / 6
+		titling := blueFnt.NewStrText("Overall Stats:", textX, textY)
 		textX += 120
 		render.Draw(titling, 2, 2)
 
-		sectionText := blueFnt.NewStrText("Sections Cleared: "+strconv.Itoa(runInfo.SectionsCleared), textX, textY)
+		sectionText := blueFnt.NewStrText("Sections Cleared: "+strconv.Itoa(int(r.SectionsCleared)), textX, textY)
 		textX += 200
 		render.Draw(sectionText, 2, 2)
 
@@ -173,6 +170,26 @@ var Scene = scene.Scene{
 		render.Draw(enemy, 2, 2)
 
 		chestValues := blueFnt.NewStrText("Chest Value: "+strconv.Itoa(chestTotal), textX, textY)
+		textX += 200
+		render.Draw(chestValues, 2, 2)
+
+		// Current Run info
+		textX = float64(oak.ScreenWidth) / 6
+		textY += 30
+
+		titling = blueFnt.NewStrText("Last Run Info:", textX, textY)
+		textX += 120
+		render.Draw(titling, 2, 2)
+
+		sectionText = blueFnt.NewStrText("Sections Cleared: "+strconv.Itoa(runInfo.SectionsCleared), textX, textY)
+		textX += 200
+		render.Draw(sectionText, 2, 2)
+
+		enemy = blueFnt.NewStrText("Enemies Defeated: "+strconv.FormatInt(runInfo.EnemiesDefeated, 10), textX, textY)
+		textX += 200
+		render.Draw(enemy, 2, 2)
+
+		chestValues = blueFnt.NewStrText("Chest Value: "+strconv.Itoa(chestTotal), textX, textY)
 		textX += 200
 		render.Draw(chestValues, 2, 2)
 
