@@ -114,7 +114,6 @@ type aiServeDrinkLocation struct {
 func (a aiServeDrinkLocation) start() (func(int) aiStatus, func(int)) {
 	barX := (rand.Float64() * (a.rect.Max.X() - a.rect.Min.X())) + a.rect.Min.X()
 	barY := (rand.Float64() * (a.rect.Max.Y() - a.rect.Min.Y())) + a.rect.Min.Y()
-	// keeper.Tree
 
 	var end time.Time
 	reached := false

@@ -12,9 +12,11 @@ import (
 	"github.com/200sc/go-dist/intrange"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
+	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/mouse"
 	"github.com/oakmound/oak/physics"
+	"github.com/oakmound/oak/render/mod"
 	"github.com/oakmound/oak/render/particle"
 	"github.com/oakmound/oak/shape"
 
@@ -22,6 +24,7 @@ import (
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
+	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/dtools"
@@ -38,8 +41,9 @@ func Init() {
 }
 
 var (
-	graveX = 90.0
-	graveY = 300.0
+	graveX   = 90.0
+	graveY   = 300.0
+	npcScale = 1.6 //TODO: remove need for this and rename
 )
 
 var stayInEndScene bool
@@ -189,9 +193,11 @@ var Scene = scene.Scene{
 			render.Draw(r, layer.Debug, 18)
 		}
 
-		if justVisiting == true {
-			return
-		}
+		// A way to return to the inn scene
+		dWidth := 150.0
+		doodads.NewCustomInnDoor("inn", (float64(oak.ScreenWidth)-dWidth)/2, float64(oak.ScreenHeight)-20, dWidth, 20)
+		// Block off the top of the inn from being walkable
+		doodads.NewFurniture(0, 0, float64(oak.ScreenWidth), 187) // top of inn
 
 		oak.AddCommand("debug", func(args []string) {
 			dlog.Warn("Cheating to toggle debug mode")
@@ -216,6 +222,11 @@ var Scene = scene.Scene{
 			dlog.Info("Current Debug Commands are: ", strings.Join(oak.GetDebugKeys(), " , "))
 		})
 
+		if justVisiting == true {
+			visitEnter(r.PartyComp)
+			return
+		}
+
 		// Extra running info
 		presentSpoils(runInfo.Party, currentDeathTollp, 0)
 
@@ -228,6 +239,73 @@ var Scene = scene.Scene{
 // investigate allows us to investigate and poke around the end game with our living characters
 func investigate(party *players.Party) {
 	fmt.Println("Ending actions can be taken here")
+
+}
+
+func visitEnter(pComp []players.PartyMember) {
+	ptycon := players.PartyConstructor{
+		Players:    players.ClassConstructor(pComp),
+		MaxPlayers: len(pComp),
+	}
+
+	pty, err := ptycon.NewParty(true)
+	if err != nil {
+		dlog.Error(err)
+		return
+	}
+	pc := newEndWalker(npcScale, pty.Players)
+
+	stop1 := float64(oak.ScreenHeight) - 140
+
+	stop2 := float64(oak.ScreenWidth/2) - 200
+
+	pc.Front.Delta = physics.NewVector(0, -8)
+	pc.Front.Bind(func(id int, _ interface{}) int {
+		p, ok := event.GetEntity(id).(*entities.Interactive)
+		if !ok {
+			dlog.Error("Non-player sent to player binding")
+		}
+		_, y := p.GetPos()
+		if y < stop1 {
+			pc.State = overridable
+
+			p.RSpace.Add(collision.Label(labels.Door), (func(s1, s2 *collision.Space) {
+				_, ok := s2.CID.E().(*doodads.InnDoor)
+				if !ok {
+					dlog.Error("Non-door sent to inndoor binding")
+					return
+				}
+				stayInEndScene = false
+			}))
+
+			pc.Front.Delta = physics.NewVector(-4, 0)
+			pc.Front.Bind(func(id int, _ interface{}) int {
+				if pc.State == playing {
+					investigate(pty)
+					return 1
+				}
+				p, ok := event.GetEntity(id).(*entities.Interactive)
+				if !ok {
+					dlog.Error("Non-player sent to player binding")
+				}
+				x, _ := p.GetPos()
+
+				if x < stop2 {
+
+					pc.State = playing
+					investigate(pty)
+					return event.UnbindSingle
+
+				}
+
+				return 0
+			}, "EnterFrame")
+			return event.UnbindSingle
+		}
+
+		return 0
+	}, "EnterFrame")
+
 }
 
 func presentSpoils(party *players.Party, graveCount *int, index int) {
@@ -238,6 +316,9 @@ func presentSpoils(party *players.Party, graveCount *int, index int) {
 	p := party.Players[index]
 	p.CID = p.Init()
 
+	s := p.Swtch.Copy()
+	p.Swtch = s.Modify(mod.Scale(npcScale, npcScale)).(*render.Switch)
+	p.Interactive.R = p.Swtch
 	//Player enters stage right
 	p.SetPos(float64(oak.ScreenWidth-64), startY)
 	render.Draw(p.R, layer.Play, 20)
@@ -256,12 +337,12 @@ func presentSpoils(party *players.Party, graveCount *int, index int) {
 
 		ply.ShiftPos(-2, 0)
 
-		ply.Swtch.Set("walkLT")
+		p.Swtch.Set("walkLT")
 		if len(ply.ChestValues) > 0 {
-			ply.Swtch.Set("walkHold")
+			p.Swtch.Set("walkHold")
 		}
 		if !ply.Alive {
-			ply.Swtch.Set("deadLT")
+			p.Swtch.Set("deadLT")
 
 		}
 
@@ -334,7 +415,6 @@ func hop(p *players.Player) {
 		return 0
 	}, "EnterFrame")
 }
-
 func tossChests(p *players.Player) {
 
 	for _, c := range p.Chests {
@@ -372,8 +452,6 @@ func livingExit(p *players.Player) {
 		return 0
 	}, "EnterFrame")
 }
-
-// var deathParticles particle.Generator
 
 func deadMovement(p *players.Player) {
 	p.CheckedBind(func(ply *players.Player, _ interface{}) int {

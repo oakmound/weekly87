@@ -186,9 +186,9 @@ var Scene = scene.Scene{
 		pc := newInnWalker(npcScale, pty.Players)
 
 		// Lazy impl for start game walking
-		pc.front.Delta = physics.NewVector(4, 0)
-		pc.front.Bind(func(id int, _ interface{}) int {
-			if pc.gameState == playing {
+		pc.Front.Delta = physics.NewVector(4, 0)
+		pc.Front.Bind(func(id int, _ interface{}) int {
+			if pc.State == playing {
 				return 1
 			}
 			p, ok := event.GetEntity(id).(*entities.Interactive)
@@ -197,9 +197,9 @@ var Scene = scene.Scene{
 			}
 			x, _ := p.GetPos()
 			if x > float64(oak.ScreenWidth)/3*2 {
-				pc.front.Delta = physics.NewVector(0, 4)
-				pc.front.Bind(func(id int, _ interface{}) int {
-					if pc.gameState == playing {
+				pc.Front.Delta = physics.NewVector(0, 4)
+				pc.Front.Bind(func(id int, _ interface{}) int {
+					if pc.State == playing {
 						return 1
 					}
 					p, ok := event.GetEntity(id).(*entities.Interactive)
@@ -210,10 +210,10 @@ var Scene = scene.Scene{
 
 					if y > float64(oak.ScreenHeight/2)+38 {
 						if x < float64(oak.ScreenWidth)/2 {
-							pc.gameState = playing
+							pc.State = playing
 							return event.UnbindSingle
 						}
-						pc.front.Delta = physics.NewVector(-4, 0)
+						pc.Front.Delta = physics.NewVector(-4, 0)
 					}
 
 					return 0
@@ -226,7 +226,7 @@ var Scene = scene.Scene{
 
 		var lastInteractedNPC *NPC
 		// Interact with NPCs
-		pc.front.RSpace.Add(labels.NPC, func(_, n *collision.Space) {
+		pc.Front.RSpace.Add(labels.NPC, func(_, n *collision.Space) {
 			// Todo: what if we're touching multiple NPCS?
 			// Keep track of most recently touched npc
 			npc, ok := n.CID.E().(*NPC)
@@ -292,7 +292,7 @@ var Scene = scene.Scene{
 			npcW, _ := npc.R.GetDims()
 			bkgW, bkgH := partyBackground.GetDims()
 			// Disable all controls
-			pc.gameState = inMenu
+			pc.State = inMenu
 			// Spawn a box with the party above the npc being selected
 			partyBackground.SetPos(npc.X()+float64(npcW-bkgW)/2, npc.Y()-10-float64(bkgH))
 			ptycon.Players[0].Position = floatgeom.Point2{partyBackground.X() + 20, partyBackground.Y() + 10}
@@ -388,7 +388,7 @@ var Scene = scene.Scene{
 					}
 
 					// end selection
-					pc.gameState = playing
+					pc.State = playing
 					event.Trigger("EndPartySelect", nil)
 				}),
 				selector.SelectTrigger(key.Down+key.Spacebar),

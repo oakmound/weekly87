@@ -22,9 +22,6 @@ import (
 	"github.com/oakmound/weekly87/internal/layer"
 )
 
-const frameLag = 10
-const maxPartySize = 4
-
 const (
 	prePlay = iota
 
@@ -33,12 +30,7 @@ const (
 )
 
 type innWalker struct {
-	front     *entities.Interactive
-	followers []*entities.Interactive
-	scale     float64
-	lagDeltas [frameLag * maxPartySize]floatgeom.Point2
-	lagIdx    int
-	gameState int
+	*players.FreeWalker
 }
 
 // setParty for the innWalker. Create any nessecary players and update if not
@@ -49,50 +41,50 @@ func (iw *innWalker) setParty(plys []*players.Player) {
 		return
 	}
 
-	if iw.front == nil {
-		iw.front = entities.NewInteractive(
+	if iw.Front == nil {
+		iw.Front = entities.NewInteractive(
 			float64(oak.ScreenWidth/2),
 			float64(170),
-			16*iw.scale,
-			32*iw.scale,
-			plys[0].Swtch.Copy().Modify(mod.Scale(iw.scale, iw.scale)),
+			16*iw.Scale,
+			32*iw.Scale,
+			plys[0].Swtch.Copy().Modify(mod.Scale(iw.Scale, iw.Scale)),
 			nil,
 			0,
 			0,
 		)
 		iw.bindFront()
 	} else {
-		old := iw.front.R
+		old := iw.Front.R
 		old.Undraw()
-		iw.front.R = plys[0].Swtch.Copy().Modify(mod.Scale(iw.scale, iw.scale))
-		iw.front.R.SetPos(old.X(), old.Y())
-		iw.front.R.(*render.Switch).Set(old.(*render.Switch).Get())
+		iw.Front.R = plys[0].Swtch.Copy().Modify(mod.Scale(iw.Scale, iw.Scale))
+		iw.Front.R.SetPos(old.X(), old.Y())
+		iw.Front.R.(*render.Switch).Set(old.(*render.Switch).Get())
 	}
-	render.Draw(iw.front.R, layer.Play, maxPartySize)
+	render.Draw(iw.Front.R, layer.Play, players.MaxPartySize)
 
 	for i := 1; i < len(plys); i++ {
-		if i >= len(iw.followers) {
+		if i >= len(iw.Followers) {
 			// make a new one for this position
-			iw.followers = append(iw.followers, entities.NewInteractive(
-				iw.front.X(),
-				iw.front.Y(),
-				16*iw.scale,
-				32*iw.scale,
-				plys[i].Swtch.Copy().Modify(mod.Scale(iw.scale, iw.scale)),
+			iw.Followers = append(iw.Followers, entities.NewInteractive(
+				iw.Front.X(),
+				iw.Front.Y(),
+				16*iw.Scale,
+				32*iw.Scale,
+				plys[i].Swtch.Copy().Modify(mod.Scale(iw.Scale, iw.Scale)),
 				nil,
 				0,
 				0,
 			))
 
 		} else {
-			old := iw.followers[i-1].R
+			old := iw.Followers[i-1].R
 			old.Undraw()
-			iw.followers[i-1].R = plys[i].Swtch.Copy().Modify(mod.Scale(iw.scale, iw.scale))
-			iw.followers[i-1].SetPos(old.X(), old.Y())
-			iw.followers[i-1].R.(*render.Switch).Set(old.(*render.Switch).Get())
+			iw.Followers[i-1].R = plys[i].Swtch.Copy().Modify(mod.Scale(iw.Scale, iw.Scale))
+			iw.Followers[i-1].SetPos(old.X(), old.Y())
+			iw.Followers[i-1].R.(*render.Switch).Set(old.(*render.Switch).Get())
 
 		}
-		render.Draw(iw.followers[i-1].R, layer.Play, maxPartySize-1)
+		render.Draw(iw.Followers[i-1].R, layer.Play, players.MaxPartySize-1)
 	}
 }
 
@@ -100,7 +92,7 @@ func (iw *innWalker) setParty(plys []*players.Player) {
 func newInnWalker(scale float64, plys []*players.Player) *innWalker {
 
 	iw := &innWalker{
-		scale: scale,
+		&players.FreeWalker{Scale: scale},
 	}
 	iw.setParty(plys)
 
@@ -108,42 +100,27 @@ func newInnWalker(scale float64, plys []*players.Player) *innWalker {
 }
 
 func (iw *innWalker) bindFront() {
-	lowestID := joys.LowestID()
-	iw.front.Bind(func(id int, _ interface{}) int {
+
+	iw.Front.Bind(func(id int, _ interface{}) int {
 		p, ok := event.GetEntity(id).(*entities.Interactive)
 		if !ok {
 			dlog.Error("Non-player sent to player binding")
 		}
 
-		switch iw.gameState {
+		switch iw.State {
 		case inMenu:
 			p.Delta.Zero()
 			return 0
 		case playing:
-			p.Delta.Zero()
-			js := joys.StickState(lowestID)
-			// Todo: support full analog control
-
-			if oak.IsDown(key.UpArrow) || js.StickLY > 8000 {
-				p.Delta.Add(physics.NewVector(0, -p.Speed.Y()))
-			}
-			if oak.IsDown(key.DownArrow) || js.StickLY < -8000 {
-				p.Delta.Add(physics.NewVector(0, p.Speed.Y()))
-			}
-			if oak.IsDown(key.LeftArrow) || js.StickLX < -8000 {
-				p.Delta.Add(physics.NewVector(-p.Speed.X(), 0))
-			}
-			if oak.IsDown(key.RightArrow) || js.StickLX > 8000 {
-				p.Delta.Add(physics.NewVector(p.Speed.X(), 0))
-			}
+			players.FreeWalkControls(p)
 		default:
+			lowestID := joys.LowestID()
 			js := joys.StickState(lowestID)
 			if oak.IsDown(key.UpArrow) || js.StickLY > 8000 ||
 				oak.IsDown(key.DownArrow) || js.StickLY < -8000 ||
 				oak.IsDown(key.LeftArrow) || js.StickLX < -8000 ||
 				oak.IsDown(key.RightArrow) || js.StickLX > 8000 {
-				iw.gameState = playing
-
+				iw.State = playing
 			}
 
 		}
@@ -170,65 +147,20 @@ func (iw *innWalker) bindFront() {
 		}
 		p.R.SetPos(p.Vector.X(), p.Vector.Y())
 		p.RSpace.Update(p.Vector.X(), p.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
-		<-iw.front.RSpace.CallOnHits()
-		if collision.HitLabel(iw.front.RSpace.Space, labels.Blocking, labels.NPC) != nil {
+		<-iw.Front.RSpace.CallOnHits()
+		if collision.HitLabel(iw.Front.RSpace.Space, labels.Blocking, labels.NPC) != nil {
 			p.Vector.Sub(p.Delta)
 			p.Delta.Zero()
 			p.R.SetPos(p.Vector.X(), p.Vector.Y())
 			p.RSpace.Update(p.Vector.X(), p.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
 		}
+		players.FreeFollow(iw.FreeWalker, p)
 
-		if p.Delta.Magnitude() != 0 {
-			//fmt.Println("delta x, y", p.Delta.X(), p.Delta.Y())
-			//fmt.Println("lag index", iw.lagIdx)
-			// Store this event in our frame delay
-			iw.lagDeltas[iw.lagIdx] = floatgeom.Point2{p.Delta.X(), p.Delta.Y()}
-
-			// Access stored frame deltas, move followers
-			for i, fw := range iw.followers {
-				delta := iw.lagDeltas[(iw.lagIdx+frameLag*(i+1))%len(iw.lagDeltas)]
-				fw.Vector.Add(physics.NewVector(delta.X(), delta.Y()))
-				fw.R.SetPos(fw.Vector.X(), fw.Vector.Y())
-
-				swch := fw.R.(*render.Switch)
-				if delta.X() > 0 {
-					swch.Set("walkRT")
-				} else {
-					swch.Set("walkLT")
-				}
-			}
-
-			// Shift the contents of the frame deltas
-			iw.lagIdx--
-			if iw.lagIdx < 0 {
-				iw.lagIdx = len(iw.lagDeltas) - 1
-			}
-		} else {
-			for _, fw := range iw.followers {
-				swch := fw.R.(*render.Switch)
-				cur := swch.Get()
-				err := swch.Set("stand" + string(cur[len(cur)-2:]))
-				dlog.ErrorCheck(err)
-			}
-		}
-
-		swch := p.R.(*render.Switch)
-		if p.Delta.X() != 0 || p.Delta.Y() != 0 {
-			if p.Delta.X() > 0 {
-				swch.Set("walkRT")
-			} else {
-				swch.Set("walkLT")
-			}
-		} else {
-			cur := swch.Get()
-			err := swch.Set("stand" + string(cur[len(cur)-2:]))
-			dlog.ErrorCheck(err)
-		}
 		return 0
 	}, "EnterFrame")
-	iw.front.Speed = physics.NewVector(5, 5) // We actually allow players to move around in the inn!
+	iw.Front.Speed = physics.NewVector(5, 5)
 
-	iw.front.RSpace.Add(collision.Label(labels.Door), (func(s1, s2 *collision.Space) {
+	iw.Front.RSpace.Add(collision.Label(labels.Door), (func(s1, s2 *collision.Space) {
 		d, ok := s2.CID.E().(*doodads.InnDoor)
 		if !ok {
 			dlog.Error("Non-door sent to inndoor binding")
