@@ -27,7 +27,7 @@ func NewThickColoredRTree(t *collision.Tree, thickness int, colorMapping map[col
 	rt.Tree = t
 	rt.Thickness = thickness
 	rt.LayeredPoint = render.NewLayeredPoint(0, 0, -1)
-	rt.OutlineColor = color.RGBA{0, 0, 255, 255}
+	rt.OutlineColor = color.RGBA{200, 200, 200, 255}
 	rt.ColorMap = colorMapping
 	return rt
 }

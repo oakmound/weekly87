@@ -3,6 +3,7 @@ package end
 import (
 	"fmt"
 	"image/color"
+	"math"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -562,13 +563,13 @@ func makeGoldParticles(goldCount int, location floatgeom.Rect2) {
 	center := location.Center()
 
 	//TODO: make this an actual fxn probably making it a log of goldCount
-	particleCount := goldCount
+	particleCount := int(math.Log(float64(10.0 * goldCount)))
 
 	colorOpts := particle.And(
 		particle.NewPerFrame(floatrange.NewConstant(float64(particleCount))),
 		particle.Limit(particleCount),
 		particle.InfiniteLifeSpan(),
-		particle.Spread(location.W()/2, location.H()/2),
+		particle.Spread(location.W()/2+8, location.H()/2),
 		particle.Shape(shape.Diamond),
 		particle.Size(intrange.NewConstant(4)),
 		particle.Speed(floatrange.NewConstant(0)),
