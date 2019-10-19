@@ -58,7 +58,6 @@ func Init() {
 	downSlashIcon.Modify(mod.Transpose, mod.Rotate(90))
 	// downSLash.Modify()
 
-
 	MageInit()
 	WarriorInit()
 }

@@ -266,7 +266,7 @@ func MageInit() {
 				WithBuff(buff.Rez))(Producer{})
 
 			pg := particle.NewColorGenerator(
-				particle.Color(color.RGBA{255, 255, 0, 255}, color.RGBA{0, 0, 0, 0},
+				particle.Color(color.RGBA{255, 255, 250, 255}, color.RGBA{0, 0, 0, 0},
 					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
 				particle.Shape(shape.Diamond),
 				particle.Size(intrange.NewConstant(10)),
@@ -294,7 +294,7 @@ func MageInit() {
 	// Invulnerability gives a temp buff of near invuln to the entire living party
 	Invulnerability = NewAbility(
 
-		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{90, 240, 90, 255}), shieldIcon),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 240, 190, 255}), shieldIcon),
 		time.Second*10,
 		func(u User) []characters.Character {
 			pos := u.Vec()
