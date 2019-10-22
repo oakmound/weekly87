@@ -50,6 +50,7 @@ func thwack(image string, xOffset, yDelta float64, mods ...mod.Mod) func(User) [
 			FrameLength(16),
 			FollowSpeed(u.GetDelta().Xp(), u.GetDelta().Yp()),
 			WithHitEffects(baseHit),
+			WithLabel(labels.EffectsEnemy),
 			WithRenderable(md),
 		)
 		dlog.ErrorCheck(err)
@@ -125,6 +126,7 @@ func WarriorInit() {
 				FrameLength(16),
 				FollowSpeed(delta.Xp(), delta.Yp()),
 				WithHitEffects(baseHit),
+				WithLabel(labels.EffectsEnemy),
 				WithRenderable(down.Copy()),
 				PlaySFX("slashHeavy"),
 			)(Producer{})
@@ -135,6 +137,7 @@ func WarriorInit() {
 				FollowSpeed(delta.Xp(), delta.Yp()),
 				WithHitEffects(baseHit),
 				WithRenderable(up.Copy()),
+				WithLabel(labels.EffectsEnemy),
 				Then(Chain(hit4)),
 				PlaySFX("slashLight"),
 			)(Producer{})
@@ -145,6 +148,7 @@ func WarriorInit() {
 				FollowSpeed(delta.Xp(), delta.Yp()),
 				WithHitEffects(baseHit),
 				WithRenderable(up.Copy()),
+				WithLabel(labels.EffectsEnemy),
 				Then(Chain(hit3)),
 				PlaySFX("slashHeavy"),
 			)(Producer{})
@@ -156,6 +160,7 @@ func WarriorInit() {
 				FollowSpeed(delta.Xp(), delta.Yp()),
 				WithHitEffects(baseHit),
 				WithRenderable(down),
+				WithLabel(labels.EffectsEnemy),
 				Then(Chain(hit2)),
 				PlaySFX("slashLight"),
 			)
