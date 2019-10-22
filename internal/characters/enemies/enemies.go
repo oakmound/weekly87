@@ -254,6 +254,11 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 
 		for k, v := range effectMap {
 			switch k {
+			case "pushback":
+				if be.facing == "RT" {
+					v = -v
+				}
+				be.PushBack.Add(physics.NewVector(v, 0))
 			case "damage":
 				be.Health -= int(v)
 				if be.Health < 1 {
