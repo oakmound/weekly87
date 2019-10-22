@@ -225,9 +225,12 @@ var Scene = scene.Scene{
 		}, "EnterFrame")
 
 		var lastInteractedNPC *NPC
+		var lastInteractedLock sync.Mutex
 		// Interact with NPCs
 		pc.Front.RSpace.Add(labels.NPC, func(_, n *collision.Space) {
-			// Todo: what if we're touching multiple NPCS?
+			lastInteractedLock.Lock()
+			defer lastInteractedLock.Unlock()
+
 			// Keep track of most recently touched npc
 			npc, ok := n.CID.E().(*NPC)
 			if !ok {
@@ -240,7 +243,6 @@ var Scene = scene.Scene{
 				return
 			}
 			lastInteractedNPC = npc
-			fmt.Println(lastInteractedNPC)
 
 			// Make a pop up above the NPC being touched
 			// as a command prompt
@@ -271,6 +273,7 @@ var Scene = scene.Scene{
 						if lastInteractedNPC == npc {
 							lastInteractedNPC = nil
 						}
+						return event.UnbindSingle
 					}
 				}
 				return 0
