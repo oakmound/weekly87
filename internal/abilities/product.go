@@ -353,6 +353,7 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 				prd.source.ShiftX(nextDelta.X() + *prd.FollowX)
 				prd.source.ShiftY(nextDelta.Y() + *prd.FollowY)
 			}
+			<-prd.Interactive.RSpace.CallOnHits()
 			return 0
 		}, "EnterFrame")
 	}
