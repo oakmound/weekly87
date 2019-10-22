@@ -102,7 +102,7 @@ func (be *BasicEnemy) Destroy() {
 
 func (be *BasicEnemy) DeathEffect(secid, idx int64) {
 	be.RSpace.Label = 0
-	be.PushBack.Add(physics.NewVector(100, 0))
+	be.PushBack.Add(physics.NewVector(60, 0))
 	abilities.Produce(
 		abilities.StartAt(floatgeom.Point2{be.X() + 8, be.Y() + 10}),
 		abilities.LineTo(floatgeom.Point2{be.X() + 30, be.Y() + 30}),
@@ -210,7 +210,7 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 			push.Scale(-1)
 		}
 		be.Delta = be.Speed.Copy().Add(push)
-		be.PushBack.Scale(0.8)
+		be.PushBack.Scale(0.86)
 		if be.X() <= float64(oak.ScreenWidth+oak.ViewPos.X) &&
 			be.X()+be.W >= float64(oak.ViewPos.X) {
 			//be.RSpace.Label = labels.Enemy
@@ -255,9 +255,6 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		for k, v := range effectMap {
 			switch k {
 			case "pushback":
-				if be.facing == "RT" {
-					v = -v
-				}
 				be.PushBack.Add(physics.NewVector(v, 0))
 			case "damage":
 				be.Health -= int(v)
