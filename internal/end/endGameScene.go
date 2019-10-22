@@ -150,13 +150,15 @@ var Scene = scene.Scene{
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 2
 		menuY := 16.0
 
-		btn.New(menus.BtnCfgB,
-			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
-			btn.Pos(menuX, menuY), btn.Text("Return To Inn"),
-			btn.Binding(mouse.ClickOn, func(int, interface{}) int {
-				stayInEndScene = false
-				return 0
-			}))
+		if !justVisiting {
+			btn.New(menus.BtnCfgB,
+				btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
+				btn.Pos(menuX, menuY), btn.Text("Return To Inn"),
+				btn.Binding(mouse.ClickOn, func(int, interface{}) int {
+					stayInEndScene = false
+					return 0
+				}))
+		}
 
 		// totalChestValue := 20
 		goldPit := floatgeom.NewRect2WH(670, float64(oak.ScreenHeight)-100, 330, 100)

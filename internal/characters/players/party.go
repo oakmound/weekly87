@@ -423,7 +423,8 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 
 		for i := 1; i < len(pty.Players); i++ {
 			p := pty.Players[i]
-			p.Vector.Add(p0.Delta)
+			p.Vector.ShiftX(p0.Delta.X())
+			p.Vector.SetY(p0.Vector.Y())
 		}
 		flashStartTime := time.Now().Add(time.Second * 5)
 		flashCounter := 5

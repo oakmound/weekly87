@@ -120,7 +120,7 @@ func MageInit() {
 			AnimationMap: mageCharMap,
 			Dimensions:   floatgeom.Point2{16, 32},
 			Speed:        floatgeom.Point2{0, 5},
-			RunSpeed:     3.0,
+			RunSpeed:     4.0,
 			Special1:     def.Special1,
 			Special2:     def.Special2,
 		}

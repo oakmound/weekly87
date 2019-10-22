@@ -13,6 +13,7 @@ import (
 	"github.com/200sc/go-dist/intrange"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
+	"github.com/oakmound/oak/render/mod"
 	"github.com/oakmound/oak/render/particle"
 	"github.com/oakmound/oak/shape"
 
@@ -29,7 +30,9 @@ func bolt(image string, frames int, endDelta float64, opts func(particle.Generat
 		pos := u.Vec()
 
 		// Spell Display
-		r, err := render.LoadSheetSequence(image, 16, 16, 0, 16,
+		var r render.Modifiable
+		var err error
+		r, err = render.LoadSheetSequence(image, 16, 16, 0, 16,
 			0, 0, 1, 0, 0, 1, 1, 1)
 		dlog.ErrorCheck(err)
 
@@ -44,6 +47,7 @@ func bolt(image string, frames int, endDelta float64, opts func(particle.Generat
 		)
 		if u.Direction() == "LT" {
 			endDelta *= -1
+			r = r.Copy().Modify(mod.FlipX)
 		}
 		delta := u.GetDelta()
 		end := floatgeom.Point2{pos.X() + endDelta, pos.Y()}
@@ -69,21 +73,27 @@ func storm(image string, dur time.Duration, speed floatrange.Range, sc, ec color
 		rs, err := render.LoadSprites("", image, 16, 16, 0)
 		dlog.ErrorCheck(err)
 		delta := u.GetDelta()
+
+		endDelta := 600.0
+		angle := floatrange.NewLinear(200, 205)
+		if u.Direction() == "LT" {
+			endDelta *= -1
+			rs[0][0] = rs[0][0].Copy().Modify(mod.FlipX).(*render.Sprite)
+			angle = floatrange.NewLinear(335, 340)
+		}
+
 		pg := particle.NewSpriteGenerator(
 			particle.Sprite(rs[0][0]),
-			particle.Angle(floatrange.NewLinear(240, 300)),
+			particle.Angle(angle),
 			particle.Size(intrange.NewConstant(10)),
 			particle.EndSize(intrange.NewConstant(3)),
 			particle.Speed(speed),
+			particle.Gravity(0, 0.05),
 			particle.NewPerFrame(floatrange.NewLinear(2, 7)),
 			particle.LifeSpan(floatrange.NewLinear(200, 201)),
 			particle.Spread(float64(oak.ScreenWidth)*xSpreadFactor, 0),
 			opts,
 		)
-		endDelta := 600.0
-		if u.Direction() == "LT" {
-			endDelta *= -1
-		}
 
 		cpg := particle.NewCollisionGenerator(
 			pg,
@@ -190,7 +200,7 @@ func MageInit() {
 
 	//Fireball tries to cast a magical fire ball in front of the mage
 	Fireball = NewAbility(
-		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 160, 160, 200}), redBlastIcon),
+		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 80, 80, 200}), redBlastIcon),
 		time.Second*10,
 		bolt(filepath.Join("16x16", "fireball.png"),
 			200,
@@ -226,13 +236,6 @@ func MageInit() {
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 200}), blueBlastDIcon),
 		time.Second*10,
 		shower(floatrange.NewLinear(3, 8), time.Second*3, color.RGBA{10, 10, 255, 255}, color.RGBA{125, 125, 125, 125}, 1.5, particle.And(), map[string]float64{"frost": 1.2}),
-	)
-
-	// FireWall is a short lived long cooldown vertical destructive force
-	FireWall = NewAbility(
-		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 200}), redBlastDIcon),
-		time.Second*20,
-		shower(floatrange.NewLinear(3, 8), time.Second*2, color.RGBA{255, 10, 10, 255}, color.RGBA{125, 125, 125, 125}, 1, particle.And(particle.NewPerFrame(floatrange.NewLinear(2, 4)), particle.Size(intrange.NewConstant(20))), map[string]float64{"damage": 1}),
 	)
 
 	// FireStorm is a short lived long cooldown vertical destructive force
