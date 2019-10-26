@@ -251,7 +251,7 @@ func MageInit() {
 	// Rez the first person who is dead in the party on pickup
 	Rez = NewAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 150, 150, 200}), rezIcon),
-		time.Second*10,
+		time.Second*25,
 		func(u User) []characters.Character {
 			pos := u.Vec()
 
@@ -277,7 +277,7 @@ func MageInit() {
 				particle.Speed(floatrange.NewConstant(1)),
 				particle.LifeSpan(floatrange.NewConstant(15)),
 			)
-			endDelta := 600.0
+			endDelta := 1700.0
 			if u.Direction() == "LT" {
 				endDelta *= -1
 			}
@@ -298,7 +298,7 @@ func MageInit() {
 	Invulnerability = NewAbility(
 
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 240, 190, 255}), shieldIcon),
-		time.Second*10,
+		time.Second*20,
 		func(u User) []characters.Character {
 			pos := u.Vec()
 
@@ -324,7 +324,7 @@ func MageInit() {
 				particle.Speed(floatrange.NewConstant(1)),
 				particle.LifeSpan(floatrange.NewConstant(15)),
 			)
-			endDelta := 600.0
+			endDelta := 900.0
 			if u.Direction() == "LT" {
 				endDelta *= -1
 			}

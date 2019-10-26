@@ -177,7 +177,7 @@ func WarriorInit() {
 	// Party Shield is a slower moving buff that protects the whole party
 	PartyShield = NewAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{40, 200, 90, 255}), shieldAuraIcon),
-		time.Second*10,
+		time.Second*15,
 		func(u User) []characters.Character {
 			pos := u.Vec()
 
@@ -202,7 +202,7 @@ func WarriorInit() {
 				particle.LifeSpan(floatrange.NewConstant(15)),
 			)
 
-			endDelta := 280.0
+			endDelta := 680.0
 			if u.Direction() == "LT" {
 				endDelta *= -1
 			}
@@ -249,7 +249,7 @@ func WarriorInit() {
 				particle.LifeSpan(floatrange.NewConstant(15)),
 			)
 
-			endDelta := 220.0
+			endDelta := 520.0
 			if u.Direction() == "LT" {
 				endDelta *= -1
 			}
