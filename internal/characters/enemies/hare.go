@@ -46,6 +46,7 @@ func initHare() {
 				return 0
 			},
 		},
+		Health: 1,
 	}
 
 	// Todo: if this gets more complicated, we can have initHare return the baseConstructor

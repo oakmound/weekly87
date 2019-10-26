@@ -188,7 +188,7 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 				if facingRight {
 					direction = -1.0
 				}
-				pushD := -1 * direction * p.RunSpeed * 20
+				pushD := -1*direction + p.RunSpeed*6
 				dlog.Info("Enemy hit us be we were shielded so we pushed them back by", pushD)
 
 				vfx.VerySmallShaker.Shake(time.Duration(400) * time.Millisecond)

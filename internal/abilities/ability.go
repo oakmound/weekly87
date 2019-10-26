@@ -70,11 +70,13 @@ var (
 	iconW                                                        = 64
 	iconH                                                        = 64
 
+	// BuffIconSize is used to determine how to display the buffs icons
 	BuffIconSize = 16
 
+	dmg     = map[string]float64{"damage": 1.0}
 	baseHit = map[collision.Label]collision.OnHit{
 		labels.Enemy: func(a, b *collision.Space) {
-			b.CID.Trigger("Attacked", map[string]float64{"damage": 1.0})
+			b.CID.Trigger("Attacked", dmg)
 		},
 	}
 )

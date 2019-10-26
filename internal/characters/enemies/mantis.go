@@ -30,6 +30,7 @@ func initMantis() {
 			-1 * ((rand.Float64() * 4) + 1),
 			-1 * ((rand.Float64() * 4) + 1),
 		},
+		Health: 1,
 	}
 
 	for size := 0; size < lastSize; size++ {

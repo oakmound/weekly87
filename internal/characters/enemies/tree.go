@@ -3,7 +3,7 @@ package enemies
 import (
 	"image"
 	"image/color"
-	"path/filepath" 
+	"path/filepath"
 
 	"github.com/solovev/gopsd"
 
@@ -63,6 +63,7 @@ func initTree() {
 				return 0
 			},
 		},
+		Health: 2,
 	}
 
 	for size := 0; size < lastSize; size++ {

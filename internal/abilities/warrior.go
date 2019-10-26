@@ -9,6 +9,7 @@ import (
 	"github.com/200sc/go-dist/floatrange"
 	"github.com/200sc/go-dist/intrange"
 	"github.com/oakmound/oak/alg/floatgeom"
+	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/physics"
@@ -22,14 +23,19 @@ import (
 	"github.com/oakmound/weekly87/internal/sfx"
 )
 
-func thwack(image string, xOffset, yDelta float64, mods ...mod.Mod) func(User) []characters.Character {
+func thwack(image string, xOffset, yDelta float64, hitEffects map[string]float64, mods ...mod.Mod) func(User) []characters.Character {
+	hits := map[collision.Label]collision.OnHit{
+		labels.Enemy: func(a, b *collision.Space) {
+			b.CID.Trigger("Attacked", hitEffects)
+		},
+	}
+	var md render.Modifiable
+	seq, err := render.LoadSheetSequence(image, 32, 32, 0, 32,
+		0, 0, 1, 0, 2, 0, 3, 0, 0, 1, 1, 1, 2, 1, 3, 1)
+
+	dlog.ErrorCheck(err)
 	return func(u User) []characters.Character {
-
-		var md render.Modifiable
-		seq, err := render.LoadSheetSequence(image, 32, 32, 0, 32,
-			0, 0, 1, 0, 2, 0, 3, 0, 0, 1, 1, 1, 2, 1, 3, 1)
-		md = seq
-
+		md = seq.Copy()
 		dlog.Info("Trying to swipe at enemies")
 		if u.Direction() == "LT" {
 			xOffset *= -1
@@ -40,7 +46,6 @@ func thwack(image string, xOffset, yDelta float64, mods ...mod.Mod) func(User) [
 		pos.Add(physics.NewVector(xOffset, 16.0))
 		start := floatgeom.Point2{pos.X(), pos.Y() - yDelta}
 
-		dlog.ErrorCheck(err)
 		for _, m := range mods {
 			md = md.Modify(m)
 		}
@@ -49,7 +54,8 @@ func thwack(image string, xOffset, yDelta float64, mods ...mod.Mod) func(User) [
 			LineTo(start),
 			FrameLength(16),
 			FollowSpeed(u.GetDelta().Xp(), u.GetDelta().Yp()),
-			WithHitEffects(baseHit),
+			WithHitEffects(hits),
+			WithLabel(labels.EffectsEnemy),
 			WithRenderable(md),
 		)
 		dlog.ErrorCheck(err)
@@ -79,7 +85,7 @@ func WarriorInit() {
 	SwordSwipe = NewAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 150, 0, 200}), slashIcon),
 		time.Second*4,
-		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 10),
+		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 10, dmg),
 	)
 
 	// HammerSmack is currently a huge thwack TODO: have new animation with hammer
@@ -87,7 +93,7 @@ func WarriorInit() {
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 80, 120, 255}), hammerIcon),
 
 		time.Second*8,
-		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 26, mod.Scale(2, 2)),
+		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 26, map[string]float64{"damage": 1.0, "pushback": 120.0}, mod.Scale(2, 2)),
 	)
 
 	// Rage is a multistrike attack that impacts party movement
@@ -125,6 +131,7 @@ func WarriorInit() {
 				FrameLength(16),
 				FollowSpeed(delta.Xp(), delta.Yp()),
 				WithHitEffects(baseHit),
+				WithLabel(labels.EffectsEnemy),
 				WithRenderable(down.Copy()),
 				PlaySFX("slashHeavy"),
 			)(Producer{})
@@ -135,6 +142,7 @@ func WarriorInit() {
 				FollowSpeed(delta.Xp(), delta.Yp()),
 				WithHitEffects(baseHit),
 				WithRenderable(up.Copy()),
+				WithLabel(labels.EffectsEnemy),
 				Then(Chain(hit4)),
 				PlaySFX("slashLight"),
 			)(Producer{})
@@ -145,6 +153,7 @@ func WarriorInit() {
 				FollowSpeed(delta.Xp(), delta.Yp()),
 				WithHitEffects(baseHit),
 				WithRenderable(up.Copy()),
+				WithLabel(labels.EffectsEnemy),
 				Then(Chain(hit3)),
 				PlaySFX("slashHeavy"),
 			)(Producer{})
@@ -156,6 +165,7 @@ func WarriorInit() {
 				FollowSpeed(delta.Xp(), delta.Yp()),
 				WithHitEffects(baseHit),
 				WithRenderable(down),
+				WithLabel(labels.EffectsEnemy),
 				Then(Chain(hit2)),
 				PlaySFX("slashLight"),
 			)

@@ -61,7 +61,7 @@ var (
 			for _, md := range c.AnimationMap {
 				md.Filter(recolor.WithStrategy(recolor.ColorMix(color.RGBA{255, 255, 100, 150})))
 			}
-			c.Health = 3
+			c.Health += 2
 		},
 	}
 	sizeVariants = [lastSize]Variant{

@@ -3,14 +3,10 @@ package end
 import (
 	"fmt"
 	"image/color"
-	"math"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/200sc/go-dist/floatrange"
-	"github.com/200sc/go-dist/intrange"
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
@@ -18,9 +14,6 @@ import (
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/mouse"
 	"github.com/oakmound/oak/physics"
-	"github.com/oakmound/oak/render/mod"
-	"github.com/oakmound/oak/render/particle"
-	"github.com/oakmound/oak/shape"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/entities/x/btn"
@@ -34,7 +27,6 @@ import (
 	"github.com/oakmound/weekly87/internal/menus"
 	"github.com/oakmound/weekly87/internal/records"
 	"github.com/oakmound/weekly87/internal/run"
-	"github.com/oakmound/weekly87/internal/sfx"
 )
 
 func Init() {
@@ -84,6 +76,7 @@ var Scene = scene.Scene{
 
 		render.SetDrawStack(layer.Get()...)
 
+		// Given that oak.Screen variables change in game we dont farm this out to an init
 		presentationX = float64(oak.ScreenWidth / 2)
 		presentationY = float64(oak.ScreenHeight/2) + 20
 		startY = float64(oak.ScreenHeight/2) + 20
@@ -160,13 +153,9 @@ var Scene = scene.Scene{
 				}))
 		}
 
-		// totalChestValue := 20
 		goldPit := floatgeom.NewRect2WH(670, float64(oak.ScreenHeight)-100, 330, 100)
 		makeGoldParticles(r.Wealth, goldPit)
 
-		//TODO: 2 layers: first current run
-		// Second layer totals
-		// Each layer has: sections_completed, enemies_defeated, chestvalue
 		textY := 80.0
 		textX := float64(oak.ScreenWidth) / 6
 
@@ -228,30 +217,8 @@ var Scene = scene.Scene{
 		doodads.NewCustomInnDoor("inn", (float64(oak.ScreenWidth)-dWidth)/2, float64(oak.ScreenHeight)-20, dWidth, 20)
 		// Block off the top of the inn from being walkable
 		doodads.NewFurniture(0, 0, float64(oak.ScreenWidth), 187) // top of inn
-		oak.ResetCommands()
-		oak.AddCommand("debug", func(args []string) {
-			dlog.Warn("Cheating to toggle debug mode")
-			if debugTree.DrawDisabled {
-				dlog.Warn("Debug turned off")
-				debugTree.DrawDisabled = false
-				for _, r := range debugElements {
-					r.Undraw() // TODO: fix this
-				}
-				return
-			}
-			dlog.Warn("Debug turned on")
-			debugTree.DrawDisabled = true
-			for _, r := range debugElements {
-				render.Draw(r, layer.Debug, 18)
-			}
 
-		})
-
-		dlog.Info("Current Debug Commands are: ", strings.Join(oak.GetDebugKeys(), " , "))
-		oak.AddCommand("help", func(args []string) {
-			dlog.Info("Current Debug Commands are: ", strings.Join(oak.GetDebugKeys(), " , "))
-		})
-
+		addDebugCommands(debugTree, debugElements)
 		if justVisiting == true {
 			visitEnter(r.PartyComp)
 			return
@@ -272,6 +239,7 @@ func investigate(party *players.Party) {
 
 }
 
+// visitEnter frame binding
 func visitEnter(pComp []players.PartyMember) {
 	ptycon := players.PartyConstructor{
 		Players:    players.ClassConstructor(pComp),
@@ -338,266 +306,28 @@ func visitEnter(pComp []players.PartyMember) {
 
 }
 
-func presentSpoils(party *players.Party, graveCount *int, index int) {
-	if index > len(party.Players)-1 {
-		investigate(party)
-		return
-	}
-	p := party.Players[index]
-	p.CID = p.Init()
-
-	s := p.Swtch.Copy()
-	p.Swtch = s.Modify(mod.Scale(npcScale, npcScale)).(*render.Switch)
-	p.Interactive.R = p.Swtch
-	//Player enters stage right
-	p.SetPos(float64(oak.ScreenWidth-64), startY)
-	render.Draw(p.R, layer.Play, 20)
-	p.ChestsHeight = 0
-	for _, r := range p.Chests {
-		_, h := r.GetDims()
-		p.ChestsHeight += float64(h)
-		chestHeight := p.ChestsHeight
-		r.(*render.Sprite).Vector = r.Attach(p.Vector, -3, -chestHeight)
-		render.Draw(r, layer.Play, 21)
-	}
-
-	fmt.Printf("\nCharacter %d walking through and is Alive:%t ", index, p.Alive)
-
-	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
-
-		ply.ShiftPos(-2, 0)
-
-		p.Swtch.Set("walkLT")
-		if len(ply.ChestValues) > 0 {
-			p.Swtch.Set("walkHold")
-		}
-		if !ply.Alive {
-			p.Swtch.Set("deadLT")
-
-		}
-
-		// TODO: the following
-		// Player comes to middle ish
-
-		// Do something with spoils or look sad if dead
-		// If alive: throw chests with hop and cheer
-		//		Card explaining the amount in their chests?
-		//		Chest explodes into money and goes into pit
-		// If dead: whomp whomp
-		// 		eulogoy? name, class, run?
-
-		// Next person in party starts process
-		// You walk to end point (graves or bottom)
-		// When reach your end point destroy self
-
-		if ply.R.X() < presentationX {
-
-			if p.Alive {
-				p.Swtch.Set("standRT")
-				if len(p.ChestValues) > 0 {
-					hop(p)
-
-				} else {
-					sfx.Play("ohWell")
-				}
-
-				t := time.Now().Add(time.Second)
-				p.CheckedBind(func(ply *players.Player, _ interface{}) int {
-
-					if time.Now().After(t) {
-						livingExit(p)
-						return event.UnbindSingle
-					}
-					return 0
-				}, "EnterFrame")
-			} else {
-				*graveCount++
-				deadMovement(p)
+func addDebugCommands(debugTree *dtools.Rtree, debugElements []render.Renderable) {
+	oak.ResetCommands()
+	oak.AddCommand("debug", func(args []string) {
+		dlog.Warn("Cheating to toggle debug mode")
+		if debugTree.DrawDisabled {
+			dlog.Warn("Debug turned off")
+			debugTree.DrawDisabled = false
+			for _, r := range debugElements {
+				r.Undraw() // TODO: fix this
 			}
-
-			presentSpoils(party, graveCount, index+1)
-			return event.UnbindSingle
-
+			return
 		}
-		return 0
-	}, "EnterFrame")
-
-}
-
-func hop(p *players.Player) {
-	sfx.Play("chestHop1")
-	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
-		if ply.Y() < presentationY-hopDistance {
-			tossChests(ply)
-			ply.CheckedBind(func(plyz *players.Player, _ interface{}) int {
-
-				if plyz.Y() > presentationY {
-
-					return event.UnbindSingle
-				}
-				plyz.ShiftPos(0, 4)
-				return 0
-			}, "EnterFrame")
-			return event.UnbindSingle
+		dlog.Warn("Debug turned on")
+		debugTree.DrawDisabled = true
+		for _, r := range debugElements {
+			render.Draw(r, layer.Debug, 18)
 		}
 
-		ply.ShiftPos(0, -4)
-		return 0
-	}, "EnterFrame")
-}
-func tossChests(p *players.Player) {
+	})
 
-	for _, c := range p.Chests {
-		c.(*render.Sprite).Vector = c.(*render.Sprite).Vector.Detach()
-	}
-	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
-
-		done := false
-		for _, cr := range p.Chests {
-
-			cr.ShiftX((pitX - presentationX) / 100.0)
-			cr.ShiftY((pitY - presentationY + hopDistance) / 100.0)
-
-			if cr.X() > pitX {
-				explodeChest(cr.X(), cr.Y())
-				cr.Undraw()
-				done = true
-			}
-		}
-		if done {
-			return event.UnbindSingle
-		}
-		return 0
-	}, "EnterFrame")
-}
-func livingExit(p *players.Player) {
-	p.Swtch.Set("walkLT")
-	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
-
-		ply.ShiftPos(0, 2)
-		if ply.R.Y() > float64(oak.ScreenHeight) {
-
-			return event.UnbindSingle
-		}
-		return 0
-	}, "EnterFrame")
-}
-
-func deadMovement(p *players.Player) {
-	p.CheckedBind(func(ply *players.Player, _ interface{}) int {
-
-		// ply.R.Undraw()
-
-		ply.ShiftPos(-2, 0)
-		if ply.R.X() < graveX {
-			deathSprites(ply.R.X(), ply.R.Y())
-			sfx.Play("dissappear1")
-			ply.R.Undraw()
-			return event.UnbindSingle
-		}
-
-		return 0
-	}, "EnterFrame")
-
-}
-
-func deathSprites(x, y float64) {
-	ptGenLife := intrange.NewLinear(40, 60)
-	ptColor := color.RGBA{200, 200, 200, 255}
-	ptColorRand := color.RGBA{0, 0, 0, 0}
-	newPf := floatrange.NewLinear(5, 10)
-	ptLife := floatrange.NewLinear(100, 200)
-	angle := floatrange.NewLinear(0, 360)
-	speed := floatrange.NewLinear(1, 4)
-	size := intrange.Constant(3)
-	layerFn := func(v physics.Vector) int {
-		return layer.Effect
-	}
-	particle.NewColorGenerator(
-		particle.Pos(x, y),
-		particle.Duration(ptGenLife),
-		particle.LifeSpan(ptLife),
-		particle.Angle(angle),
-		particle.Speed(speed),
-		particle.Layer(layerFn),
-		particle.Shape(shape.Square),
-		particle.Size(size),
-		particle.Color(ptColor, ptColorRand, ptColor, ptColorRand),
-		particle.NewPerFrame(newPf)).Generate(0)
-}
-
-func explodeChest(x, y float64) {
-	sp, err := render.GetSprite(filepath.Join("raw", "wood_junk.png"))
-	if err != nil {
-		dlog.Error(err)
-		return
-	}
-	sfx.Play("chestExplode")
-	explodeSprite(x, y, sp)
-
-}
-func explodeSprite(x, y float64, sprite *render.Sprite) {
-	layerFn := func(v physics.Vector) int {
-		return layer.Effect
-	}
-	ptGenLife := intrange.NewLinear(40, 60)
-	sg := particle.NewSpriteGenerator(
-		particle.NewPerFrame(floatrange.NewSpread(8, 0)),
-		particle.Pos(x, y),
-		particle.LifeSpan(floatrange.NewSpread(20, 5)),
-		particle.Angle(floatrange.NewSpread(0, 360)),
-		particle.Speed(floatrange.NewSpread(2, .5)),
-		particle.Spread(3, 2),
-		particle.Duration(ptGenLife),
-		particle.Layer(layerFn),
-		particle.Sprite(sprite),
-		particle.SpriteRotation(floatrange.Constant(10)),
-	)
-	sg.Generate(layer.Effect)
-}
-
-// makeGoldParticles creates the appropriate amount of collision particles within the given location
-func makeGoldParticles(goldCount int, location floatgeom.Rect2) {
-	debug := collision.NewRect2Space(location, 0)
-	debug.UpdateLabel(collision.Label(labels.Ornament))
-	collision.Add(debug)
-
-	center := location.Center()
-
-	//TODO: make this an actual fxn probably making it a log of goldCount
-	particleCount := int(math.Log(float64(10.0 * goldCount)))
-
-	colorOpts := particle.And(
-		particle.NewPerFrame(floatrange.NewConstant(float64(particleCount))),
-		particle.Limit(particleCount),
-		particle.InfiniteLifeSpan(),
-		particle.Spread(location.W()/2+8, location.H()/2),
-		particle.Shape(shape.Diamond),
-		particle.Size(intrange.NewConstant(4)),
-		particle.Speed(floatrange.NewConstant(0)),
-		particle.Pos(center.X(), center.Y()),
-		particle.Color(color.RGBA{200, 200, 0, 255}, color.RGBA{0, 0, 0, 0},
-			color.RGBA{200, 200, 0, 255}, color.RGBA{0, 0, 0, 0}),
-	)
-	shiftFactor := floatrange.NewLinear(0, 6)
-	pg := particle.NewCollisionGenerator(
-		particle.NewColorGenerator(colorOpts),
-		particle.Fragile(false),
-		particle.HitMap(map[collision.Label]collision.OnHit{
-			labels.PC: func(a, b *collision.Space) {
-				// b.CID.Trigger("Attacked", hitEffects)
-				p, ok := event.GetEntity(int(b.CID)).(*entities.Interactive)
-				if !ok {
-					dlog.Error("A non player is colliding with gold?")
-					return
-				}
-				goldPiece := particle.Lookup(int(a.CID))
-				d := p.Delta.Copy().Scale(shiftFactor.Poll())
-				goldPiece.ShiftX(d.X())
-				goldPiece.ShiftY(d.Y())
-			},
-		}),
-	)
-	pg.Generate(layer.Play)
-
+	dlog.Info("Current Debug Commands are: ", strings.Join(oak.GetDebugKeys(), " , "))
+	oak.AddCommand("help", func(args []string) {
+		dlog.Info("Current Debug Commands are: ", strings.Join(oak.GetDebugKeys(), " , "))
+	})
 }
