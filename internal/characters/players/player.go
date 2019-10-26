@@ -94,6 +94,9 @@ func (p *Player) GetDelta() physics.Vector {
 }
 
 func (p *Player) AddBuff(b buff.Buff) {
+	if !p.Alive {
+		return
+	}
 	p.BuffLock.Lock()
 	b.ExpireAt = time.Now().Add(b.Duration)
 	b.R = buff.BasicBuffSwitch(b.RGen())
