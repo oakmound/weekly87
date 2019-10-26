@@ -94,14 +94,13 @@ func (p *Player) GetDelta() physics.Vector {
 }
 
 func (p *Player) AddBuff(b buff.Buff) {
-	if !p.Alive {
-		return
-	}
 	p.BuffLock.Lock()
 	b.ExpireAt = time.Now().Add(b.Duration)
 	b.R = buff.BasicBuffSwitch(b.RGen())
 	p.Buffs = append(p.Buffs, b)
-	render.Draw(b.R, layer.UI, 10)
+	if p.Alive {
+		render.Draw(b.R, layer.UI, 10)
+	}
 	sort.Slice(p.Buffs, func(i, j int) bool {
 		return p.Buffs[i].ExpireAt.Before(p.Buffs[j].ExpireAt)
 	})

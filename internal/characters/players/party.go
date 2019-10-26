@@ -108,6 +108,8 @@ func (pc *PartyConstructor) NewRunningParty() (*Party, error) {
 	return pc.NewParty(false)
 }
 
+const PlayerGap = 50
+
 func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 	if len(pc.Players) == 0 {
 		return nil, errors.New("At least one player must be in a party")
@@ -119,8 +121,6 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 	}
 
 	pty := &Party{}
-
-	const PlayerGap = 50
 
 	for i, pcon := range pc.Players {
 		if pcon.Dimensions == (floatgeom.Point2{}) {
@@ -435,16 +435,6 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 			// or other awkward bits to moving around.
 			p.R.SetPos(p.Vector.X(), p0.Vector.Y())
 
-			if !p.Alive {
-				continue
-			}
-			p.RSpace.Update(p.Vector.X(), p0.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
-			<-p.RSpace.CallOnHits()
-			// Player could have died in their collision reactions
-			if !p.Alive {
-				continue
-			}
-
 			for len(p.Buffs) > 0 {
 				if p.Buffs[0].ExpireAt.Before(time.Now()) {
 					p.BuffLock.Lock()
@@ -476,6 +466,11 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 				}
 			}
 
+			if !p.Alive {
+				continue
+			}
+			p.RSpace.Update(p.Vector.X(), p0.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
+			<-p.RSpace.CallOnHits()
 		}
 
 		oak.ShiftScreen(int(pty.RunSpeed()), 0)
