@@ -19,6 +19,7 @@ import (
 	"github.com/oakmound/oak/shape"
 	"github.com/oakmound/weekly87/internal/abilities/buff"
 	"github.com/oakmound/weekly87/internal/characters"
+	"github.com/oakmound/weekly87/internal/recolor"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/sfx"
 )
@@ -184,6 +185,9 @@ func WarriorInit() {
 		},
 	)
 
+	psBannerSeq := bannerSeq.Copy()
+	psBannerSeq.Filter(recolor.WithStrategy(recolor.ColorMix(color.RGBA{40, 200, 90, 100})))
+
 	// Party Shield is a slower moving buff that protects the whole party
 	PartyShield = NewAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{40, 200, 90, 255}), shieldAuraIcon),
@@ -191,18 +195,11 @@ func WarriorInit() {
 		func(u User) []characters.Character {
 			pos := u.Vec()
 
-			animFilePath := (filepath.Join("16x32", "banner.png"))
-			seq, err := render.LoadSheetSequence(animFilePath, 16, 32, 0, 5, []int{0, 0, 1, 0, 2, 0, 3, 0, 0, 1, 1, 1, 2, 1}...)
-			dlog.ErrorCheck(err)
-
-			buffIcon, err2 := render.LoadSprite(filepath.Join("assets/images", "16x16"), "place_holder_buff.png")
-			dlog.ErrorCheck(err2)
-
-			banner := And(WithRenderable(seq),
+			psBanner := And(WithRenderable(psBannerSeq.Copy()),
 				WithLabel(labels.EffectsPlayer),
-				WithBuff(buff.Shield(buffIcon, 20*time.Second, 2, false)))(Producer{})
+				WithBuff(buff.Shield(placeHolderBuff, 20*time.Second, 2, false)))(Producer{})
 
-			pg := particle.NewColorGenerator(
+			psGenerator := particle.NewColorGenerator(
 				particle.Color(color.RGBA{0, 255, 255, 255}, color.RGBA{0, 0, 0, 0},
 					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
 				particle.Shape(shape.Diamond),
@@ -221,8 +218,8 @@ func WarriorInit() {
 				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
 				//ArcTo(end),
 				LineTo(end),
-				WithParticles(pg),
-				Then(AndDo(Drop(banner), DoPlay("bannerPlaced1"))),
+				WithParticles(psGenerator),
+				Then(AndDo(Drop(psBanner), DoPlay("bannerPlaced1"))),
 				FollowSpeed(u.GetDelta().Xp(), nil),
 				PlaySFX("warriorCast1"),
 			)
@@ -231,6 +228,8 @@ func WarriorInit() {
 		},
 	)
 
+	ssBannerSeq := bannerSeq.Copy()
+	ssBannerSeq.Filter(recolor.WithStrategy(recolor.ColorMix(color.RGBA{110, 200, 110, 100})))
 	// SelfShield is a fast flying single person shield
 	SelfShield = NewAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{110, 200, 110, 255}), shieldIcon),
@@ -238,18 +237,11 @@ func WarriorInit() {
 		func(u User) []characters.Character {
 			pos := u.Vec()
 
-			animFilePath := (filepath.Join("16x32", "banner.png"))
-			seq, err := render.LoadSheetSequence(animFilePath, 16, 32, 0, 5, []int{0, 0, 1, 0, 2, 0, 3, 0, 0, 1, 1, 1, 2, 1}...)
-			dlog.ErrorCheck(err)
-
-			buffIcon, err2 := render.LoadSprite(filepath.Join("assets/images", "16x16"), "place_holder_buff.png")
-			dlog.ErrorCheck(err2)
-
-			banner := And(WithRenderable(seq),
+			ssBanner := And(WithRenderable(ssBannerSeq.Copy()),
 				WithLabel(labels.EffectsPlayer),
-				WithBuff(buff.Shield(buffIcon, 20*time.Second, 5, true)))(Producer{})
+				WithBuff(buff.Shield(placeHolderBuff, 20*time.Second, 5, true)))(Producer{})
 
-			pg := particle.NewColorGenerator(
+			ssGenerator := particle.NewColorGenerator(
 				particle.Color(color.RGBA{120, 255, 0, 255}, color.RGBA{0, 0, 0, 0},
 					color.RGBA{125, 125, 125, 125}, color.RGBA{0, 0, 0, 0}),
 				particle.Shape(shape.Diamond),
@@ -258,18 +250,17 @@ func WarriorInit() {
 				particle.Speed(floatrange.NewConstant(1)),
 				particle.LifeSpan(floatrange.NewConstant(15)),
 			)
-
+			
 			endDelta := 520.0
 			if u.Direction() == "LT" {
 				endDelta *= -1
 			}
 			chrs, err := Produce(
 				StartAt(floatgeom.Point2{pos.X(), pos.Y()}),
-
 				LineTo(floatgeom.Point2{pos.X() + endDelta, pos.Y()}),
 				FollowSpeed(u.GetDelta().Xp(), nil),
-				WithParticles(pg),
-				Then(AndDo(Drop(banner), DoPlay("bannerPlaced1"))),
+				WithParticles(ssGenerator),
+				Then(AndDo(Drop(ssBanner), DoPlay("bannerPlaced1"))),
 				FrameLength(30),
 				PlaySFX("warriorCast1"),
 			)

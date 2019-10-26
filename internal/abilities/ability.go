@@ -21,6 +21,7 @@ import (
 )
 
 func Init() {
+	var err error
 	blastIcon, err = render.LoadSprite("", filepath.Join("64x64", "BlastIcon.png"))
 	dlog.ErrorCheck(err)
 	shieldAuraIcon, err = render.LoadSprite("", filepath.Join("64x64", "ShieldAuraIcon.png"))
@@ -58,15 +59,25 @@ func Init() {
 	downSlashIcon.Modify(mod.Transpose, mod.Rotate(90))
 	// downSLash.Modify()
 
+	bannerSeq, err = render.LoadSheetSequence(
+		filepath.Join("16x32", "banner.png"), 
+		16, 32, 0, 5, []int{0, 0, 1, 0, 2, 0, 3, 0, 0, 1, 1, 1, 2, 1}...)
+	dlog.ErrorCheck(err)
+
+	placeHolderBuff, err = render.LoadSprite(
+		filepath.Join("assets/images", "16x16"), 
+		"place_holder_buff.png")
+	dlog.ErrorCheck(err)
+
 	MageInit()
 	WarriorInit()
 }
 
 var (
-	err                                                          error
 	blastIcon, shieldAuraIcon, shieldIcon, slashIcon, hammerIcon *render.Sprite
 	redBlastIcon, blueBlastIcon, redBlastDIcon, blueBlastDIcon   *render.Sprite
-	upSlashIcon, downSlashIcon, rezIcon                          *render.Sprite
+	upSlashIcon, downSlashIcon, rezIcon, placeHolderBuff         *render.Sprite
+	bannerSeq *render.Sequence
 	iconW                                                        = 64
 	iconH                                                        = 64
 
