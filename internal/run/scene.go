@@ -8,14 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/oakmound/oak/key"
-
-	"github.com/oakmound/oak/joystick"
-	"github.com/oakmound/oak/mouse"
-
-	"github.com/oakmound/weekly87/internal/characters"
-	"github.com/oakmound/weekly87/internal/restrictor"
-
 	klg "github.com/200sc/klangsynthese/audio"
 
 	"github.com/oakmound/weekly87/internal/characters/doodads"
@@ -23,6 +15,13 @@ import (
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/records"
+	"github.com/oakmound/weekly87/internal/characters"
+	"github.com/oakmound/weekly87/internal/restrictor"
+	"github.com/oakmound/weekly87/internal/dtools"
+	"github.com/oakmound/weekly87/internal/layer"
+	"github.com/oakmound/weekly87/internal/menus"
+	"github.com/oakmound/weekly87/internal/music"
+	"github.com/oakmound/weekly87/internal/run/section"
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/oak/alg/floatgeom"
@@ -31,12 +30,11 @@ import (
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/render"
+	"github.com/oakmound/oak/key"
+	"github.com/oakmound/oak/joystick"
+	"github.com/oakmound/oak/mouse"
+	"github.com/oakmound/oak/timing"
 	"github.com/oakmound/oak/scene"
-	"github.com/oakmound/weekly87/internal/dtools"
-	"github.com/oakmound/weekly87/internal/layer"
-	"github.com/oakmound/weekly87/internal/menus"
-	"github.com/oakmound/weekly87/internal/music"
-	"github.com/oakmound/weekly87/internal/run/section"
 )
 
 var stayInGame bool
@@ -457,6 +455,29 @@ var Scene = scene.Scene{
 			sp := collision.NewFullSpace(float64(oak.ViewPos.X), float64(oak.ViewPos.Y),
 				1000, 500, labels.Enemy, event.CID(cid))
 			collision.Add(sp)
+		})
+		oak.AddCommand("kill", func(args []string) {
+			if len(args) < 1 {
+				fmt.Println("Require one argument to kill")
+				return
+			}
+			idx, err := strconv.Atoi(args[0])
+			if err != nil {
+				fmt.Println("Expected integer argument to kill", err)
+				return
+			}
+			x := players.WallOffset + idx * players.PlayerGap
+
+			be := &enemies.BasicEnemy{
+				Active: true,
+			}
+			cid := be.Init()
+			sp := collision.NewFullSpace(float64(x+oak.ViewPos.X), float64(oak.ViewPos.Y),
+				10, 500, labels.Enemy, event.CID(cid))
+			collision.Add(sp)
+			timing.DoAfter(30 * time.Millisecond, func() {
+				collision.Remove(sp)
+			})
 		})
 
 		oak.AddCommand("shake", func(args []string) {
