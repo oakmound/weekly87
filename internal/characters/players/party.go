@@ -123,6 +123,9 @@ func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 	pty := &Party{}
 
 	for i, pcon := range pc.Players {
+		if !unmoving && pcon.RunSpeed == -1 {
+			continue
+		}
 		if pcon.Dimensions == (floatgeom.Point2{}) {
 			return nil, errors.New("Dimensions must be provided for player " + strconv.Itoa(i))
 		}

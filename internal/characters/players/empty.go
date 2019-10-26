@@ -1,15 +1,15 @@
 package players
 
 import (
-	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/alg/floatgeom"
+	"github.com/oakmound/oak/render"
 )
 
 var EmptyConstructor *Constructor
- 
-func EmptyInit() { 
 
-	empty := render.NewEmptySprite(0,0,16,32)
+func EmptyInit() {
+
+	empty := render.NewEmptySprite(0, 0, 16, 32)
 
 	emptyCharMap := map[string]render.Modifiable{
 		"walkRT":    empty,
@@ -25,5 +25,6 @@ func EmptyInit() {
 	EmptyConstructor = &Constructor{
 		AnimationMap: emptyCharMap,
 		Dimensions:   floatgeom.Point2{16, 32},
+		RunSpeed:     -1,
 	}
 }
