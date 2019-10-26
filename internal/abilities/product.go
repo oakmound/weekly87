@@ -174,7 +174,7 @@ func PlaySFX(s string) Option {
 // Perform from where you left off
 func Chain(p Producer) DoOption {
 	return func(pt floatgeom.Point2) {
-		dlog.Info("An ability dropped something")
+		dlog.Info("Chaining next ability")
 		p.Start = p.Start.Add(pt)
 		p.End = p.End.Add(pt)
 		chrs, err := p.Produce()
@@ -413,12 +413,15 @@ func (p *Product) MoveParticles(nextDelta floatgeom.Point2) {
 }
 
 func (p *Product) Destroy() {
+	// Note: this assumes that destroys aren't happening simultaneously
 	if p.next != nil {
 		p.next(floatgeom.Point2{p.X(), p.Y()})
+		p.next = nil
 	}
 	p.Interactive.Destroy()
 	if p.source != nil {
 		p.source.Stop()
+		p.source = nil 
 	}
 }
 
