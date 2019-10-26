@@ -129,7 +129,7 @@ var Scene = scene.Scene{
 		fnt.Size = 14
 		blueFnt := fnt.Generate()
 		fnt.Color = render.FontColor("Black")
-		fnt.Size = 28
+		fnt.Size = 20
 		graves := fnt.Generate()
 
 		render.SetDrawStack(layer.Get()...)
@@ -156,8 +156,14 @@ var Scene = scene.Scene{
 		goldPit := floatgeom.NewRect2WH(670, float64(oak.ScreenHeight)-100, 330, 100)
 		makeGoldParticles(r.Wealth, goldPit)
 
-		textY := 80.0
+		textY := 40.0
 		textX := float64(oak.ScreenWidth) / 6
+
+		currentDeathTollp := &currentDeathToll
+		render.Draw(graves.NewStrText("Current Total Deaths:", textX, textY), 1, 10)
+		render.Draw(graves.NewText(intStringer{currentDeathTollp}, textX+200, textY), 1, 10)
+
+		textY += 40
 
 		titling := blueFnt.NewStrText("Last Run Info:", textX, textY)
 		textX += 120
@@ -194,9 +200,6 @@ var Scene = scene.Scene{
 		chestValues = blueFnt.NewStrText("Chest Value: "+strconv.Itoa(r.Wealth), textX, textY)
 		textX += 200
 		render.Draw(chestValues, 2, 2)
-
-		currentDeathTollp := &currentDeathToll
-		render.Draw(graves.NewText(intStringer{currentDeathTollp}, 100, 350), 1, 10)
 
 		debugElements := []render.Renderable{}
 		// debug locations
@@ -314,14 +317,14 @@ func addDebugCommands(debugTree *dtools.Rtree, debugElements []render.Renderable
 			dlog.Warn("Debug turned off")
 			debugTree.DrawDisabled = false
 			for _, r := range debugElements {
-				r.Undraw() // TODO: fix this
+				render.Draw(r, layer.Debug, 18)
 			}
 			return
 		}
 		dlog.Warn("Debug turned on")
 		debugTree.DrawDisabled = true
 		for _, r := range debugElements {
-			render.Draw(r, layer.Debug, 18)
+			r.Undraw()
 		}
 
 	})
