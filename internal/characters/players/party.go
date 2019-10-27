@@ -31,6 +31,7 @@ import (
 	"github.com/oakmound/weekly87/internal/vfx"
 )
 
+// Party handles having multiple pcs and the info to manage and display them!
 type Party struct {
 	event.CID
 	Players      []*Player
@@ -40,15 +41,14 @@ type Party struct {
 	Debug        bool
 }
 
+// Init the party giving them a CID
 func (p *Party) Init() event.CID {
 	return event.NextID(p)
 }
 
+// SpeedUp the party based on the contained alg
+// We use a log approach to make sure that speedup falls off
 func (p *Party) SpeedUp(n float64) {
-	// 100 sections to get to 20 accel
-	// 50 sections to get to 15 accel
-	// 25 sections to get to 10 accel
-	// 12 sections to get to 5 accel
 	p.speedUps += n
 	p.Acceleration = math.Log10(math.Pow(
 		math.Log10(p.speedUps+10), 2)) * 15
@@ -58,6 +58,7 @@ func (p *Party) SpeedUp(n float64) {
 
 }
 
+// CheckedBind wraps binding to the party performing our standard checks
 func (p *Party) CheckedBind(bnd func(*Party, interface{}) int, ev string) {
 	p.Bind(func(id int, data interface{}) int {
 		be, ok := event.GetEntity(id).(*Party)
@@ -69,6 +70,7 @@ func (p *Party) CheckedBind(bnd func(*Party, interface{}) int, ev string) {
 	}, ev)
 }
 
+// RunSpeed retrieves the current speed for the party to run at
 func (p *Party) RunSpeed() int {
 	if p.Players[0].facing == "LT" {
 		return int(p.Players[0].RunSpeed - p.Acceleration)
@@ -76,6 +78,7 @@ func (p *Party) RunSpeed() int {
 	return int(p.Players[len(p.Players)-1].RunSpeed + p.Acceleration)
 }
 
+// Speed returns the party's speed vector
 func (p *Party) Speed() physics.Vector {
 	if p.Players[0].facing == "LT" {
 		return p.Players[0].Speed
@@ -83,6 +86,7 @@ func (p *Party) Speed() physics.Vector {
 	return p.Players[len(p.Players)-1].Speed
 }
 
+// Defeated checks if the party is in a defeated state
 func (p *Party) Defeated() bool {
 	for _, pl := range p.Players {
 		if pl.Alive {
@@ -92,25 +96,30 @@ func (p *Party) Defeated() bool {
 	return true
 }
 
+// ShiftX for the entire party
 func (p *Party) ShiftX(f float64) {
 	for _, pl := range p.Players {
 		pl.ShiftX(f)
 	}
 }
 
+//PartyConstructor helps set up a party
 type PartyConstructor struct {
 	Players    []Constructor
 	Bindings   map[string]func(*Party, interface{}) int
 	MaxPlayers int
 }
 
-// NewMovingParty creates a party for the run scene
+// NewRunningParty creates a party for the run scene
 func (pc *PartyConstructor) NewRunningParty() (*Party, error) {
 	return pc.NewParty(false)
 }
 
+// PlayerGap is the xgap imbetween each member of the party
 const PlayerGap = 50
 
+// NewParty sets up the party from a constructor
+// The party may be a moving or unmoving party representation for interaction or for display
 func (pc *PartyConstructor) NewParty(unmoving bool) (*Party, error) {
 	if len(pc.Players) == 0 {
 		return nil, errors.New("At least one player must be in a party")

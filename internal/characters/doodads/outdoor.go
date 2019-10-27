@@ -13,17 +13,22 @@ import (
 	"github.com/oakmound/weekly87/internal/characters/labels"
 )
 
+// OutDoor is a door that is outdoors!
+// Furthermore it handles the whole getting back from the run scene
 type OutDoor struct {
 	*entities.Reactive
 	Unmoving
 }
 
+// Init gets the outdoor a CID
 func (d *OutDoor) Init() event.CID {
 	return event.NextID(d)
 }
 
+// Activate the outdoor to do nothing except fulfill an interface
 func (d *OutDoor) Activate() {}
 
+// NewOutDoor for run scene
 func NewOutDoor(runback bool) *OutDoor {
 
 	width := 10.0

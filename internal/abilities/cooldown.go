@@ -15,8 +15,8 @@ type cooldown struct {
 	totalTime     time.Duration
 }
 
-// NewCooldown creates a new cooldown
-func NewCooldown(w, h int, totalTime time.Duration) *cooldown {
+// newCooldown creates a new cooldown
+func newCooldown(w, h int, totalTime time.Duration) *cooldown {
 	s := render.NewEmptySprite(0, 0, w, h)
 
 	return &cooldown{s, &time.Time{}, totalTime}

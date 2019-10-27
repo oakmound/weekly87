@@ -16,9 +16,9 @@ import (
 	"github.com/oakmound/weekly87/internal/recolor"
 )
 
-var MageConstructors = map[string]*Constructor{}
+var mageConstructors = map[string]*Constructor{}
 
-func MageInit() {
+func mageInit() {
 	var mageDefinitions = []ClassDefinition{
 		{
 			Name: "Blue",
@@ -116,7 +116,7 @@ func MageInit() {
 			"standHold": standHold,
 		}
 
-		MageConstructors[def.Name] = &Constructor{
+		mageConstructors[def.Name] = &Constructor{
 			AnimationMap: mageCharMap,
 			Dimensions:   floatgeom.Point2{16, 32},
 			Speed:        floatgeom.Point2{0, 5},

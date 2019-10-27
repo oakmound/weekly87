@@ -19,8 +19,8 @@ import (
 	"github.com/oakmound/oak/shape"
 	"github.com/oakmound/weekly87/internal/abilities/buff"
 	"github.com/oakmound/weekly87/internal/characters"
-	"github.com/oakmound/weekly87/internal/recolor"
 	"github.com/oakmound/weekly87/internal/characters/labels"
+	"github.com/oakmound/weekly87/internal/recolor"
 	"github.com/oakmound/weekly87/internal/sfx"
 )
 
@@ -73,7 +73,7 @@ var (
 // WarriorInit run by abilities to set up the ability attributes
 func WarriorInit() {
 	//SpearStab tries to stab in front of the warrior
-	SpearStab = NewAbility(
+	SpearStab = newAbility(
 		render.NewColorBox(64, 64, color.RGBA{200, 200, 0, 255}),
 		time.Second*5,
 		func(u User) []characters.Character {
@@ -83,14 +83,14 @@ func WarriorInit() {
 	)
 
 	// SwordSwipe is a basic thwack
-	SwordSwipe = NewAbility(
+	SwordSwipe = newAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 150, 0, 200}), slashIcon),
 		time.Second*4,
 		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 10, dmg),
 	)
 
 	// HammerSmack is currently a huge thwack TODO: have new animation with hammer
-	HammerSmack = NewAbility(
+	HammerSmack = newAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 80, 120, 255}), hammerIcon),
 
 		time.Second*8,
@@ -98,7 +98,7 @@ func WarriorInit() {
 	)
 
 	// Rage is a multistrike attack that impacts party movement
-	Rage = NewAbility(
+	Rage = newAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 5, 0, 200}), downSlashIcon),
 		time.Second*5,
 		func(u User) []characters.Character {
@@ -176,7 +176,7 @@ func WarriorInit() {
 		},
 	)
 
-	SpearThrow = NewAbility(
+	SpearThrow = newAbility(
 		render.NewColorBox(64, 64, color.RGBA{200, 50, 150, 255}),
 		time.Second*5,
 		func(u User) []characters.Character {
@@ -189,7 +189,7 @@ func WarriorInit() {
 	psBannerSeq.Filter(recolor.WithStrategy(recolor.ColorMix(color.RGBA{40, 200, 90, 100})))
 
 	// Party Shield is a slower moving buff that protects the whole party
-	PartyShield = NewAbility(
+	PartyShield = newAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{40, 200, 90, 255}), shieldAuraIcon),
 		time.Second*15,
 		func(u User) []characters.Character {
@@ -231,7 +231,7 @@ func WarriorInit() {
 	ssBannerSeq := bannerSeq.Copy()
 	ssBannerSeq.Filter(recolor.WithStrategy(recolor.ColorMix(color.RGBA{110, 200, 110, 100})))
 	// SelfShield is a fast flying single person shield
-	SelfShield = NewAbility(
+	SelfShield = newAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{110, 200, 110, 255}), shieldIcon),
 		time.Second*5,
 		func(u User) []characters.Character {
@@ -250,7 +250,7 @@ func WarriorInit() {
 				particle.Speed(floatrange.NewConstant(1)),
 				particle.LifeSpan(floatrange.NewConstant(15)),
 			)
-			
+
 			endDelta := 520.0
 			if u.Direction() == "LT" {
 				endDelta *= -1

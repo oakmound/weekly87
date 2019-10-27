@@ -15,6 +15,7 @@ var (
 	joyStickStateLock sync.RWMutex
 )
 
+// LowestID returns the id of the joystick with the lowest number id
 func LowestID() uint32 {
 	lowestID := uint32(math.MaxInt32)
 	joyStickStateLock.RLock()
@@ -27,6 +28,7 @@ func LowestID() uint32 {
 	return lowestID
 }
 
+// StickState safely returns the current state of the requested joystick
 func StickState(v uint32) joystick.State {
 	joyStickStateLock.RLock()
 	st := joyStickStates[v]
@@ -34,6 +36,7 @@ func StickState(v uint32) joystick.State {
 	return st
 }
 
+// SetStickState safely sets the current state of the requested joystick
 func SetStickState(k uint32, v joystick.State) {
 	joyStickStateLock.Lock()
 	joyStickStates[k] = v
@@ -42,6 +45,7 @@ func SetStickState(k uint32, v joystick.State) {
 
 type handler struct{}
 
+// Trigger handles joystick events and updates our knowledge of joysticks based on them
 func (h *handler) Trigger(ev string, state interface{}) {
 	if ev == joystick.Disconnected {
 		id, ok := state.(uint32)
@@ -62,6 +66,7 @@ func (h *handler) Trigger(ev string, state interface{}) {
 
 var initOnce = sync.Once{}
 
+// Init to be run after oak setup to start listening for joysticks
 func Init() {
 	initOnce.Do(func() {
 		joystick.Init()

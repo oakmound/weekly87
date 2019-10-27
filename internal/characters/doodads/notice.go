@@ -130,6 +130,7 @@ func drawDeviatedLineBetween(x1, y1, x2, y2 int, colorer render.Colorer, thickne
 	return rgba
 }
 
+// DrawPunctuatedDeviatedLineColored has too long of a name... but hey its easier than changing oak
 func DrawPunctuatedDeviatedLineColored(rgba *image.RGBA, x1, y1, x2, y2, thickness, xPixelDeviance, yPixelDeviance int, gapPercent float64, colorer render.Colorer) {
 
 	if gapPercent >= 1 {

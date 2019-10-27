@@ -5,8 +5,12 @@ import (
 	"github.com/oakmound/oak/render"
 )
 
+// EmptyConstructor for creating an empty space in a party select screen
+// Used for party selection things
 var EmptyConstructor *Constructor
 
+// EmptyInit sets up the required placeholder renderables for empty constructor
+// Most importantly sets runspeed to -1 for comparison checks in the future
 func EmptyInit() {
 
 	empty := render.NewEmptySprite(0, 0, 16, 32)

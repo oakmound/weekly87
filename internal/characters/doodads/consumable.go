@@ -11,10 +11,12 @@ import (
 	"github.com/oakmound/weekly87/internal/layer"
 )
 
+// Consumer can consume consumables... TODO: add to this comment as we update this interface
 type Consumer interface {
 	GetPos()
 }
 
+// Consumable is an object that can be drawn, has collision and can be consumed
 type Consumable struct {
 	*entities.Solid
 	R render.Modifiable

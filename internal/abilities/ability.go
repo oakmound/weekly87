@@ -20,6 +20,7 @@ import (
 	"github.com/oakmound/oak/render/mod"
 )
 
+// Init to be run after oak setup to get our assets set up
 func Init() {
 	var err error
 	blastIcon, err = render.LoadSprite("", filepath.Join("64x64", "BlastIcon.png"))
@@ -69,7 +70,7 @@ func Init() {
 		"place_holder_buff.png")
 	dlog.ErrorCheck(err)
 
-	MageInit()
+	mageInit()
 	WarriorInit()
 }
 
@@ -183,14 +184,14 @@ func (a *ability) Enable(enabled bool) {
 	}
 }
 
-// NewAbility creates an ability
-func NewAbility(r render.Modifiable, c time.Duration, t func(User) []characters.Character) *ability {
+// newAbility creates an ability
+func newAbility(r render.Modifiable, c time.Duration, t func(User) []characters.Character) *ability {
 
 	inactive := r.Copy()
 	inactive.Filter(mod.ConformToPallete(color.GrayModel))
 	// iconW, iconH := r.GetDims()
 
-	cool := NewCooldown(iconW, iconH, c)
+	cool := newCooldown(iconW, iconH, c)
 	composite := render.NewCompositeM(r, cool)
 	swith := render.NewSwitch("active", map[string]render.Modifiable{
 		"active":   composite,

@@ -29,6 +29,7 @@ import (
 	"github.com/oakmound/weekly87/internal/run"
 )
 
+// Init to be called after oak start up to get our asset reference
 func Init() {
 	_, err := render.LoadSprite("", filepath.Join("raw", "wood_junk.png"))
 	dlog.Error("Something went wrong loading in wood junk " + err.Error())

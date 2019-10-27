@@ -7,6 +7,7 @@ import (
 
 	"github.com/oakmound/oak"
 	"github.com/oakmound/weekly87/internal/abilities/buff"
+	"github.com/oakmound/weekly87/internal/recolor"
 	"github.com/oakmound/weekly87/internal/sfx"
 
 	"github.com/200sc/go-dist/floatrange"
@@ -163,9 +164,11 @@ func shower(speed floatrange.Range, dur time.Duration, sc, ec color.Color, xSpre
 	}
 }
 
+// Mage Abilities!
 var (
 	FrostBolt, Fireball, Blizzard, FireWall, FireStorm, Rez, Invulnerability, Slow, CooldownRework, GameBreakerFireBall *ability
-
+)
+var (
 	frostHit = map[collision.Label]collision.OnHit{
 		labels.Enemy: func(a, b *collision.Space) {
 			b.CID.Trigger("Attacked", map[string]float64{"frost": 5.0})
@@ -173,10 +176,10 @@ var (
 	}
 )
 
-func MageInit() {
+func mageInit() {
 
 	// FrostBolt is a simple projectile with slowing
-	FrostBolt = NewAbility(
+	FrostBolt = newAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 200}), blueBlastIcon),
 
 		time.Second*3,
@@ -199,7 +202,7 @@ func MageInit() {
 	)
 
 	//Fireball tries to cast a magical fire ball in front of the mage
-	Fireball = NewAbility(
+	Fireball = newAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 80, 80, 200}), redBlastIcon),
 		time.Second*10,
 		bolt(filepath.Join("16x16", "fireball.png"),
@@ -232,14 +235,14 @@ func MageInit() {
 	)
 
 	// Blizzard creates a large slowing icestorm
-	Blizzard = NewAbility(
+	Blizzard = newAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{10, 10, 200, 200}), blueBlastDIcon),
 		time.Second*10,
 		shower(floatrange.NewLinear(3, 8), time.Second*3, color.RGBA{10, 10, 255, 255}, color.RGBA{125, 125, 125, 125}, 1.5, particle.And(), map[string]float64{"frost": 1.2}),
 	)
 
 	// FireStorm is a short lived long cooldown vertical destructive force
-	FireStorm = NewAbility(
+	FireStorm = newAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 10, 0, 200}), redBlastDIcon),
 		time.Second*20,
 		storm(filepath.Join("16x16", "fireball.png"),
@@ -248,23 +251,17 @@ func MageInit() {
 			particle.And(particle.NewPerFrame(floatrange.NewLinear(0, 2)), particle.Size(intrange.NewConstant(20))), map[string]float64{"damage": 1}),
 	)
 
+	rBannerSeq := bannerSeq.Copy()
+	rBannerSeq.Filter(recolor.WithStrategy(recolor.ColorMix(color.RGBA{100, 100, 100, 100})))
+
 	// Rez the first person who is dead in the party on pickup
-	Rez = NewAbility(
+	Rez = newAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 150, 150, 200}), rezIcon),
 		time.Second*25,
 		func(u User) []characters.Character {
 			pos := u.Vec()
 
-			animFilePath := (filepath.Join("16x32", "banner.png"))
-			seq, err := render.LoadSheetSequence(animFilePath, 16, 32, 0, 5, []int{0, 0, 1, 0, 2, 0, 3, 0, 0, 1, 1, 1, 2, 1}...)
-			dlog.ErrorCheck(err)
-
-			if err != nil {
-				dlog.Error(err)
-				return nil
-			}
-
-			banner := And(WithRenderable(seq),
+			banner := And(WithRenderable(rBannerSeq.Copy()),
 				WithLabel(labels.EffectsPlayer),
 				WithBuff(buff.Rez))(Producer{})
 
@@ -295,7 +292,7 @@ func MageInit() {
 		},
 	)
 	// Invulnerability gives a temp buff of near invuln to the entire living party
-	Invulnerability = NewAbility(
+	Invulnerability = newAbility(
 
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{200, 240, 190, 255}), shieldIcon),
 		time.Second*20,
@@ -346,7 +343,7 @@ func MageInit() {
 	)
 
 	// Slow TODO: Implement
-	Slow = NewAbility(
+	Slow = newAbility(
 		render.NewColorBox(64, 64, color.RGBA{120, 120, 120, 255}),
 		time.Second*10,
 		func(u User) []characters.Character {
@@ -392,7 +389,7 @@ func MageInit() {
 		},
 	)
 	// CooldownRework TODO: Implement
-	CooldownRework = NewAbility(
+	CooldownRework = newAbility(
 		render.NewColorBox(64, 64, color.RGBA{120, 120, 120, 255}),
 		time.Second*10,
 		func(u User) []characters.Character {

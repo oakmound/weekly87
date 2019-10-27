@@ -8,10 +8,10 @@ import (
 	"github.com/oakmound/oak/render/mod"
 	"github.com/oakmound/weekly87/internal/abilities"
 )
-
+// Init to be run after oak setup to get our assets set up
 func Init() {
 	WarriorsInit()
-	MageInit()
+	mageInit()
 	EmptyInit()
 	InnKeeperInit()
 	classmapping = map[int]*Constructor{
@@ -21,10 +21,10 @@ func Init() {
 		Swordsman: WarriorConstructors["Swordsman"],
 		Berserker: WarriorConstructors["Berserker"],
 		Paladin:   WarriorConstructors["Paladin"],
-		Mage:      MageConstructors["Red"],
-		WhiteMage: MageConstructors["White"],
-		BlueMage:  MageConstructors["Blue"],
-		TimeMage:  MageConstructors["Time"],
+		Mage:      mageConstructors["Red"],
+		WhiteMage: mageConstructors["White"],
+		BlueMage:  mageConstructors["Blue"],
+		TimeMage:  mageConstructors["Time"],
 	}
 }
 func filterCharMap(baseCharMap map[string]render.Modifiable, filter mod.Filter) map[string]render.Modifiable {

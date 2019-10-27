@@ -93,6 +93,7 @@ var enemyTypeList = [TypeLimit]enemyType{
 	Tree,
 }
 
+// Init to be run after oak setup to make sure that enemies have assets and constructors set up
 func Init() {
 	initHare()
 	initMantis()

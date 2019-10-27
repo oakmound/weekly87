@@ -301,7 +301,6 @@ var Scene = scene.Scene{
 			ptycon.Players[0].Position = floatgeom.Point2{partyBackground.X() + 20, partyBackground.Y() + 10}
 			render.Draw(partyBackground, layer.UI, 1)
 
-			fmt.Println("Ptycon players", len(ptycon.Players))
 			pty, err := ptycon.NewParty(true)
 			dlog.ErrorCheck(err)
 			spcs := make([]*collision.Space, 0)

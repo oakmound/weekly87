@@ -30,6 +30,10 @@ var requiredAnimations = []string{
 	"standHold",
 }
 
+// WallOffset is how far from the wall to create the run party
+const WallOffset = 50
+
+// Constructor for a player
 type Constructor struct {
 	Position   floatgeom.Point2
 	Speed      floatgeom.Point2
@@ -89,14 +93,17 @@ type Player struct {
 	Party *Party
 }
 
+// DebugEnabled checks if the party is in debug mode
 func (p *Player) DebugEnabled() bool {
 	return p.Party.Debug
 }
 
+// GetDelta for the party that the player is in.
 func (p *Player) GetDelta() physics.Vector {
 	return p.Party.Players[0].Delta
 }
 
+// AddBuff to the player!
 func (p *Player) AddBuff(b buff.Buff) {
 	p.BuffLock.Lock()
 	b.ExpireAt = time.Now().Add(b.Duration)
@@ -133,6 +140,7 @@ func (p *Player) DropChest() {
 	p.Special2.Enable(true)
 }
 
+// AddChest to those carried by the player
 func (p *Player) AddChest(h int, r render.Modifiable, contents int64) {
 	p.ChestsHeight += float64(h)
 	chestHeight := p.ChestsHeight
@@ -149,6 +157,7 @@ func (p *Player) AddChest(h int, r render.Modifiable, contents int64) {
 	}
 }
 
+// ReorderBuffs on the player by expiry time
 func (p *Player) ReorderBuffs() {
 	xOffset := abilities.BuffIconSize + 4
 	yOffset := abilities.BuffIconSize + 4
@@ -159,10 +168,12 @@ func (p *Player) ReorderBuffs() {
 	}
 }
 
+// Init the player and give it a CID for bindings
 func (p *Player) Init() event.CID {
 	return event.NextID(p)
 }
 
+// CheckedBind makes a convience function to wrap bindings with
 func (p *Player) CheckedBind(bnd func(*Player, interface{}) int, ev string) {
 	p.Bind(func(id int, data interface{}) int {
 		be, ok := event.GetEntity(id).(*Player)
@@ -174,14 +185,17 @@ func (p *Player) CheckedBind(bnd func(*Player, interface{}) int, ev string) {
 	}, ev)
 }
 
+// Direction returns the direction the player is facing
 func (p *Player) Direction() string {
 	return p.facing
 }
 
+// Ready checks if the player is ready to do stuff. IE is alive
 func (p *Player) Ready() bool {
 	return p.Alive
 }
 
+// Kill the player...
 func (p *Player) Kill() {
 	p.Special1.Enable(false)
 	p.Special2.Enable(false)
@@ -203,11 +217,10 @@ func (p *Player) Kill() {
 	p.Alive = false
 }
 
+// Revive the player making them alive once more
 func (p *Player) Revive() {
 	p.Alive = true
 	p.Special1.Enable(true)
 	p.Special2.Enable(true)
 	dlog.ErrorCheck(p.Swtch.Set("walk" + p.facing))
 }
-
-const WallOffset = 50

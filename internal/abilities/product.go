@@ -20,6 +20,7 @@ import (
 	"github.com/oakmound/weekly87/internal/sfx"
 )
 
+//Producer of ability affects
 type Producer struct {
 	Start     floatgeom.Point2
 	End       floatgeom.Point2
@@ -49,6 +50,7 @@ type Producer struct {
 	Buffs []buff.Buff
 }
 
+// Option to set on the producer
 type Option func(Producer) Producer
 
 // FrameLength overwrites the default of 100 for frame length with the provided int
@@ -59,6 +61,7 @@ func FrameLength(frames int) Option {
 	}
 }
 
+// FollowSpeed to set on the producer. Modifies the base speed of the ability to keep pace weith these float pointers
 func FollowSpeed(xFollow, yFollow *float64) Option {
 	return func(p Producer) Producer {
 		p.FollowX = xFollow
@@ -67,6 +70,7 @@ func FollowSpeed(xFollow, yFollow *float64) Option {
 	}
 }
 
+// StartAt location for the ability
 func StartAt(pt floatgeom.Point2) Option {
 	return func(p Producer) Producer {
 		p.Start = pt
@@ -74,6 +78,7 @@ func StartAt(pt floatgeom.Point2) Option {
 	}
 }
 
+// ArcTo denotes a path to set for the ability
 func ArcTo(pts ...floatgeom.Point2) Option {
 	return func(p Producer) Producer {
 		p.ArcPoints = make([]float64, len(pts)*2)
@@ -86,6 +91,7 @@ func ArcTo(pts ...floatgeom.Point2) Option {
 	}
 }
 
+// LineTo denotes a simple point to go to for the ability
 func LineTo(pt floatgeom.Point2) Option {
 	return func(p Producer) Producer {
 		p.End = pt
@@ -93,6 +99,7 @@ func LineTo(pt floatgeom.Point2) Option {
 	}
 }
 
+// Duration sets the total life of the ability
 func Duration(dur time.Duration) Option {
 	return func(p Producer) Producer {
 		p.TotalLife = dur
@@ -100,6 +107,7 @@ func Duration(dur time.Duration) Option {
 	}
 }
 
+// WithParticles sets a particle generator to couple with the ability
 func WithParticles(pg particle.Generator) Option {
 	return func(p Producer) Producer {
 		p.Generator = pg
@@ -107,6 +115,7 @@ func WithParticles(pg particle.Generator) Option {
 	}
 }
 
+// WithLabel sets the collision label  for the ability
 func WithLabel(l collision.Label) Option {
 	return func(p Producer) Producer {
 		p.Label = l
@@ -114,6 +123,7 @@ func WithLabel(l collision.Label) Option {
 	}
 }
 
+// WithHitEffects sets the hitmap on the ability
 func WithHitEffects(he map[collision.Label]collision.OnHit) Option {
 	return func(p Producer) Producer {
 		p.HitEffects = he
@@ -121,6 +131,7 @@ func WithHitEffects(he map[collision.Label]collision.OnHit) Option {
 	}
 }
 
+// WithRenderable sets the renderable for the ability
 func WithRenderable(r render.Renderable) Option {
 	return func(p Producer) Producer {
 		p.R = r
@@ -128,8 +139,11 @@ func WithRenderable(r render.Renderable) Option {
 	}
 }
 
+// DoOption is an option that will be performed at a given passed in location
+// Often used for the DoAfter function
 type DoOption func(floatgeom.Point2)
 
+// Drop an ability effect at the passed in location
 func Drop(p Producer) DoOption {
 	return func(pt floatgeom.Point2) {
 		dlog.Info("An ability dropped something")
@@ -144,26 +158,14 @@ func Drop(p Producer) DoOption {
 	}
 }
 
-func Perform(p Producer) DoOption {
-	return func(pt floatgeom.Point2) {
-		dlog.Info("An ability dropped something")
-		p.Start = pt
-		chrs, err := p.Produce()
-		if err != nil {
-			dlog.Error(err)
-			return
-		}
-
-		event.Trigger("AbilityFired", chrs)
-	}
-}
-
+// DoPlay a sound as a DoOption
 func DoPlay(s string) DoOption {
 	return func(_ floatgeom.Point2) {
 		sfx.Play(s)
 	}
 }
 
+// PlaySFX on Produce() of the ability
 func PlaySFX(s string) Option {
 	return func(p Producer) Producer {
 		p.ToPlay = s
@@ -171,7 +173,7 @@ func PlaySFX(s string) Option {
 	}
 }
 
-// Perform from where you left off
+// Chain from where you left off and perform the action of the given producer
 func Chain(p Producer) DoOption {
 	return func(pt floatgeom.Point2) {
 		dlog.Info("Chaining next ability")
@@ -187,6 +189,7 @@ func Chain(p Producer) DoOption {
 	}
 }
 
+// AndDo chains DoOptions
 func AndDo(dos ...DoOption) DoOption {
 	return func(pt floatgeom.Point2) {
 
@@ -196,6 +199,7 @@ func AndDo(dos ...DoOption) DoOption {
 	}
 }
 
+// Then sets the action to take at the end of the producers life
 func Then(do DoOption) Option {
 	return func(p Producer) Producer {
 		p.ThenFn = do
@@ -203,6 +207,7 @@ func Then(do DoOption) Option {
 	}
 }
 
+// While a producer is alive do something
 // Todo: implement while effects on product
 func While(do DoOption, interval time.Duration) Option {
 	return func(p Producer) Producer {
@@ -212,6 +217,7 @@ func While(do DoOption, interval time.Duration) Option {
 	}
 }
 
+// WithBuff sets the buff on the ability
 func WithBuff(b buff.Buff) Option {
 	return func(p Producer) Producer {
 		old := p.Buffs
@@ -222,6 +228,7 @@ func WithBuff(b buff.Buff) Option {
 	}
 }
 
+// And concatenates options
 func And(opts ...Option) Option {
 	return func(p Producer) Producer {
 		for _, o := range opts {
@@ -239,11 +246,13 @@ func defProducer() Producer {
 	}
 }
 
+// Produce a set of outcomes given a set of options on the default producer
 func Produce(opts ...Option) ([]characters.Character, error) {
 	prd := defProducer()
 	return prd.Produce(opts...)
 }
 
+// Produce a set of outcomes given a producer and a set of options
 func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 	for _, o := range opts {
 		p = o(p)
@@ -387,11 +396,13 @@ func (p Producer) Produce(opts ...Option) ([]characters.Character, error) {
 	return chrs, nil
 }
 
+// Init a product by getting it a CID
 func (p *Product) Init() event.CID {
 	p.CID = event.NextID(p)
 	return p.CID
 }
 
+//Product of a ability producer
 type Product struct {
 	*entities.Interactive
 	shouldPersist bool
@@ -405,6 +416,7 @@ type Product struct {
 	buffs  []buff.Buff
 }
 
+// MoveParticles updates the location of the particle source on a product if it exists
 func (p *Product) MoveParticles(nextDelta floatgeom.Point2) {
 	if p.source != nil {
 		p.source.ShiftX(nextDelta.X())
@@ -412,6 +424,7 @@ func (p *Product) MoveParticles(nextDelta floatgeom.Point2) {
 	}
 }
 
+// Destroy cleans up a product
 func (p *Product) Destroy() {
 	// Note: this assumes that destroys aren't happening simultaneously
 	if p.next != nil {
@@ -421,16 +434,19 @@ func (p *Product) Destroy() {
 	p.Interactive.Destroy()
 	if p.source != nil {
 		p.source.Stop()
-		p.source = nil 
+		p.source = nil
 	}
 }
 
+// Activate a product, needed to fulfill some interfaces
 func (p *Product) Activate() {}
 
+// ShouldPersist to our records
 func (p *Product) ShouldPersist() bool {
 	return p.shouldPersist
 }
 
+// Buffs that the product gives
 func (p *Product) Buffs() []buff.Buff {
 	return p.buffs
 }

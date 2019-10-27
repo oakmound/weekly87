@@ -14,6 +14,7 @@ import (
 	"github.com/oakmound/weekly87/internal/restrictor"
 )
 
+// Chest is a unit of value which can be interacted with and drawn
 type Chest struct {
 	*entities.Reactive
 	Unmoving
@@ -21,24 +22,29 @@ type Chest struct {
 	Active bool
 }
 
+// Init the chest and get its CID
 func (c *Chest) Init() event.CID {
 	return event.NextID(c)
 }
 
+// Destroy a chest and clean up its artifcats
 func (c *Chest) Destroy() {
 	c.Active = false
 	c.Reactive.Destroy()
 }
 
+// Activate a Chest and allow users to interact with it
 func (c *Chest) Activate() {
 	restrictor.Add(c)
 	c.Active = true
 }
 
+// GetDims of the chest renderable
 func (c *Chest) GetDims() (int, int) {
 	return c.Reactive.R.GetDims()
 }
 
+// NewChest creates a chest with the given value
 func NewChest(value int64) *Chest {
 	ch := &Chest{}
 	// r := render.NewColorBox(16, 16, color.RGBA{0, 255, 255, 255})

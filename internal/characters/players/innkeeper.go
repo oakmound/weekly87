@@ -9,10 +9,11 @@ import (
 	"github.com/oakmound/oak/render/mod"
 )
 
+// InnKeeperConstructor creates an innkeeper
 var InnKeeperConstructor *Constructor
 
+// InnKeeperInit sets up the required animations and behaviours of the innkeeper
 func InnKeeperInit() {
-
 	sh, err := render.LoadSheet(filepath.Join("assets", "images", "16x32"), "innkeeper.png", 16, 32, 0)
 	dlog.ErrorCheck(err)
 
