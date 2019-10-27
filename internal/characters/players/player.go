@@ -89,6 +89,10 @@ type Player struct {
 	Party *Party
 }
 
+func (p *Player) DebugEnabled() bool {
+	return p.Party.Debug
+}
+
 func (p *Player) GetDelta() physics.Vector {
 	return p.Party.Players[0].Delta
 }

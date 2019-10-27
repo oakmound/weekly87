@@ -10,17 +10,17 @@ import (
 
 	klg "github.com/200sc/klangsynthese/audio"
 
+	"github.com/oakmound/weekly87/internal/characters"
 	"github.com/oakmound/weekly87/internal/characters/doodads"
 	"github.com/oakmound/weekly87/internal/characters/enemies"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
-	"github.com/oakmound/weekly87/internal/records"
-	"github.com/oakmound/weekly87/internal/characters"
-	"github.com/oakmound/weekly87/internal/restrictor"
 	"github.com/oakmound/weekly87/internal/dtools"
 	"github.com/oakmound/weekly87/internal/layer"
 	"github.com/oakmound/weekly87/internal/menus"
 	"github.com/oakmound/weekly87/internal/music"
+	"github.com/oakmound/weekly87/internal/records"
+	"github.com/oakmound/weekly87/internal/restrictor"
 	"github.com/oakmound/weekly87/internal/run/section"
 
 	"github.com/oakmound/oak"
@@ -29,12 +29,12 @@ import (
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities/x/btn"
 	"github.com/oakmound/oak/event"
-	"github.com/oakmound/oak/render"
-	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/joystick"
+	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/mouse"
-	"github.com/oakmound/oak/timing"
+	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/scene"
+	"github.com/oakmound/oak/timing"
 )
 
 var stayInGame bool
@@ -437,6 +437,11 @@ var Scene = scene.Scene{
 			}
 			debugTree.DrawDisabled = true
 		})
+		oak.AddCommand("cooldowns", func(args []string) {
+			dlog.Warn("Cheating to toggle debug mode for cooldowns")
+			pty.Debug = !pty.Debug
+
+		})
 		oak.AddCommand("speedup", func(args []string) {
 			up := 5.0
 			if len(args) > 0 {
@@ -466,7 +471,7 @@ var Scene = scene.Scene{
 				fmt.Println("Expected integer argument to kill", err)
 				return
 			}
-			x := players.WallOffset + idx * players.PlayerGap
+			x := players.WallOffset + idx*players.PlayerGap
 
 			be := &enemies.BasicEnemy{
 				Active: true,
@@ -475,7 +480,7 @@ var Scene = scene.Scene{
 			sp := collision.NewFullSpace(float64(x+oak.ViewPos.X), float64(oak.ViewPos.Y),
 				10, 500, labels.Enemy, event.CID(cid))
 			collision.Add(sp)
-			timing.DoAfter(30 * time.Millisecond, func() {
+			timing.DoAfter(30*time.Millisecond, func() {
 				collision.Remove(sp)
 			})
 		})

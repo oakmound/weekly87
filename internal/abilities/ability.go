@@ -60,12 +60,12 @@ func Init() {
 	// downSLash.Modify()
 
 	bannerSeq, err = render.LoadSheetSequence(
-		filepath.Join("16x32", "banner.png"), 
+		filepath.Join("16x32", "banner.png"),
 		16, 32, 0, 5, []int{0, 0, 1, 0, 2, 0, 3, 0, 0, 1, 1, 1, 2, 1}...)
 	dlog.ErrorCheck(err)
 
 	placeHolderBuff, err = render.LoadSprite(
-		filepath.Join("assets/images", "16x16"), 
+		filepath.Join("assets/images", "16x16"),
 		"place_holder_buff.png")
 	dlog.ErrorCheck(err)
 
@@ -77,7 +77,7 @@ var (
 	blastIcon, shieldAuraIcon, shieldIcon, slashIcon, hammerIcon *render.Sprite
 	redBlastIcon, blueBlastIcon, redBlastDIcon, blueBlastDIcon   *render.Sprite
 	upSlashIcon, downSlashIcon, rezIcon, placeHolderBuff         *render.Sprite
-	bannerSeq *render.Sequence
+	bannerSeq                                                    *render.Sequence
 	iconW                                                        = 64
 	iconH                                                        = 64
 
@@ -97,6 +97,7 @@ type User interface {
 	Vec() physics.Vector      //Position
 	GetDelta() physics.Vector // Speed
 	Direction() string        //Facing
+	DebugEnabled() bool       // If Debug is on
 }
 
 // Ability is an action with an associated UI element that can be invoked
@@ -135,7 +136,7 @@ func (a *ability) Trigger() {
 		sfx.Play("nope1")
 		return
 	}
-	if !a.cooldown.Trigger() {
+	if !a.cooldown.Trigger() && !a.user.DebugEnabled() {
 		sfx.Play("cooldown")
 		return
 	}

@@ -37,6 +37,7 @@ type Party struct {
 	Acceleration float64
 	speedUps     float64
 	joystickID   uint32
+	Debug        bool
 }
 
 func (p *Party) Init() event.CID {
