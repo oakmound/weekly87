@@ -24,14 +24,14 @@ import (
 	"github.com/oakmound/weekly87/internal/sfx"
 )
 
-func thwack(image string, xOffset, yDelta float64, hitEffects map[string]float64, mods ...mod.Mod) func(User) []characters.Character {
+func thwack(image string, fLength int, xOffset, yDelta float64, hitEffects map[string]float64, mods ...mod.Mod) func(User) []characters.Character {
 	hits := map[collision.Label]collision.OnHit{
 		labels.Enemy: func(a, b *collision.Space) {
 			b.CID.Trigger("Attacked", hitEffects)
 		},
 	}
 	var md render.Modifiable
-	seq, err := render.LoadSheetSequence(image, 32, 32, 0, 32,
+	seq, err := render.LoadSheetSequence(image, 32, 32, 0, float64(60/fLength*8),
 		0, 0, 1, 0, 2, 0, 3, 0, 0, 1, 1, 1, 2, 1, 3, 1)
 
 	dlog.ErrorCheck(err)
@@ -53,7 +53,7 @@ func thwack(image string, xOffset, yDelta float64, hitEffects map[string]float64
 		chrs, err := Produce(
 			StartAt(start),
 			LineTo(start),
-			FrameLength(16),
+			FrameLength(fLength),
 			FollowSpeed(u.GetDelta().Xp(), u.GetDelta().Yp()),
 			WithHitEffects(hits),
 			WithLabel(labels.EffectsEnemy),
@@ -86,7 +86,7 @@ func WarriorInit() {
 	SwordSwipe = newAbility(
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 150, 0, 200}), slashIcon),
 		time.Second*4,
-		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 10, dmg),
+		thwack(filepath.Join("32x32", "BaseSlash.png"), 16, 100, 10, dmg),
 	)
 
 	// HammerSmack is currently a huge thwack TODO: have new animation with hammer
@@ -94,7 +94,7 @@ func WarriorInit() {
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 80, 120, 255}), hammerIcon),
 
 		time.Second*8,
-		thwack(filepath.Join("32x32", "BaseSlash.png"), 100, 26, map[string]float64{"damage": 1.0, "pushback": 120.0}, mod.Scale(2, 2)),
+		thwack(filepath.Join("32x32", "BaseSmash.png"), 42, 100, 26, map[string]float64{"damage": 1.0, "pushback": 120.0}, mod.Scale(2, 2)),
 	)
 
 	// Rage is a multistrike attack that impacts party movement
