@@ -112,6 +112,7 @@ type aiServeDrinkLocation struct {
 }
 
 func (a aiServeDrinkLocation) start() (func(int) aiStatus, func(int)) {
+	// where to serve drink
 	barX := (rand.Float64() * (a.rect.Max.X() - a.rect.Min.X())) + a.rect.Min.X()
 	barY := (rand.Float64() * (a.rect.Max.Y() - a.rect.Min.Y())) + a.rect.Min.Y()
 
@@ -129,6 +130,7 @@ func (a aiServeDrinkLocation) start() (func(int) aiStatus, func(int)) {
 			dy = -1.0
 		}
 
+		// if gotten to serving location
 		if reached {
 			if time.Now().After(end) {
 				return aiComplete
@@ -139,6 +141,7 @@ func (a aiServeDrinkLocation) start() (func(int) aiStatus, func(int)) {
 		keeper.ShiftPos(0, dy)
 		if keeper.Y() > barY-1 && keeper.Y() < barY+1 {
 			end = time.Now().Add(time.Duration(4000 * time.Millisecond))
+			// end = time.Now().Add(time.Duration(1 * time.Millisecond)) // CONSIDER: allowing this to be set via debug commands
 			reached = true
 			doodads.NewDrinkable(barX, barY, a.drinkImg)
 		}
@@ -148,10 +151,13 @@ func (a aiServeDrinkLocation) start() (func(int) aiStatus, func(int)) {
 }
 
 type aiDrinker struct {
-	duration intrange.Range
-	solid    *entities.Interactive
+	duration  intrange.Range
+	solid     *entities.Interactive
+	consuming int
 }
 
+// start aidrinkerbindings
+// currently unsafe and could end up with people in bad states
 func (a aiDrinker) start() (func(int) aiStatus, func(int)) {
 	start := time.Now()
 	nextCheck := start.Add(time.Duration(a.duration.Poll()) * time.Millisecond)
@@ -161,8 +167,24 @@ func (a aiDrinker) start() (func(int) aiStatus, func(int)) {
 	drinkSpace := collision.NewEmptyReactiveSpace(
 		collision.NewUnassignedSpace(pSpace.X()-50, pSpace.Y(), pSpace.GetW()+50, pSpace.GetH()))
 
+	swtch := a.solid.R.(*render.Switch)
+
+	a.solid.CID.Bind(func(id int, _ interface{}) int {
+
+		// TODO: reconsider structure here and if we want mutexes
+		a.consuming--
+		if a.consuming <= 0 {
+			swtch.Set("standLT") // hacky as we only support bar drinkers for now
+		}
+
+		return 0
+	}, "consumeCompleted")
+
 	drinkSpace.Add(labels.Drinkable, func(_, d *collision.Space) {
 		d.CID.Trigger("Consume", pSpace.Space)
+		swtch.Set("consume")
+		a.consuming++
+
 		dlog.Info("Trying to consume a drink")
 	})
 	a.solid.Tree.Add(drinkSpace.Space)

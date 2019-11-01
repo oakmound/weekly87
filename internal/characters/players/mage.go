@@ -105,6 +105,10 @@ func mageInit() {
 		dlog.ErrorCheck(err)
 		deadLT := deadRT.Copy().Modify(mod.FlipX)
 
+		consume, err := render.NewSheetSequence(sh, 8, []int{0, 0, 0, 1, 0, 1}...)
+		dlog.ErrorCheck(err)
+		consume = consume.Copy().Modify(mod.FlipX).(*render.Sequence)
+
 		mageCharMap := map[string]render.Modifiable{
 			"walkRT":    walkRT,
 			"walkLT":    walkLT,
@@ -114,6 +118,7 @@ func mageInit() {
 			"deadLT":    deadLT,
 			"walkHold":  walkHold,
 			"standHold": standHold,
+			"consume":   consume,
 		}
 
 		mageConstructors[def.Name] = &Constructor{

@@ -217,7 +217,7 @@ func NewInnNPC(class int, scale, x, y float64) *NPC {
 	n.AI = NewAI(
 		[]aiAction{
 			aiDrinker{
-				duration: intrange.NewLinear(2000, 4000),
+				duration: intrange.NewLinear(2000, 12000),
 				solid:    n.Interactive,
 			},
 		},
@@ -282,7 +282,7 @@ func NewInnkeeper(img *render.Sprite, scale, x, y float64) *NPC {
 			},
 		},
 		[]float64{
-			.5, .5,
+			.25, .75,
 		},
 	)
 	keeper.Bind(func(id int, frame interface{}) int {
@@ -298,6 +298,17 @@ func NewInnkeeper(img *render.Sprite, scale, x, y float64) *NPC {
 			if status == aiComplete {
 				kpr.curCancel(id)
 				kpr.inAction = false
+			}
+			if kpr.Delta.X() != 0 || kpr.Delta.Y() != 0 {
+				if kpr.Delta.X() < 0 {
+					kpr.Swtch.Set("walkLT")
+				} else {
+					kpr.Swtch.Set("walkRT")
+				}
+			} else {
+				cur := kpr.Swtch.Get()
+				err := kpr.Swtch.Set("stand" + string(cur[len(cur)-2:]))
+				dlog.ErrorCheck(err)
 			}
 			return 0
 		}

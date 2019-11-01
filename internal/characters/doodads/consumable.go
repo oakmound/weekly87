@@ -35,7 +35,7 @@ func NewConsumable(x, y float64, img *render.Sprite) *Consumable {
 	c.Solid = entities.NewSolid(x, y, float64(width), float64(height), nil, nil, c.Init())
 	c.Bind(func(id int, space interface{}) int {
 		s := space.(*collision.Space)
-		c.Consume(s.X(), s.Y()-20)
+		c.Consume(0, 20, s)
 		return 1
 	}, "Consume")
 
@@ -52,7 +52,7 @@ func NewDrinkable(x, y float64, img *render.Sprite) *Consumable {
 	return c
 }
 
-// SetPos of the solid and the renderable
+// SetPos of the solid and the renderable for the consumable
 func (c *Consumable) SetPos(x, y float64) {
 	c.Solid.SetPos(x, y)
 	c.R.SetPos(x, y)
@@ -66,12 +66,15 @@ func (c *Consumable) ShiftPos(x, y float64) {
 }
 
 // Consume in what is for now a boiler plate fashion
-func (c *Consumable) Consume(x, y float64) {
+func (c *Consumable) Consume(xOff, yOff float64, sp *collision.Space) {
 	dlog.Info("pretending to be consumed")
 	c.Tree.Remove(c.Space)
+	x := sp.X() - xOff
+	y := sp.Y() - yOff
 
-	delta := physics.NewVector(x-c.X(), y-c.Y()).Normalize()
-	//Vector{x - c.X(), y - c.Y()}
+	speedMod := .25
+
+	delta := physics.NewVector(x-c.X(), y-c.Y()).Normalize().Scale(speedMod)
 
 	c.Bind(func(id int, _ interface{}) int {
 
@@ -86,6 +89,8 @@ func (c *Consumable) Consume(x, y float64) {
 			c.R.Undraw()
 			c.Destroy()
 
+			// Let the consumer know that it is no longer consuming
+			sp.CID.Trigger("consumeCompleted", con.CID)
 			return event.UnbindSingle
 		}
 		return 0
