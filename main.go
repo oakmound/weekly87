@@ -7,7 +7,6 @@ import (
 	"github.com/oakmound/weekly87/internal/history"
 	"github.com/oakmound/weekly87/internal/inn"
 	"github.com/oakmound/weekly87/internal/run"
-	"github.com/oakmound/weekly87/internal/savemanagement"
 	"github.com/oakmound/weekly87/internal/settingsmanagement"
 	"github.com/oakmound/weekly87/internal/startup"
 )
@@ -35,7 +34,6 @@ func main() {
 	oak.AddScene("inn", inn.Scene)
 	oak.AddScene("settings", settingsmanagement.Scene)
 	oak.AddScene("credits", credits.Scene)
-	oak.AddScene("load", savemanagement.Scene)
 	oak.AddScene("history", history.Scene)
 	oak.AddScene("run", run.Scene)
 	oak.AddScene("endGame", end.Scene) // At end if there is time break this into its own package and export the correct stats
