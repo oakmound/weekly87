@@ -30,6 +30,7 @@ import (
 	"github.com/oakmound/weekly87/internal/dtools"
 	"github.com/oakmound/weekly87/internal/keyviz"
 	"github.com/oakmound/weekly87/internal/layer"
+	"github.com/oakmound/weekly87/internal/menus"
 	"github.com/oakmound/weekly87/internal/menus/selector"
 	"github.com/oakmound/weekly87/internal/music"
 	"github.com/oakmound/weekly87/internal/records"
@@ -75,7 +76,6 @@ var Scene = scene.Scene{
 
 		// Additional inn such as tables
 		doodads.NewFurniture(130, 130, 100, float64(oak.ScreenHeight)-130)
-		// leftT.PlaceConsumablesa(prettyMugs, 3+rand.Intn(7))
 
 		// TODO: update placement strats for consumables
 		doodads.NewDrinkable(200, 290, prettyMugs[0]).Activate()
@@ -405,6 +405,16 @@ var Scene = scene.Scene{
 				selector.MouseBindings(true),
 
 				selector.MouseRight(selector.MouseInteract("boot")),
+				selector.Display(func(pt floatgeom.Point2) render.Renderable {
+					poly, err := render.NewPolygon(
+						floatgeom.Point2{0, 0},
+						floatgeom.Point2{pt.X(), 0},
+						floatgeom.Point2{pt.X(), pt.Y()},
+						floatgeom.Point2{0, pt.Y()},
+					)
+					dlog.ErrorCheck(err)
+					return poly.GetThickOutline(menus.Green, 1)
+				}),
 			)
 
 			return 0
