@@ -94,7 +94,7 @@ func WarriorInit() {
 		render.NewCompositeM(render.NewColorBox(64, 64, color.RGBA{150, 80, 120, 255}), hammerIcon),
 
 		time.Second*8,
-		thwack(filepath.Join("32x32", "BaseSmash.png"), 42, 100, 26, map[string]float64{"damage": 1.0, "pushback": 120.0}, mod.Scale(2, 2)),
+		thwack(filepath.Join("32x32", "BaseSmash.png"), 42, 100, 26, map[string]float64{"damage": 1.0, "pushback": 80.0}, mod.Scale(2, 2)),
 	)
 
 	// Rage is a multistrike attack that impacts party movement

@@ -81,7 +81,7 @@ type BasicEnemy struct {
 	swtch         *render.Switch
 	Active        bool
 	beenDisplayed bool
-	PushBack      physics.Vector
+	pushBack      physics.Vector
 	baseSpeed     physics.Vector
 	Health        int
 }
@@ -102,7 +102,7 @@ func (be *BasicEnemy) Destroy() {
 
 func (be *BasicEnemy) DeathEffect(secid, idx int64) {
 	be.RSpace.Label = 0
-	be.PushBack.Add(physics.NewVector(60, 0))
+	be.PushBack(physics.NewVector(60, 0))
 	abilities.Produce(
 		abilities.StartAt(floatgeom.Point2{be.X() + 8, be.Y() + 10}),
 		abilities.LineTo(floatgeom.Point2{be.X() + 30, be.Y() + 30}),
@@ -113,7 +113,8 @@ func (be *BasicEnemy) DeathEffect(secid, idx int64) {
 	be.CheckedBind(func(be *BasicEnemy, data interface{}) int {
 
 		// wait for pushback to complete
-		if be.PushBack.Magnitude() > 0.15 {
+		if be.pushBack.Magnitude() > 0.15 {
+			be.RSpace.Remove(labels.Enemy) // Clean up the interaction with other enemies
 			return 0
 		}
 		event.Trigger("EnemyDeath", []int64{secid, idx})
@@ -167,7 +168,7 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		}
 	}
 	be := &BasicEnemy{}
-	be.PushBack = physics.NewVector(0, 0)
+	be.pushBack = physics.NewVector(0, 0)
 	newMp := map[string]render.Modifiable{}
 	for animKey, anim := range ec.AnimationMap {
 		newMp[animKey] = anim.Copy()
@@ -204,13 +205,13 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		// Enemies should only do anything if they are on screen
 		// Todo: other things could effect delta temporarily
 
-		push := be.PushBack.Copy()
+		push := be.pushBack.Copy()
 
 		if be.facing == "RT" {
 			push.Scale(-1)
 		}
 		be.Delta = be.Speed.Copy().Add(push)
-		be.PushBack.Scale(0.86)
+		be.pushBack.Scale(0.95)
 		if be.X() <= float64(oak.ScreenWidth+oak.ViewPos.X) &&
 			be.X()+be.W >= float64(oak.ViewPos.X) {
 			//be.RSpace.Label = labels.Enemy
@@ -255,7 +256,7 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		for k, v := range effectMap {
 			switch k {
 			case "pushback":
-				be.PushBack.Add(physics.NewVector(v, 0))
+				be.PushBack(physics.NewVector(v, 0))
 			case "damage":
 				be.Health -= int(v)
 				if be.Health < 1 {
@@ -292,6 +293,36 @@ func (ec *Constructor) NewEnemy(secid, idx int64) (*BasicEnemy, error) {
 		be.CheckedBind(b, ev)
 	}
 	return be, nil
+}
+
+// PushBack the enemy adding to their pushback vector
+// Also sets them up to knockback other enemies
+func (be *BasicEnemy) PushBack(pBack physics.Vector) {
+	if be.pushBack.Magnitude() != 0 {
+		be.pushBack.Add(pBack)
+		return
+	}
+	be.pushBack.Add(pBack)
+
+	// CONSIDER: Nicer ways to have chaining knockback in good ways
+	be.RSpace.Add(labels.Enemy, func(s, e *collision.Space) {
+		pusher, ok := s.CID.E().(*BasicEnemy)
+		if !ok {
+			dlog.Error("Non-enemy sent to enemy binding as pusher")
+			return
+		}
+		pushee, ok := e.CID.E().(*BasicEnemy)
+		if !ok {
+			dlog.Error("Non-enemy sent to enemy binding as pushee")
+			fmt.Printf("%T\n", s.CID.E())
+			return
+		}
+		pushFactor := pusher.pushBack.Magnitude() - pushee.pushBack.Magnitude()
+		if pushFactor > 0 {
+			pushee.PushBack(physics.NewVector(pushFactor/2, 0))
+		}
+	})
+
 }
 
 func (be *BasicEnemy) RunBackwards() {
