@@ -1,7 +1,6 @@
 package credits
 
 import (
-	"image/color"
 	"path/filepath"
 
 	"github.com/oakmound/oak/collision"
@@ -43,37 +42,35 @@ var Scene = scene.Scene{
 		title := titleFnt.NewStrText("Credits", menuX-20, menuY-40)
 		render.Draw(title, 2, 12)
 
-		construction := titleFnt.NewStrText("!Under Construction!", float64(oak.ScreenWidth)/3, menuY+70)
-		render.Draw(construction, 2, 12)
-
-		creditFenrir := btn.New(
+		_ = btn.New(
 			menus.BtnCfgC,
 			btn.Text("Art - LightningFenrir"),
 			btn.Pos(menuX, menuY),
-			btn.Color(color.RGBA{0, 125, 255, 255}),
+			btn.Color(menus.Blue),
 		)
 
 		menuY += menus.BtnHeightB * 1.5
 
-		creditPlaus := btn.New(
+		_ = btn.New(
 			menus.BtnCfgC,
 			btn.Text("Code - PlausiblyFun"),
 			btn.Pos(menuX, menuY),
-			btn.Color(color.RGBA{0, 125, 255, 255}),
+			btn.Color(menus.Purple),
 		)
 
 		menuY += menus.BtnHeightB * 1.5
 
-		credit200sc := btn.New(
+		_ = btn.New(
 			menus.BtnCfgC,
 			btn.Text("Code/Music - 200sc"),
 			btn.Pos(menuX, menuY),
-			btn.Color(color.RGBA{0, 125, 255, 255}),
+			btn.Color(menus.LightBlue),
 		)
 
 		menuY += menus.BtnHeightB * 1.5
 
 		returnBtn := btn.New(menus.BtnCfgB,
+			btn.Color(menus.Red),
 			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
 			btn.Pos(menuX, menuY),
 			btn.Text("Return To Menu"),
@@ -85,7 +82,7 @@ var Scene = scene.Scene{
 				}))
 
 		spcs := []*collision.Space{}
-		btnList := []btn.Btn{returnBtn, credit200sc, creditPlaus, creditFenrir}
+		btnList := []btn.Btn{returnBtn}
 		for _, b := range btnList {
 			spcs = append(spcs, b.GetSpace())
 		}

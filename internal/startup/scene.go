@@ -6,8 +6,6 @@ import (
 
 	"github.com/oakmound/oak/mouse"
 
-	"golang.org/x/image/colornames"
-
 	"github.com/oakmound/weekly87/internal/abilities"
 	"github.com/oakmound/weekly87/internal/joys"
 	"github.com/oakmound/weekly87/internal/menus/selector"
@@ -67,6 +65,8 @@ var Scene = scene.Scene{
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
 		render.Draw(menuBackground, 0)
 
+		oak.LoadingR = menuBackground
+
 		looters, _ := render.LoadSprite("", filepath.Join("raw", "title_card.png"))
 		looters.SetPos(30, 60)
 		render.Draw(looters, 0)
@@ -88,12 +88,11 @@ var Scene = scene.Scene{
 			grid.Content(
 				[][]btn.Option{
 					{
-						btn.And(btn.Color(colornames.Green), btn.Text("Start Game"), bindNewScene("inn")),
-						// btn.And(btn.Color(colornames.Blueviolet), btn.Text("Load Game"), bindNewScene("load")),
-						btn.And(btn.Color(colornames.Gold), btn.Text("Game History"), bindNewScene("history")),
-						btn.And(btn.Color(colornames.Blue), btn.Text("Settings"), bindNewScene("settings")),
-						btn.And(btn.Color(colornames.Blueviolet), btn.Text("Credits"), bindNewScene("credits")),
-						btn.And(btn.Text("Exit Game"), btn.Binding(mouse.ClickOn, func(int, interface{}) int {
+						btn.And(btn.Color(menus.Green), btn.Text("Start Game"), bindSceneAndClear("inn")),
+						btn.And(btn.Color(menus.Blue), btn.Text("Game History"), bindNewScene("history")),
+						btn.And(btn.Color(menus.Blue), btn.Text("Settings"), bindNewScene("settings")),
+						btn.And(btn.Color(menus.Blue), btn.Text("Credits"), bindNewScene("credits")),
+						btn.And(btn.Color(menus.Red), btn.Text("Exit Game"), btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 							os.Exit(3)
 							return 0
 						})),
@@ -116,6 +115,15 @@ func bindNewScene(newScene string) btn.Option {
 	return btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 		nextscene = newScene
 		stayInMenu = false
+		return 0
+	})
+}
+
+func bindSceneAndClear(newScene string) btn.Option {
+	return btn.Binding(mouse.ClickOn, func(int, interface{}) int {
+		nextscene = newScene
+		stayInMenu = false
+		oak.LoadingR = nil
 		return 0
 	})
 }

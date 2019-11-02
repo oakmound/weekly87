@@ -32,7 +32,7 @@ var Scene = scene.Scene{
 		fnt.Size = 14
 		blueFnt := fnt.Generate()
 
-		dlog.Verb("Entering ther History Scene")
+		dlog.Verb("Entering the History Scene")
 		stayInMenu = true
 		nextscene = "history"
 		render.SetDrawStack(
@@ -46,12 +46,12 @@ var Scene = scene.Scene{
 
 		textBackingX := oak.ScreenWidth / 3
 
-		textBacking := render.NewColorBox(textBackingX, oak.ScreenHeight*2/3, color.RGBA{120, 120, 120, 210})
+		textBacking := render.NewColorBox(textBackingX, oak.ScreenHeight*3/5, color.RGBA{120, 120, 120, 210})
 		textBacking.SetPos(float64(oak.ScreenWidth)/18, 80)
 		render.Draw(textBacking, 1)
 
 		menuX := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 6
-		menuY := float64(textBacking.Bounds().Max.Y) + 40
+		menuY := float64(textBacking.Bounds().Max.Y) + 84
 
 		r := records.Load()
 		dlog.Verb("Records loaded:", r)
@@ -75,10 +75,23 @@ var Scene = scene.Scene{
 		render.Draw(farthestText, 2, 2)
 		textY += 40
 
-		nStartBtn := btn.New(menus.BtnCfgA,
-			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
+		newSavePressed := 0
+		newSaveStr := "Are you sure"
+
+		var nStartBtn btn.Btn
+		nStartBtn = btn.New(menus.BtnCfgB,
+			btn.Color(menus.Red),
 			btn.Pos(menuX, menuY),
 			btn.Text("New Save File"), btn.Binding(mouse.ClickOn, func(int, interface{}) int {
+				if newSavePressed < 3 {
+					type SetStringer interface {
+						SetString(string)
+					}
+					newSaveStr += "?"
+					nStartBtn.(SetStringer).SetString(newSaveStr)
+					newSavePressed++
+					return 0
+				}
 				newPath, err := records.Archive()
 				nextscene = "history"
 				stayInMenu = false
@@ -91,8 +104,8 @@ var Scene = scene.Scene{
 				return 0
 			}))
 		menuY += 40
-		returnBtn := btn.New(menus.BtnCfgA,
-			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
+		returnBtn := btn.New(menus.BtnCfgB,
+			btn.Color(menus.Red),
 			btn.Pos(menuX, menuY),
 			btn.Text("Return To Menu"), btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 				nextscene = "startup"

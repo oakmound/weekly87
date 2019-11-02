@@ -6,6 +6,9 @@ import (
 	"github.com/oakmound/oak/entities/x/btn/grid"
 	"github.com/oakmound/oak/joystick"
 	"github.com/oakmound/oak/key"
+	"github.com/oakmound/oak/render"
+	"github.com/oakmound/oak/dlog"
+	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/mouse"
 	s "github.com/oakmound/weekly87/internal/menus/selector"
 	"github.com/oakmound/weekly87/internal/sfx"
@@ -18,7 +21,9 @@ func ButtonSelectorA(selectors grid.Grid) s.Option {
 	for _, selectList := range selectors {
 		btnList = append(btnList, selectList...)
 		for _, button := range selectList {
-			spcs = append(spcs, button.GetSpace())
+			sp := button.GetSpace()
+			sp.Location.Max = sp.Location.Max.Add(floatgeom.Point3{1,1,0})
+			spcs = append(spcs, sp)
 		}
 	}
 	return ButtonSelectorSpacesA(spcs, btnList)
@@ -41,5 +46,15 @@ func ButtonSelectorSpacesA(spcs []*collision.Space, btnList []btn.Btn) s.Option 
 		s.SelectTrigger("Start"+joystick.ButtonUp),
 		s.DestroyTrigger(key.Down+key.Escape),
 		s.Wraps(true),
+		s.Display(func(pt floatgeom.Point2) render.Renderable {
+			poly, err := render.NewPolygon(
+				floatgeom.Point2{0, 0},
+				floatgeom.Point2{pt.X(), 0},
+				floatgeom.Point2{pt.X(), pt.Y()},
+				floatgeom.Point2{0, pt.Y()},
+			)
+			dlog.ErrorCheck(err)
+			return poly.GetThickOutline(Gold, 2)
+		}),
 	)
 }

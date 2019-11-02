@@ -2,6 +2,7 @@ package settingsmanagement
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"path/filepath"
 
@@ -48,14 +49,12 @@ var Scene = scene.Scene{
 		menuBackground, _ := render.LoadSprite("", filepath.Join("raw", "standard_placeholder.png"))
 		render.Draw(menuBackground, 0)
 
-		showFPS := render.NewVerticalGradientBox(100, 20, color.RGBA{0, 210, 90, 255}, color.RGBA{0, 170, 50, 255})
-		showFPS.Modify(mod.CutRound(.05, .25),
-			mods.Highlight(color.RGBA{170, 170, 170, 200}, 1),
-			mods.HighlightOff(color.RGBA{0, 0, 0, 100}, 1, 2, 1))
-
-		sliderWidth := 150.0
-		sliderHeight := 42.0
-		volBackground := render.NewVerticalGradientBox(int(sliderWidth), int(sliderHeight), color.RGBA{0, 210, 90, 255}, color.RGBA{0, 170, 50, 255})
+		const (
+			sliderWidth = 115
+			sliderHeight = 42
+			sliderXOffset = 10
+		)
+		volBackground := render.NewColorBox(int(sliderWidth), int(sliderHeight), menus.Blue)
 		volBackground.Modify(mod.CutRound(.05, .25),
 			mods.Highlight(color.RGBA{170, 170, 170, 200}, 1),
 			mods.HighlightOff(color.RGBA{0, 0, 0, 100}, 1, 2, 1))
@@ -69,21 +68,21 @@ var Scene = scene.Scene{
 			floatgeom.Point2{0, 11},
 		)
 		dlog.ErrorCheck(err)
-		checkMark.Fill(color.RGBA{100, 255, 100, 255})
+		checkMark.Fill(menus.Green)
 		checkMark.ShiftX(110)
 
 		x := (float64(oak.ScreenWidth) - menus.BtnWidthA) / 6
 		y := float64(oak.ScreenHeight) / 2.7
 
 		fnt := render.DefFontGenerator.Copy()
-		fnt.Color = render.FontColor("Green")
+		fnt.Color = image.NewUniform(menus.Green)
 		fnt.Size = 60
 		titleFnt := fnt.Generate()
 
 		title := titleFnt.NewStrText("Settings", x-20, y-40)
 		render.Draw(title, 2, 12)
 
-		infR1 := render.NewVerticalGradientBox(150, 32, color.RGBA{0, 120, 255, 255}, color.RGBA{0, 80, 230, 255})
+		infR1 := render.NewColorBox(150, 32, menus.Purple)
 		infR2 := render.NewCompositeM(infR1, checkMark).ToSprite()
 
 		showFps := btn.And(
@@ -99,9 +98,9 @@ var Scene = scene.Scene{
 
 		y += 50
 
-		sfxVolume := menus.NewSlider(0, x, y, sliderWidth, sliderHeight, 10, 20, nil,
+		sfxVolume := menus.NewSlider(0, x+sliderXOffset, y, sliderWidth, sliderHeight, 10, 20, nil,
 			volBackground.Copy(), 0, 100, 100*(*sfxLevel),
-			render.NewColorBox(5, 15, color.RGBA{255, 0, 0, 255}), 1, 1)
+			render.NewColorBox(5, 15, menus.Red), 1, 1)
 
 		sfxVolume.SetString("SFX Volume")
 		sfxVolume.Callback = func(val float64) {
@@ -109,18 +108,18 @@ var Scene = scene.Scene{
 		}
 
 		y += 50
-		musicVolume := menus.NewSlider(0, x, y, sliderWidth, sliderHeight, 10, 20, nil,
+		musicVolume := menus.NewSlider(0, x+sliderXOffset, y, sliderWidth, sliderHeight, 10, 20, nil,
 			volBackground.Copy(), 0, 100, 100*(*musicLevel),
-			render.NewColorBox(5, 15, color.RGBA{255, 0, 0, 255}), 1, 1)
+			render.NewColorBox(5, 15, menus.Red), 1, 1)
 
 		musicVolume.SetString("Music Volume")
 		musicVolume.Callback = func(val float64) {
 			*musicLevel = val * 0.01
 		}
 		y += 50
-		masterVolume := menus.NewSlider(0, x, y, sliderWidth, sliderHeight, 10, 20, nil,
+		masterVolume := menus.NewSlider(0, x+sliderXOffset, y, sliderWidth, sliderHeight, 10, 20, nil,
 			volBackground.Copy(), 0, 100, 100*(*masterLevel),
-			render.NewColorBox(5, 15, color.RGBA{255, 0, 0, 255}), 1, 1)
+			render.NewColorBox(5, 15, menus.Red), 1, 1)
 
 		masterVolume.SetString("Master Volume")
 		masterVolume.Callback = func(val float64) {
@@ -128,6 +127,7 @@ var Scene = scene.Scene{
 		}
 		y += 100
 		returnBtn := btn.New(menus.BtnCfgB,
+			btn.Color(menus.Red),
 			btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
 			btn.Pos(x+10, y),
 			btn.Text("Return To Menu"),
@@ -182,6 +182,16 @@ var Scene = scene.Scene{
 			}),
 			selector.Layers(2, 20),
 			selector.Wraps(true),
+			selector.Display(func(pt floatgeom.Point2) render.Renderable {
+				poly, err := render.NewPolygon(
+					floatgeom.Point2{0, 0},
+					floatgeom.Point2{pt.X(), 0},
+					floatgeom.Point2{pt.X(), pt.Y()},
+					floatgeom.Point2{0, pt.Y()},
+				)
+				dlog.ErrorCheck(err)
+				return poly.GetThickOutline(menus.Gold, 2)
+			}),
 		)
 
 	},
