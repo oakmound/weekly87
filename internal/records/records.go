@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"time"
+	"sync"
 
 	"github.com/oakmound/weekly87/internal/characters/players"
 
@@ -30,9 +31,15 @@ type Records struct {
 	LastRun RunInfo `json:"lastRun"`
 }
 
+var recordLock sync.Mutex
+
 // Store a record to a file
 func (s *Records) Store() {
+	recordLock.Lock()
+	defer recordLock.Unlock()
+
 	f, err := os.Create(recordsFile)
+	dlog.ErrorCheck(err)
 	data, err := json.Marshal(s)
 	dlog.ErrorCheck(err)
 	_, err = f.Write(data)
@@ -42,6 +49,9 @@ func (s *Records) Store() {
 
 // Load a record from a file
 func Load() *Records {
+	recordLock.Lock()
+	defer recordLock.Unlock()
+
 	r := &Records{}
 
 	f, err := os.Open(recordsFile)
@@ -71,6 +81,9 @@ func Load() *Records {
 
 // Archive the current save file
 func Archive() (string, error) {
+	recordLock.Lock()
+	defer recordLock.Unlock()
+
 	newName := fmt.Sprintf("%s%s.json", archPath, time.Now().Format("MonJan2150405"))
 	err := os.Rename(recordsFile, newName)
 	return newName, err
