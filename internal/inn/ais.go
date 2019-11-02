@@ -34,6 +34,7 @@ type AI struct {
 	actionWeights []float64
 }
 
+// NewAI creates a set of aiactions and their weights that can be acted upon to perform desired actions
 func NewAI(actions []aiAction, weights []float64) *AI {
 	remainingWeights := alg.RemainingWeights(weights)
 	return &AI{
@@ -81,19 +82,7 @@ func (a aiWalkUpDownBar) start() (func(int) aiStatus, func(int)) {
 			}
 			keeper.Delta.SetPos(speed.X(), speed.Y())
 
-			// Todo: pull out into "move"?
 			keeper.ShiftPos(keeper.Delta.X(), keeper.Delta.Y())
-			if keeper.Delta.X() != 0 || keeper.Delta.Y() != 0 {
-				if keeper.Delta.X() < 0 {
-					keeper.Swtch.Set("walkLT")
-				} else {
-					keeper.Swtch.Set("walkRT")
-				}
-			} else {
-				cur := keeper.Swtch.Get()
-				err := keeper.Swtch.Set("stand" + string(cur[len(cur)-2:]))
-				dlog.ErrorCheck(err)
-			}
 
 			return aiContinue
 		}, func(id int) {
@@ -107,47 +96,60 @@ func (a aiWalkUpDownBar) start() (func(int) aiStatus, func(int)) {
 }
 
 type aiServeDrinkLocation struct {
-	rect     floatgeom.Rect2
-	drinkImg *render.Sprite
+	rect      floatgeom.Rect2
+	drinkImg  *render.Sprite
+	sOverride *string
 }
 
+// start trying to serve a drink
+// Navigate to a location and throw a drink at it
 func (a aiServeDrinkLocation) start() (func(int) aiStatus, func(int)) {
 	// where to serve drink
 	barX := (rand.Float64() * (a.rect.Max.X() - a.rect.Min.X())) + a.rect.Min.X()
 	barY := (rand.Float64() * (a.rect.Max.Y() - a.rect.Min.Y())) + a.rect.Min.Y()
+	var drink *doodads.Consumable
+	var dDelta physics.Vector
 
-	var end time.Time
 	reached := false
 	return func(id int) aiStatus {
-		keeper, ok := event.GetEntity(id).(*NPC)
-		if !ok {
-			dlog.Error("Got non NPC in Innkeeper bindings")
-			return 1
-		}
 
-		dy := 1.0
-		if keeper.Y() > barY {
-			dy = -1.0
-		}
+			keeper, ok := event.GetEntity(id).(*NPC)
+			if !ok {
+				dlog.Error("Got non NPC in Innkeeper bindings")
+				return 1
+			}
 
-		// if gotten to serving location
-		if reached {
-			if time.Now().After(end) {
+			// if gotten to serving location TODO: actually make pretty
+			if reached {
+				// CONSIDER: should innkeeper be responsible for this movement?
+				drink.ShiftPos(dDelta.X(), dDelta.Y())
+				if drink.X()-barX < 1 { //complete serving within acceptable bounds
+					return aiContinue
+				}
+				drink.Activate()
 				return aiComplete
 			}
+
+			dy := 1.0
+			if keeper.Y() > barY {
+				dy = -1.0
+			}
+
+			keeper.Delta.SetPos(0, dy)
+			keeper.ShiftPos(0, dy)
+			if keeper.Y() > barY-1 && keeper.Y() < barY+1 {
+				reached = true
+				*a.sOverride = "consume"
+				drinkStartY := keeper.Y() - 16 // Unintentionally funny name!
+				drink = doodads.NewDrinkable(keeper.X(), drinkStartY, a.drinkImg)
+				dDelta = physics.NewVector(barX-keeper.X(), barY-drinkStartY).Normalize()
+
+			}
+
 			return aiContinue
+		}, func(id int) {
+			*a.sOverride = ""
 		}
-
-		keeper.ShiftPos(0, dy)
-		if keeper.Y() > barY-1 && keeper.Y() < barY+1 {
-			end = time.Now().Add(time.Duration(4000 * time.Millisecond))
-			// end = time.Now().Add(time.Duration(1 * time.Millisecond)) // CONSIDER: allowing this to be set via debug commands
-			reached = true
-			doodads.NewDrinkable(barX, barY, a.drinkImg)
-		}
-
-		return aiContinue
-	}, func(id int) {}
 }
 
 type aiDrinker struct {

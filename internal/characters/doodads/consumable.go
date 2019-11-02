@@ -19,7 +19,8 @@ type Consumer interface {
 // Consumable is an object that can be drawn, has collision and can be consumed
 type Consumable struct {
 	*entities.Solid
-	R render.Modifiable
+	R      render.Modifiable
+	cLabel collision.Label
 }
 
 // Init creates the furnitures entity id
@@ -33,11 +34,6 @@ func NewConsumable(x, y float64, img *render.Sprite) *Consumable {
 	c.R = img.Copy()
 	width, height := img.GetDims()
 	c.Solid = entities.NewSolid(x, y, float64(width), float64(height), nil, nil, c.Init())
-	c.Bind(func(id int, space interface{}) int {
-		s := space.(*collision.Space)
-		c.Consume(0, 20, s)
-		return 1
-	}, "Consume")
 
 	c.SetPos(x, y)
 	render.Draw(c.R, layer.Play, 2)
@@ -45,11 +41,16 @@ func NewConsumable(x, y float64, img *render.Sprite) *Consumable {
 	return c
 }
 
-// NewDrinkable creates a drinkable consumable
-func NewDrinkable(x, y float64, img *render.Sprite) *Consumable {
-	c := NewConsumable(x, y, img)
-	c.UpdateLabel(collision.Label(labels.Drinkable))
-	return c
+// Activate the consumable allowing it to be consumed
+// Consider: Should this report on something? (already activated? or failed to activate?)
+func (c *Consumable) Activate() {
+	c.Bind(func(id int, space interface{}) int {
+		s := space.(*collision.Space)
+		c.Consume(0, 20, s)
+		return 1
+	}, "Consume")
+	c.UpdateLabel(collision.Label(c.cLabel))
+	return
 }
 
 // SetPos of the solid and the renderable for the consumable
@@ -96,4 +97,11 @@ func (c *Consumable) Consume(xOff, yOff float64, sp *collision.Space) {
 		return 0
 	}, "EnterFrame")
 
+}
+
+// NewDrinkable creates a drinkable consumable
+func NewDrinkable(x, y float64, img *render.Sprite) *Consumable {
+	c := NewConsumable(x, y, img)
+	c.cLabel = labels.Drinkable
+	return c
 }

@@ -175,6 +175,7 @@ func (iw *innWalker) bindFront() {
 type NPC struct {
 	*entities.Interactive
 	Swtch          *render.Switch
+	overrideR      *string
 	Class          int
 	Button         render.Renderable
 	UndrawButtonAt time.Time
@@ -197,8 +198,9 @@ func (n *NPC) FaceLeft(shouldFaceLeft bool) *NPC {
 	return n
 }
 
-// NewInnNPC creates a npc to interact with for setting up party
-func NewInnNPC(class int, scale, x, y float64) *NPC {
+// newInnNPCBasic sets up the basics for an npc in the inn but does not set any ai/bindings
+// Safety to allow for reuse between special npc types
+func newInnNPCBasic(class int, scale, x, y float64) *NPC {
 	pcon := players.ClassConstructor([]players.PartyMember{{class, 0, "NPC How did you find me"}})[0]
 	n := &NPC{}
 	n.Class = class
@@ -214,6 +216,15 @@ func NewInnNPC(class int, scale, x, y float64) *NPC {
 		n.Init(),
 		0,
 	)
+	oStr := ""
+	n.overrideR = &oStr
+	return n
+}
+
+// NewInnNPC creates a npc to interact with for setting up party
+func NewInnNPC(class int, scale, x, y float64) *NPC {
+	n := newInnNPCBasic(class, scale, x, y)
+
 	n.AI = NewAI(
 		[]aiAction{
 			aiDrinker{
@@ -237,12 +248,14 @@ func NewInnNPC(class int, scale, x, y float64) *NPC {
 		if drinkr.inAction {
 			status := drinkr.curAction(id)
 			if status == aiComplete {
+				dlog.Verb("Cancelled innkeeperAction")
 				drinkr.curCancel(id)
 				drinkr.inAction = false
 			}
 			return 0
 		}
 
+		dlog.Verb("Inkeeper choosing a new ai action!")
 		action := drinkr.AI.Choose()
 		drinkr.curAction, drinkr.curCancel = action.start()
 		drinkr.inAction = true
@@ -267,7 +280,7 @@ func (n NPC) Destroy() {
 
 // NewInnkeeper creates the innkeeper who moves around behind the bar
 func NewInnkeeper(img *render.Sprite, scale, x, y float64) *NPC {
-	keeper := NewInnNPC(players.InnKeeper, scale, x, y)
+	keeper := newInnNPCBasic(players.InnKeeper, scale, x, y)
 	keeper.AI = NewAI(
 		[]aiAction{
 			aiWalkUpDownBar{
@@ -277,8 +290,9 @@ func NewInnkeeper(img *render.Sprite, scale, x, y float64) *NPC {
 				duration: intrange.NewConstant(2000),
 			},
 			aiServeDrinkLocation{
-				rect:     floatgeom.NewRect2WH(180, 150, 25, float64(oak.ScreenHeight)/2),
-				drinkImg: img,
+				rect:      floatgeom.NewRect2WH(180, 150, 25, float64(oak.ScreenHeight)/2),
+				drinkImg:  img,
+				sOverride: keeper.overrideR,
 			},
 		},
 		[]float64{
@@ -298,6 +312,11 @@ func NewInnkeeper(img *render.Sprite, scale, x, y float64) *NPC {
 			if status == aiComplete {
 				kpr.curCancel(id)
 				kpr.inAction = false
+			}
+			// Consider: having a enum not a string swtich here...
+			if *kpr.overrideR != "" {
+				kpr.Swtch.Set(*kpr.overrideR)
+				return 0
 			}
 			if kpr.Delta.X() != 0 || kpr.Delta.Y() != 0 {
 				if kpr.Delta.X() < 0 {

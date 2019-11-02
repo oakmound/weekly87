@@ -78,7 +78,7 @@ var Scene = scene.Scene{
 		// leftT.PlaceConsumablesa(prettyMugs, 3+rand.Intn(7))
 
 		// TODO: update placement strats for consumables
-		doodads.NewDrinkable(200, 290, prettyMugs[0])
+		doodads.NewDrinkable(200, 290, prettyMugs[0]).Activate()
 
 		topT := doodads.NewFurniture(480, 230, 190, 60)
 		topT.SetOrnaments(prettyMugs, rand.Intn(6))

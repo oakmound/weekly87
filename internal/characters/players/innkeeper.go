@@ -33,6 +33,9 @@ func InnKeeperInit() {
 	dlog.ErrorCheck(err)
 	walkHold = walkHold.Copy().Modify(mod.FlipX).(*render.Sequence)
 
+	consume, err := render.NewSheetSequence(sh, 8, []int{0, 0, 0, 1, 0, 1}...)
+	dlog.ErrorCheck(err)
+
 	animMap := map[string]render.Modifiable{
 		"walkRT":    walkRT,
 		"walkLT":    walkLT,
@@ -42,6 +45,7 @@ func InnKeeperInit() {
 		"deadLT":    walkLT,
 		"walkHold":  walkHold,
 		"standHold": standHold,
+		"consume":   consume,
 	}
 
 	InnKeeperConstructor = &Constructor{
