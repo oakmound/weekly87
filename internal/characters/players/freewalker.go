@@ -34,17 +34,24 @@ func FreeWalkControls(p *entities.Interactive) {
 	js := joys.StickState(lowestID)
 	// Todo: support full analog control
 
-	if oak.IsDown(key.UpArrow) || js.StickLY > 8000 {
+	if oak.IsDown(key.UpArrow) {
 		p.Delta.Add(physics.NewVector(0, -p.Speed.Y()))
 	}
-	if oak.IsDown(key.DownArrow) || js.StickLY < -8000 {
+	if oak.IsDown(key.DownArrow) {
 		p.Delta.Add(physics.NewVector(0, p.Speed.Y()))
 	}
-	if oak.IsDown(key.LeftArrow) || js.StickLX < -8000 {
+	if oak.IsDown(key.LeftArrow) {
 		p.Delta.Add(physics.NewVector(-p.Speed.X(), 0))
 	}
-	if oak.IsDown(key.RightArrow) || js.StickLX > 8000 {
+	if oak.IsDown(key.RightArrow) {
 		p.Delta.Add(physics.NewVector(p.Speed.X(), 0))
+	}
+
+	if js.StickLY > 8000 || js.StickLX > 8000 || 
+		js.StickLY < -8000 || js.StickLX < -8000 {
+			xFct := float64(js.StickLX) / 32000
+			yFct := float64(js.StickLY) / 32000
+			p.Delta.Add(physics.NewVector(p.Speed.X()*xFct, p.Speed.Y()*-yFct)) 
 	}
 
 }
