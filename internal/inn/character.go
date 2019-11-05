@@ -148,9 +148,16 @@ func (iw *innWalker) bindFront() {
 		p.R.SetPos(p.Vector.X(), p.Vector.Y())
 		p.RSpace.Update(p.Vector.X(), p.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
 		<-iw.Front.RSpace.CallOnHits()
-		if collision.HitLabel(iw.Front.RSpace.Space, labels.Blocking, labels.NPC) != nil {
-			p.Vector.Sub(p.Delta)
-			p.Delta.Zero()
+		if hitSpace := collision.HitLabel(iw.Front.RSpace.Space, labels.Blocking, labels.NPC); hitSpace != nil {
+			xOverlap, yOverlap := iw.Front.RSpace.Space.Overlap(hitSpace)
+			if xOverlap != 0 {
+				p.Vector.Sub(physics.NewVector(0, p.Delta.Y()))
+				p.Delta.SetY(0)
+			}
+			if yOverlap != 0 {
+				p.Vector.Sub(physics.NewVector(p.Delta.X(), 0))
+				p.Delta.SetX(0)
+			}
 			p.R.SetPos(p.Vector.X(), p.Vector.Y())
 			p.RSpace.Update(p.Vector.X(), p.Vector.Y(), p.RSpace.GetW(), p.RSpace.GetH())
 		}
