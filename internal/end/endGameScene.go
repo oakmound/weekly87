@@ -135,6 +135,7 @@ var Scene = scene.Scene{
 
 		render.SetDrawStack(layer.Get()...)
 		debugTree := dtools.NewThickColoredRTree(collision.DefTree, 4, labels.ColorMap)
+		debugTree.DrawDisabled = true
 		render.Draw(debugTree, layer.Play, 1000)
 
 		// Make the graveyard backing
