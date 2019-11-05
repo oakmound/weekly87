@@ -1,12 +1,15 @@
 package doodads
 
 import (
+	"time"
+
 	"github.com/oakmound/oak/collision"
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
 	"github.com/oakmound/oak/physics"
 	"github.com/oakmound/oak/render"
+	"github.com/oakmound/oak/timing"
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/layer"
 )
@@ -103,5 +106,10 @@ func (c *Consumable) Consume(xOff, yOff float64, sp *collision.Space) {
 func NewDrinkable(x, y float64, img *render.Sprite) *Consumable {
 	c := NewConsumable(x, y, img)
 	c.cLabel = labels.Drinkable
+	go timing.DoAfter(40 * time.Second, func() {
+		c.cLabel = 0
+		c.Destroy()
+		c.R.Undraw()
+	})
 	return c
 }
