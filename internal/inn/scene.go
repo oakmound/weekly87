@@ -156,7 +156,7 @@ var Scene = scene.Scene{
 		}
 		partySize := len(partySizeUnlocks)
 		for i, psu := range partySizeUnlocks {
-			if int64(psu) > curRecord.SectionsCleared {
+			if int64(psu) > curRecord.SectionsCleared+int64(curRecord.Wealth) {
 				partySize = i
 				break
 			}
