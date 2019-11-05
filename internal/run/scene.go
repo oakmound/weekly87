@@ -16,6 +16,7 @@ import (
 	"github.com/oakmound/weekly87/internal/characters/labels"
 	"github.com/oakmound/weekly87/internal/characters/players"
 	"github.com/oakmound/weekly87/internal/dtools"
+	"github.com/oakmound/weekly87/internal/joys"
 	"github.com/oakmound/weekly87/internal/layer"
 	"github.com/oakmound/weekly87/internal/menus"
 	"github.com/oakmound/weekly87/internal/music"
@@ -78,6 +79,23 @@ var Scene = scene.Scene{
 			Party:           pty,
 			SectionsCleared: 1,
 			EnemiesDefeated: 0,
+		}
+
+		if oak.MostRecentInput == oak.Joystick {
+			joyID := joys.LowestID()
+			fmt.Println("Ability Highlgihit")
+			abilityHighlight := render.NewHorizontalGradientBox(100, 68, color.RGBA{80, 64, 34, 128}, color.RGBA{0, 0, 0, 0})
+			abilityHighlight.SetPos(0, 20)
+			render.Draw(abilityHighlight, layer.UI, 10)
+			event.GlobalBind(func(int, interface{}) int {
+				jState := joys.StickState(joyID)
+				if jState.TriggerR > 100 {
+					abilityHighlight.SetPos(0, 98)
+				} else {
+					abilityHighlight.SetPos(0, 20)
+				}
+				return 0
+			}, "EnterFrame")
 		}
 
 		tracker := section.NewTracker(BaseSeed)
