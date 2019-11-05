@@ -60,6 +60,7 @@ var Scene = scene.Scene{
 		render.SetDrawStack(layer.Get()...)
 
 		debugTree := dtools.NewRTree(collision.DefTree)
+		debugTree.DrawDisabled = true
 		debugTree.ColorMap = labels.ColorMap
 		render.Draw(debugTree, layer.Debug, 20)
 
@@ -75,7 +76,7 @@ var Scene = scene.Scene{
 
 		runInfo = records.RunInfo{
 			Party:           pty,
-			SectionsCleared: 0,
+			SectionsCleared: 1,
 			EnemiesDefeated: 0,
 		}
 
@@ -86,6 +87,7 @@ var Scene = scene.Scene{
 			rs := p.GetReactiveSpace()
 			// Player got back to the Inn!
 			rs.Add(labels.Door, func(_, d *collision.Space) {
+				runInfo.SectionsCleared++
 				d.CID.Trigger("RibbonCut", nil)
 				go func() {
 					time.Sleep(500 * time.Millisecond)

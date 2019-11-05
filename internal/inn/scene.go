@@ -56,6 +56,7 @@ var Scene = scene.Scene{
 		nextscene = "inn"
 		render.SetDrawStack(layer.Get()...)
 		debugTree := dtools.NewThickColoredRTree(collision.DefTree, 4, labels.ColorMap)
+		debugTree.DrawDisabled = true
 		render.Draw(debugTree, layer.Play, 1000)
 
 		// Make the Inn backing
