@@ -12,6 +12,8 @@ import (
 	"github.com/oakmound/oak/dlog"
 	"github.com/oakmound/oak/entities"
 	"github.com/oakmound/oak/event"
+	"github.com/oakmound/oak/joystick"
+	"github.com/oakmound/oak/key"
 	"github.com/oakmound/oak/mouse"
 	"github.com/oakmound/oak/physics"
 
@@ -25,8 +27,10 @@ import (
 	"github.com/oakmound/weekly87/internal/dtools"
 	"github.com/oakmound/weekly87/internal/layer"
 	"github.com/oakmound/weekly87/internal/menus"
+	"github.com/oakmound/weekly87/internal/menus/selector"
 	"github.com/oakmound/weekly87/internal/records"
 	"github.com/oakmound/weekly87/internal/run"
+	"github.com/oakmound/weekly87/internal/sfx"
 )
 
 // Init to be called after oak start up to get our asset reference
@@ -145,13 +149,44 @@ var Scene = scene.Scene{
 		menuY := 16.0
 
 		if !justVisiting {
-			btn.New(menus.BtnCfgB,
+			b := btn.New(menus.BtnCfgB,
 				btn.TxtOff(menus.BtnWidthA/8, menus.BtnHeightA/3),
 				btn.Pos(menuX, menuY), btn.Text("Return To Inn"),
 				btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 					stayInEndScene = false
 					return 0
 				}))
+			selector.New(
+				selector.Layers(layer.UI, 3),
+				selector.HorzArrowControl(),
+				selector.JoystickHorzDpadControl(),
+				selector.SelectTrigger(key.Down+key.Spacebar),
+				selector.SelectTrigger("A"+joystick.ButtonUp),
+
+				selector.Spaces(b.GetSpace()),
+
+				selector.InteractTrigger(key.Down+key.B, "boot"),
+				selector.InteractTrigger("X"+joystick.ButtonUp, "boot"),
+
+				selector.DestroyTrigger(key.Down+key.Escape),
+				selector.DestroyTrigger("B"+joystick.ButtonUp),
+				selector.MouseBindings(true),
+				selector.Callback(func(i int, _ ...interface{}) {
+					sfx.Play("selected")
+					b.Trigger(mouse.ClickOn, nil)
+				}),
+				selector.Display(func(pt floatgeom.Point2) render.Renderable {
+					poly, err := render.NewPolygon(
+						floatgeom.Point2{0, 0},
+						floatgeom.Point2{pt.X(), 0},
+						floatgeom.Point2{pt.X(), pt.Y()},
+						floatgeom.Point2{0, pt.Y()},
+					)
+					dlog.ErrorCheck(err)
+					return poly.GetThickOutline(menus.Gold, 2)
+				}),
+			)
+
 		}
 
 		goldPit := floatgeom.NewRect2WH(670, float64(oak.ScreenHeight)-100, 330, 100)
