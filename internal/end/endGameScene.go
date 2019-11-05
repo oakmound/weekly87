@@ -133,13 +133,10 @@ var Scene = scene.Scene{
 		fnt.Color = render.FontColor("Blue")
 		fnt.Size = 14
 		blueFnt := fnt.Generate()
-		fnt.Color = render.FontColor("Black")
-		fnt.Size = 20
-		graves := fnt.Generate()
 
 		render.SetDrawStack(layer.Get()...)
 		debugTree := dtools.NewThickColoredRTree(collision.DefTree, 4, labels.ColorMap)
-		debugTree.DrawDisabled = true
+
 		render.Draw(debugTree, layer.Play, 1000)
 
 		// Make the graveyard backing
@@ -197,8 +194,12 @@ var Scene = scene.Scene{
 		textX := float64(oak.ScreenWidth) / 6
 
 		currentDeathTollp := &currentDeathToll
-		render.Draw(graves.NewStrText("Current Total Deaths:", textX, textY), 1, 10)
-		render.Draw(graves.NewText(intStringer{currentDeathTollp}, textX+200, textY), 1, 10)
+		fmt.Println(currentDeathTollp)
+		// fnt.Color = render.FontColor("Black")
+		// fnt.Size = 20
+		// graves := fnt.Generate()
+		// render.Draw(graves.NewStrText("Current Total Deaths:", textX, textY), 1, 10)
+		// render.Draw(graves.NewText(intStringer{currentDeathTollp}, textX+200, textY), 1, 10)
 
 		textY += 40
 
@@ -259,6 +260,12 @@ var Scene = scene.Scene{
 		doodads.NewFurniture(0, 0, float64(oak.ScreenWidth), 187) // top of inn
 
 		addDebugCommands(debugTree, debugElements)
+
+		debugTree.DrawDisabled = true
+		for _, r := range debugElements {
+			r.Undraw()
+		}
+
 		if justVisiting == true {
 			visitEnter(r.PartyComp)
 			return
