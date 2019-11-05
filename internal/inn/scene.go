@@ -129,7 +129,7 @@ var Scene = scene.Scene{
 			3,
 			10,
 			15,
-			25,
+			45,
 			75,
 			120,
 		}
@@ -313,6 +313,16 @@ var Scene = scene.Scene{
 				}
 			}
 
+			crossedOuts := []render.Renderable{}
+
+			// TODO: hardcoded 4
+			for i := len(pty.Players); i < 4; i++ {
+				bx := render.NewColorBox(16, 32, menus.Gray)
+				bx.SetPos(partyBackground.X() + 20 + (float64(i) * players.PlayerGap), partyBackground.Y() + 10)
+				render.Draw(bx, layer.UI, 3)
+				crossedOuts = append(crossedOuts, bx)
+			}
+
 			// Show a confirm button, a cancel button and a boot button
 			cnfrm := getConfirmBtn()
 			cnfrm.SetPos(partyBackground.X(), partyBackground.Y()+float64(bkgH)+2)
@@ -374,6 +384,9 @@ var Scene = scene.Scene{
 						p.R.Undraw()
 						collision.Remove(p.GetSpace())
 						mouse.Remove(p.GetSpace())
+					}
+					for _, r := range crossedOuts {
+						r.Undraw()
 					}
 					cnfrm.Undraw()
 					cancl.Undraw()
