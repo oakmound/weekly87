@@ -58,3 +58,32 @@ func ButtonSelectorSpacesA(spcs []*collision.Space, btnList []btn.Btn) s.Option 
 		}),
 	)
 }
+
+// ButtonSelectorSpacesNoWrap sets up a standard button selector for menus given a set of spaces and btns
+// For times when the menu is not in a grid.Grid, but it doesn't wrap
+func ButtonSelectorSpacesNoWrap(spcs []*collision.Space, btnList []btn.Btn) s.Option {
+	return s.And(
+		s.Layers(2, 3),
+		s.VertArrowControl(),
+		s.JoystickVertDpadControl(),
+		s.Spaces(spcs...),
+		s.Callback(func(i int, _ ...interface{}) {
+			sfx.Play("selected")
+			btnList[i].Trigger(mouse.ClickOn, nil)
+		}),
+		s.SelectTrigger(key.Down+key.Spacebar),
+		s.SelectTrigger("A"+joystick.ButtonUp),
+		s.SelectTrigger("Start"+joystick.ButtonUp),
+		s.DestroyTrigger(key.Down+key.Escape),
+		s.Display(func(pt floatgeom.Point2) render.Renderable {
+			poly, err := render.NewPolygon(
+				floatgeom.Point2{0, 0},
+				floatgeom.Point2{pt.X(), 0},
+				floatgeom.Point2{pt.X(), pt.Y()},
+				floatgeom.Point2{0, pt.Y()},
+			)
+			dlog.ErrorCheck(err)
+			return poly.GetThickOutline(Gold, 2)
+		}),
+	)
+}

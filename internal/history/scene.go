@@ -80,7 +80,7 @@ var Scene = scene.Scene{
 
 		var nStartBtn btn.Btn
 		nStartBtn = btn.New(menus.BtnCfgB,
-			btn.Color(menus.Red),
+			btn.Color(menus.Purple),
 			btn.Pos(menuX, menuY),
 			btn.Text("New Save File"), btn.Binding(mouse.ClickOn, func(int, interface{}) int {
 				if newSavePressed < 3 {
@@ -114,12 +114,12 @@ var Scene = scene.Scene{
 			}))
 
 		spcs := []*collision.Space{}
-		btnList := []btn.Btn{returnBtn, nStartBtn}
+		btnList := []btn.Btn{nStartBtn, returnBtn}
 		for _, b := range btnList {
 			spcs = append(spcs, b.GetSpace())
 		}
 		selector.New(
-			menus.ButtonSelectorSpacesA(spcs, btnList),
+			menus.ButtonSelectorSpacesNoWrap(spcs, btnList),
 			selector.MouseBindings(true),
 		)
 
