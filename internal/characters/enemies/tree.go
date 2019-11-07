@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/color"
 	"path/filepath"
+	"strings"
 
 	"github.com/solovev/gopsd"
 
@@ -22,7 +23,6 @@ func initTree() {
 	psdFilePath := filepath.Join("assets", "images", "64x64", "tree2.psd")
 	psd, err := gopsd.ParseFromPath(psdFilePath)
 	combined := render.NewCompositeM()
-	combined.Append(render.NewEmptySprite(0, 0, int(psd.Width), int(psd.Height))) // Make sure this is here in case there is no layer that encompasses the whole thing
 	for _, layer := range psd.Layers {
 		//TODO: combine strat with that of mage
 		img, err := layer.GetImage()
@@ -41,7 +41,8 @@ func initTree() {
 		// Todo: bug with shoulder having some pixel flashing
 		combined.Append(sp)
 	}
-	combinedSp := combined.ToSprite()
+	combined.Append(render.NewEmptySprite(0, 0, int(psd.Width), int(psd.Height))) // Make sure this is here in case there is no layer that encompasses the whole thing
+	combinedSp := combined.Slice(combined.Len()-2, combined.Len()).ToSprite()
 	sh, err := render.MakeSheet(combinedSp.GetRGBA(), 64, 64, 0)
 	dlog.ErrorCheck(err)
 	sheet := sh.ToSprites()
@@ -66,16 +67,28 @@ func initTree() {
 		Health: 2,
 	}
 
+	toOverwriteWith := combined.Slice(0,combined.Len()-2)
+	toOverwriteWithFlipped := toOverwriteWith.Copy().Modify(mod.FlipX).(*render.CompositeM)
 	for size := 0; size < lastSize; size++ {
 		for col := 0; col < lastColor; col++ {
 			cons := baseConstructor.Copy()
-			sizeVariants[size](cons)
 			colorVariants[col](cons)
 			if size == 0 && col == 0 {
 				for _, md := range cons.AnimationMap {
 					md.Filter(recolor.WithStrategy(recolor.ColorMix(color.RGBA{140, 200, 140, 100})))
 				}
 			}
+			// Overwrite with non-zero layers from combined
+			for k, md := range cons.AnimationMap {
+				var cmp *render.CompositeM = toOverwriteWith
+				if strings.HasSuffix(k, "LT") {
+					cmp = toOverwriteWithFlipped
+				}
+				cmp.Append(md)
+				sprite := cmp.ToSprite()
+				cons.AnimationMap[k] = sprite
+			}
+			sizeVariants[size](cons)
 			setConstructor(int(Tree), size, col, cons)
 		}
 	}
