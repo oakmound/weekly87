@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"path/filepath"
 	"strings"
+	"io/ioutil"
 
 	"github.com/solovev/gopsd"
 
@@ -16,12 +17,17 @@ import (
 	"github.com/oakmound/oak/render/mod"
 
 	"github.com/oakmound/oak/render"
+	"github.com/oakmound/oak/fileutil"
 )
 
 func initTree() {
 
 	psdFilePath := filepath.Join("assets", "images", "64x64", "tree2.psd")
-	psd, err := gopsd.ParseFromPath(psdFilePath)
+	rd, err := fileutil.Open(psdFilePath)
+	dlog.ErrorCheck(err)
+	data, err := ioutil.ReadAll(rd)
+	dlog.ErrorCheck(err)
+	psd, err := gopsd.ParseFromBuffer(data)
 	combined := render.NewCompositeM()
 	for _, layer := range psd.Layers {
 		//TODO: combine strat with that of mage
@@ -61,9 +67,9 @@ func initTree() {
 		Bindings: map[string]func(*BasicEnemy, interface{}) int{
 			"EnterFrame": func(b *BasicEnemy, frame interface{}) int {
 
-				return 0
-			},
-		},
+				return 0 
+			}, 
+		},   
 		Health: 2,
 	}
 

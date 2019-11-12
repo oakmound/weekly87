@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"path/filepath"
 	"strings"
+	"io/ioutil"
 
 	"github.com/oakmound/weekly87/internal/abilities"
 	"github.com/oakmound/weekly87/internal/recolor"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/dlog"
+	"github.com/oakmound/oak/fileutil"
 	"github.com/oakmound/oak/render"
 	"github.com/oakmound/oak/render/mod"
 )
@@ -58,7 +60,11 @@ func WarriorsInit() {
 
 	for _, def := range warriorDefinitions {
 		psdFilePath := filepath.Join("assets", "images", "16x32", "warrior.psd")
-		psd, err := gopsd.ParseFromPath(psdFilePath)
+		rd, err := fileutil.Open(psdFilePath)
+		dlog.ErrorCheck(err)
+		data, err := ioutil.ReadAll(rd)
+		dlog.ErrorCheck(err)
+		psd, err := gopsd.ParseFromBuffer(data)
 
 		combined := render.NewCompositeM()
 

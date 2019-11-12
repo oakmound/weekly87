@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/oakmound/oak"
+	"github.com/oakmound/weekly87/internal/assets"
 	"github.com/oakmound/weekly87/internal/credits"
 	"github.com/oakmound/weekly87/internal/end"
 	"github.com/oakmound/weekly87/internal/history"
@@ -25,7 +26,7 @@ func main() {
 		},
 		TrackInputChanges: true,
 	}
-	//oak.SetBinaryPayload(assets.Asset, assets.AssetDir)
+	oak.SetBinaryPayload(assets.Asset, assets.AssetDir)
 
 	oak.SetupTopMost = true
 
