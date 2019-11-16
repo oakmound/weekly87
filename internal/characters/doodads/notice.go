@@ -9,8 +9,8 @@ import (
 
 	"github.com/oakmound/oak/alg/floatgeom"
 	"github.com/oakmound/oak/render"
-	"github.com/oakmound/shiny/materialdesign/colornames"
 	"github.com/oakmound/weekly87/internal/layer"
+	"golang.org/x/image/colornames"
 )
 
 // NewNote creates overlapping notes with random colors
