@@ -15,8 +15,10 @@ import (
 func main() {
 	oak.SetupConfig = oak.Config{
 		Screen: oak.Screen{
-			Width:  1024,
-			Height: 576,
+			Width:        1024,
+			Height:       576,
+			TargetWidth:  1920,
+			TargetHeight: 1080,
 		},
 		Title:     "Hiring Now: Looters",
 		BatchLoad: true,
